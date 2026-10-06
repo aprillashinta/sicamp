@@ -1,28 +1,242 @@
 // ==========================================
-// 1. DATABASE LOCALSTORAGE & INISIALISASI
+// LOGIKA KERANJANG & CHECKOUT SEWA
 // ==========================================
-function initDefaultData() {
-    const defaultKategori = [
-        { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
-        { id_kategori: '2', nama_kategori: 'Carrier & Tas' },
-        { id_kategori: '3', nama_kategori: 'Alat Masak & Makan' },
-        { id_kategori: '4', nama_kategori: 'Tidur & Matras' },
-        { id_kategori: '5', nama_kategori: 'Aksesori & Penerangan' }
-    ];
 
-    if (!localStorage.getItem('kategori_peralatan')) {
-        localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
+// 1. Tambah Barang ke Keranjang
+function tambahKeranjang(idPeralatan) {
+    const session = JSON.parse(localStorage.getItem('session_user'));
+    
+    if (!session) {
+        alert('Silakan login terlebih dahulu untuk menyewa!');
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    if (session.role === 'admin') {
+        alert('Admin tidak dapat melakukan penyewaan.');
+        return;
+    }
+
+    const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
+    const targetAlat = peralatan.find(p => String(p.id_peralatan) === String(idPeralatan));
+
+    if (!targetAlat || targetAlat.stok <= 0) {
+        alert('Maaf, stok peralatan ini sedang habis!');
+        return;
+    }
+
+    let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    const itemIndex = keranjang.findIndex(k => String(k.id_peralatan) === String(idPeralatan));
+
+    if (itemIndex !== -1) {
+        if (keranjang[itemIndex].qty + 1 > targetAlat.stok) {
+            alert(`Jumlah melebihi sisa stok yang tersedia (${targetAlat.stok} unit)!`);
+            return;
+        }
+        keranjang[itemIndex].qty += 1;
+    } else {
+        keranjang.push({
+            id_peralatan: targetAlat.id_peralatan,
+            nama_peralatan: targetAlat.nama_peralatan,
+            harga_sewa: targetAlat.harga_sewa,
+            gambar: targetAlat.gambar,
+            qty: 1
+        });
+    }
+
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    updateCartBadge();
+    alert(`"${targetAlat.nama_peralatan}" berhasil ditambahkan ke keranjang!`);
+}
+
+// 2. Update Jumlah Badge Keranjang di Navbar
+function updateCartBadge() {
+    const badge = document.getElementById('cartBadgeCount');
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    const totalQty = keranjang.reduce((sum, item) => sum + item.qty, 0);
+
+    if (badge) {
+        badge.innerText = totalQty;
+        // Hapus kelas 'hidden' agar angka 0 tetap kelihatan sejak awal
+        badge.classList.remove('hidden'); 
     }
 }
 
-function initDatabase() {
-    initDefaultData();
+// 3. Render Modal Keranjang
+function openModalKeranjang() {
+    const modal = document.getElementById('modalKeranjang');
+    const container = document.getElementById('cartItemsContainer');
+    const totalElement = document.getElementById('cartTotalHarga');
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
 
+    if (!modal) return;
+
+    if (container) {
+        container.innerHTML = '';
+
+        if (keranjang.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-cart-flatbed text-3xl mb-2 block"></i>
+                    Keranjang sewa Anda masih kosong.
+                </div>
+            `;
+            if (totalElement) totalElement.innerText = 'Rp 0';
+        } else {
+            let total = 0;
+            keranjang.forEach((item, idx) => {
+                const subtotal = item.harga_sewa * item.qty;
+                total += subtotal;
+
+                container.innerHTML += `
+                    <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+                        <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" class="w-12 h-12 object-cover rounded-xl shrink-0">
+                        <div class="flex-grow min-w-0">
+                            <h4 class="text-xs font-bold text-slate-900 truncate">${item.nama_peralatan}</h4>
+                            <span class="text-[11px] font-semibold text-sicamp-700">Rp ${item.harga_sewa.toLocaleString('id-ID')} / hari</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="ubahQtyKeranjang(${idx}, -1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-100">-</button>
+                            <span class="text-xs font-bold w-4 text-center">${item.qty}</span>
+                            <button onclick="ubahQtyKeranjang(${idx}, 1)" class="w-6 h-6 bg-white border border-slate-200 rounded-lg text-xs font-bold hover:bg-slate-100">+</button>
+                            <button onclick="hapusItemKeranjang(${idx})" class="w-6 h-6 text-rose-500 hover:text-rose-700 ml-1 text-xs">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            if (totalElement) totalElement.innerText = `Rp ${total.toLocaleString('id-ID')}`;
+        }
+    }
+
+    modal.classList.remove('hidden');
+}
+
+function closeModalKeranjang() {
+    const modal = document.getElementById('modalKeranjang');
+    if (modal) modal.classList.add('hidden');
+}
+
+function ubahQtyKeranjang(index, change) {
+    let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    if (keranjang[index]) {
+        keranjang[index].qty += change;
+        if (keranjang[index].qty <= 0) {
+            keranjang.splice(index, 1);
+        }
+        localStorage.setItem('keranjang', JSON.stringify(keranjang));
+        openModalKeranjang();
+        updateCartBadge();
+    }
+}
+
+function hapusItemKeranjang(index) {
+    let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    keranjang.splice(index, 1);
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    openModalKeranjang();
+    updateCartBadge();
+}
+
+// 4. Proses Checkout (Masuk ke Riwayat Transaksi)
+function prosesCheckoutSewa() {
+    const session = JSON.parse(localStorage.getItem('session_user'));
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+
+    if (!session) {
+        alert('Silakan login terlebih dahulu!');
+        window.location.href = 'login.html';
+        return;
+    }
+
+    if (keranjang.length === 0) {
+        alert('Keranjang sewa masih kosong!');
+        return;
+    }
+
+    const tglSewa = document.getElementById('checkoutTglSewa')?.value || new Date().toISOString().split('T')[0];
+    const tglKembali = document.getElementById('checkoutTglKembali')?.value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    const totalHargaPerHari = keranjang.reduce((sum, item) => sum + (item.harga_sewa * item.qty), 0);
+
+    const newTransaksi = {
+        id_penyewaan: Date.now(),
+        kode_transaksi: 'TRX-' + String(Date.now()).slice(-6),
+        nama_pelanggan: session.nama || session.nama_pelanggan,
+        total_harga: totalHargaPerHari,
+        tgl_sewa: tglSewa,
+        tgl_kembali_rencana: tglKembali,
+        status: 'Menunggu Pembayaran',
+        detail_items: keranjang,
+        bukti: null
+    };
+
+    let penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    penyewaan.unshift(newTransaksi);
+    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+
+    // Kosongkan keranjang setelah checkout
+    localStorage.removeItem('keranjang');
+    updateCartBadge();
+    closeModalKeranjang();
+
+    alert('Checkout Berhasil! Silakan unggah bukti pembayaran di halaman Riwayat Penyewaan.');
+    window.location.href = 'riwayat-sewa.html';
+}
+
+// ==========================================
+// 1. DATABASE INITIALIZATION & SEEDING
+// ==========================================
+function initDatabase() {
+    // 1. Setup 5 Kategori Peralatan Standar SiCamp
+    if (!localStorage.getItem('kategori_peralatan')) {
+        const defaultKategori = [
+            { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
+            { id_kategori: '2', nama_kategori: 'Carrier & Tas' },
+            { id_kategori: '3', nama_kategori: 'Alat Masak & Makan' },
+            { id_kategori: '4', nama_kategori: 'Tidur & Matras' },
+            { id_kategori: '5', nama_kategori: 'Aksesori & Penerangan' }
+        ];
+        localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
+    }
+
+    // 2. Setup Peralatan Standar SiCamp
     if (!localStorage.getItem('peralatan')) {
         const defaultPeralatan = [
-            { id_peralatan: 1, id_kategori: 1, nama_peralatan: 'Tenda Dome 4P', harga_sewa: 50000, stok: 5, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Tenda waterproof double layer.' },
-            { id_peralatan: 2, id_kategori: 2, nama_peralatan: 'Carrier Eiger 60L', harga_sewa: 35000, stok: 8, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Tas gunung ergonomis.' },
-            { id_peralatan: 3, id_kategori: 4, nama_peralatan: 'Sleeping Bag Dacron', harga_sewa: 15000, stok: 12, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Sleeping bag hangat.' }
+            {
+                id_peralatan: '1',
+                id_kategori: '1',
+                nama_peralatan: 'Tenda Dome 4P',
+                harga_sewa: 50000,
+                stok: 5,
+                kondisi: 'Bagus',
+                status: 'Aktif',
+                deskripsi: 'Tenda waterproof double layer muat hingga 4 orang.',
+                gambar: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id_peralatan: '2',
+                id_kategori: '2',
+                nama_peralatan: 'Carrier Eiger 60L',
+                harga_sewa: 35000,
+                stok: 8,
+                kondisi: 'Bagus',
+                status: 'Aktif',
+                deskripsi: 'Tas gunung ergonomis nyaman untuk pendakian jauh.',
+                gambar: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id_peralatan: '3',
+                id_kategori: '4',
+                nama_peralatan: 'Sleeping Bag Dacron',
+                harga_sewa: 15000,
+                stok: 12,
+                kondisi: 'Bagus',
+                status: 'Aktif',
+                deskripsi: 'Sleeping bag hangat menjaga suhu tubuh malam hari.',
+                gambar: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80'
+            }
         ];
         localStorage.setItem('peralatan', JSON.stringify(defaultPeralatan));
     }
@@ -38,6 +252,7 @@ function initDatabase() {
                 kode_transaksi: 'TRX-20261001',
                 nama_pelanggan: 'Budi Santoso',
                 total_harga: 100000,
+                tgl_sewa: '2026-10-01',
                 tgl_kembali_rencana: '2026-10-05',
                 status: 'Menunggu Pembayaran',
                 bukti: null
@@ -47,14 +262,518 @@ function initDatabase() {
     }
 }
 
+function initDefaultData() {
+    initDatabase();
+}
+
 // ==========================================
-// 2. EVENT LISTENER AWAL (DOM CONTENT LOADED)
+// 2. NAVIGASI USER (TOPBAR) & ADMIN (SIDEBAR)
+// ==========================================
+function renderUserNavigation() {
+    const navPelanggan = document.getElementById('navPelanggan');
+    const userIndicator = document.getElementById('userIndicator');
+    const sidebarMenu = document.getElementById('sidebarMenu');
+    const userInfo = document.getElementById('userInfo');
+
+    const session = JSON.parse(localStorage.getItem('session_user'));
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+
+    // Topbar User / Tamu / Admin
+    if (userIndicator) {
+        if (!session) {
+            if (navPelanggan) navPelanggan.innerHTML = '';
+            userIndicator.innerHTML = `
+                <a href="login.html" class="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200 no-underline">Masuk</a>
+                <a href="register.html" class="px-4 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20 no-underline">Daftar</a>
+            `;
+        } else if (session.role === 'pelanggan') {
+            if (navPelanggan) {
+                navPelanggan.innerHTML = `
+                    <a href="riwayat-sewa.html" class="hover:text-sicamp-700 transition-colors flex items-center gap-1.5 no-underline">
+                        <i class="fa-solid fa-clock-rotate-left text-xs text-sicamp-700"></i> Riwayat Penyewaan
+                    </a>
+                `;
+            }
+            userIndicator.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800 hidden sm:inline">Halo, <strong>${session.nama}</strong></span>
+                    <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-full border border-rose-200 transition-all">Logout</button>
+                </div>
+            `;
+        } else if (session.role === 'admin') {
+            if (navPelanggan) {
+                navPelanggan.innerHTML = `
+                    <a href="dashboard.html" class="text-amber-600 font-bold hover:underline no-underline">Panel Admin</a>
+                `;
+            }
+            userIndicator.innerHTML = `
+                <a href="dashboard.html" class="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all no-underline shadow-md shadow-amber-500/20">Admin Dashboard</a>
+            `;
+        }
+    }
+
+    // Sidebar Khusus Admin
+    if (sidebarMenu && session && session.role === 'admin') {
+        const menuItems = [
+            { name: 'Dashboard Utama', url: 'dashboard.html', icon: 'fa-chart-pie' },
+            { name: 'Lihat Landing Page', url: 'index.html', icon: 'fa-globe' },
+            { name: 'Kelola Kategori & Alat', url: 'admin-dashboard.html', icon: 'fa-boxes-stacked' },
+            { name: 'Verifikasi Pembayaran', url: 'verifikasi-pembayaran.html', icon: 'fa-file-invoice-dollar' },
+            { name: 'Kelola Pengembalian', url: 'pengembalian.html', icon: 'fa-rotate-left' }
+        ];
+
+        sidebarMenu.innerHTML = '';
+        menuItems.forEach(item => {
+            const isActive = currentPath === item.url;
+            const activeClass = isActive 
+                ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' 
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
+
+            sidebarMenu.innerHTML += `
+                <li>
+                    <a href="${item.url}" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${activeClass}">
+                        <i class="fa-solid ${item.icon} text-sm"></i>
+                        <span>${item.name}</span>
+                    </a>
+                </li>
+            `;
+        });
+
+        sidebarMenu.innerHTML += `
+            <li class="pt-4 mt-2 border-t border-slate-800">
+                <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold no-underline">
+                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
+        `;
+
+        if (userInfo) {
+            userInfo.innerHTML = `User: <strong class="text-white">${session.nama}</strong><br>Role: <strong class="text-amber-500 uppercase">ADMIN</strong>`;
+        }
+    }
+}
+
+function logout() {
+    localStorage.removeItem('session_user');
+    alert('Anda telah logout.');
+    window.location.href = 'index.html';
+}
+
+// ==========================================
+// 3. KATALOG & FILTERING PERALATAN
+// ==========================================
+let currentCategoryFilter = 'all';
+let searchKeyword = '';
+
+function renderCategoryOptionsAndTabs() {
+    const tabContainer = document.getElementById('filterCategoryContainer');
+    const selectSelect = document.getElementById('searchKategoriSelect');
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+
+    // Render Tombol Pill Filter
+    if (tabContainer) {
+        tabContainer.innerHTML = `
+            <button onclick="setCategoryFilter('all')" 
+                class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                Semua Alat
+            </button>
+        `;
+
+        kategoris.forEach(k => {
+            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
+            tabContainer.innerHTML += `
+                <button onclick="setCategoryFilter('${k.id_kategori}')" 
+                    class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                    ${k.nama_kategori}
+                </button>
+            `;
+        });
+    }
+
+    // Render Dropdown Search (jika ada)
+    if (selectSelect) {
+        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
+        kategoris.forEach(k => {
+            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
+        });
+        selectSelect.value = currentCategoryFilter;
+    }
+}
+
+function setCategoryFilter(catId) {
+    currentCategoryFilter = catId;
+    renderCategoryOptionsAndTabs();
+    renderKatalog();
+}
+
+function searchKeywordHandler() {
+    const input = document.getElementById('searchInput');
+    searchKeyword = input ? input.value.toLowerCase().trim() : '';
+    renderKatalog();
+}
+
+function renderKatalog() {
+    const grid = document.getElementById('equipmentGrid');
+    if (!grid) return;
+
+    const items = JSON.parse(localStorage.getItem('peralatan')) || [];
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+
+    grid.innerHTML = '';
+
+    const filtered = items.filter(item => {
+        const matchCategory = (currentCategoryFilter === 'all') || (String(item.id_kategori) === String(currentCategoryFilter));
+        const matchKeyword = !searchKeyword || item.nama_peralatan.toLowerCase().includes(searchKeyword);
+        return matchCategory && matchKeyword;
+    });
+
+    if (filtered.length === 0) {
+        grid.innerHTML = `
+            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200">
+                <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i>
+                <p class="text-slate-500 text-xs font-medium">Belum ada peralatan yang sesuai dengan pencarian Anda.</p>
+            </div>
+        `;
+        return;
+    }
+
+    filtered.forEach((item) => {
+        const kat = kategoris.find(k => String(k.id_kategori) === String(item.id_kategori));
+
+        grid.innerHTML += `
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
+                <div class="relative h-48 overflow-hidden bg-slate-100">
+                    <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" alt="${item.nama_peralatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute top-3 left-3">
+                        <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                            ${kat ? kat.nama_kategori : 'Umum'}
+                        </span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        <span class="bg-sicamp-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                            Stok: ${item.stok}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 group-hover:text-sicamp-700 transition-colors line-clamp-1">
+                            ${item.nama_peralatan}
+                        </h3>
+                        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                            ${item.deskripsi || 'Peralatan pendakian berkualitas tinggi, terawat, dan siap pakai.'}
+                        </p>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                        <div>
+                            <span class="block text-[10px] font-semibold text-slate-400 uppercase">Harga Sewa</span>
+                            <span class="text-base font-black text-slate-900">
+                                Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}
+                                <span class="text-xs text-slate-400 font-normal">/hari</span>
+                            </span>
+                        </div>
+                        <button onclick="tambahKeranjang('${item.id_peralatan}')" class="px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-cart-plus"></i> Sewa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+}
+
+function sewaItem(nama) {
+    const session = JSON.parse(localStorage.getItem('session_user'));
+    if (!session) {
+        alert('Silakan login terlebih dahulu untuk menyewa!');
+        window.location.href = 'login.html';
+    } else if (session.role === 'admin') {
+        alert('Admin tidak dapat melakukan penyewaan.');
+    } else {
+        alert(`Pengajuan penyewaan untuk "${nama}" berhasil! Cek pesanan pada menu Riwayat Penyewaan.`);
+    }
+}
+
+// ==========================================
+// 4. MANAGEMENT ADMIN (KATEGORI, ALAT, TRANSAKSI)
+// ==========================================
+function renderTabelKategoriAdmin() {
+    const tbody = document.querySelector('#tblKategoriAdmin tbody') || document.querySelector('#tblKategori tbody');
+    if (!tbody) return;
+
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    tbody.innerHTML = '';
+
+    if (kategoris.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">Belum ada kategori.</td></tr>`;
+        return;
+    }
+
+    kategoris.forEach((k, idx) => {
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-6 font-bold text-slate-900">${k.id_kategori}</td>
+                <td class="py-3.5 px-6 font-semibold">${k.nama_kategori}</td>
+                <td class="py-3.5 px-6 text-center">
+                    <button onclick="hapusKategoriAdmin(${idx})" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs transition-all flex items-center gap-1 mx-auto">
+                        <i class="fa-solid fa-trash"></i> Hapus
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function openModalTambahKategori() {
+    const input = document.getElementById('inputNamaKategori');
+    if (input) input.value = '';
+    const modal = document.getElementById('modalKategori');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeModalKategori() {
+    const modal = document.getElementById('modalKategori');
+    if (modal) modal.classList.add('hidden');
+}
+
+async function saveKategoriHandler(e) {
+    e.preventDefault();
+    const input = document.getElementById('inputNamaKategori');
+    const nama = input ? input.value.trim() : '';
+
+    if (!nama) return;
+
+    try {
+        // Kirim data ke PHP MySQL
+        const response = await fetch('api_kategori.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nama_kategori: nama })
+        });
+        
+        const result = await response.json();
+        if (result.status === 'success') {
+            alert('Kategori berhasil ditambahkan ke Database MySQL!');
+            closeModalKategori();
+            loadKategoriFromDB(); // Tarik data terbaru dari MySQL
+        } else {
+            alert('Gagal menyimpan kategori ke Database.');
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert('Terjadi kesalahan koneksi ke server PHP.');
+    }
+}
+
+function hapusKategoriAdmin(index) {
+    if (confirm('Yakin ingin menghapus kategori ini?')) {
+        const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+        kategoris.splice(index, 1);
+        localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
+        renderTabelKategoriAdmin();
+        renderCategoryOptionsAndTabs();
+    }
+}
+
+function renderPelangganAdmin() {
+    const tbody = document.querySelector('#tblPelangganMaster tbody');
+    if (!tbody) return;
+    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+    tbody.innerHTML = '';
+
+    if (pelanggan.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="py-6 text-center text-slate-400">Belum ada data pelanggan terdaftar.</td></tr>';
+        return;
+    }
+
+    pelanggan.forEach((p, idx) => {
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3 px-4 font-bold">${p.id_pelanggan}</td>
+                <td class="py-3 px-4"><strong>${p.nama_pelanggan || p.nama}</strong></td>
+                <td class="py-3 px-4">${p.email}</td>
+                <td class="py-3 px-4 text-center">
+                    <button class="px-2.5 py-1 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-lg border border-rose-200" onclick="hapusPelanggan(${idx})">Hapus</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function hapusPelanggan(index) {
+    if (confirm('Yakin ingin menghapus data pelanggan ini?')) {
+        const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
+        pelanggan.splice(index, 1);
+        localStorage.setItem('pelanggan', JSON.stringify(pelanggan));
+        renderPelangganAdmin();
+    }
+}
+
+function renderRiwayatPelanggan() {
+    const tbody = document.querySelector('#tblRiwayat tbody');
+    if (!tbody) return;
+
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    tbody.innerHTML = '';
+
+    if (penyewaan.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400">Belum ada riwayat penyewaan.</td></tr>`;
+        return;
+    }
+
+    penyewaan.forEach((p, idx) => {
+        let aksi = '-';
+        if (p.status === 'Menunggu Pembayaran') {
+            aksi = `<button class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl" onclick="uploadBuktiSimulasi(${idx})">Unggah Bukti</button>`;
+        }
+
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-4 px-6 font-bold">${p.kode_transaksi}</td>
+                <td class="py-4 px-6">${p.tgl_kembali_rencana || '-'}</td>
+                <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${parseInt(p.total_harga).toLocaleString('id-ID')}</td>
+                <td class="py-4 px-6 font-bold">${p.status}</td>
+                <td class="py-4 px-6 text-center">${aksi}</td>
+            </tr>
+        `;
+    });
+}
+
+function uploadBuktiSimulasi(index) {
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    penyewaan[index].status = 'Menunggu Verifikasi';
+    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+    alert('Bukti pembayaran berhasil diunggah!');
+    renderRiwayatPelanggan();
+}
+
+function renderVerifikasiAdmin() {
+    const tbody = document.querySelector('#tblVerifikasi tbody');
+    if (!tbody) return;
+
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    tbody.innerHTML = '';
+
+    const pending = penyewaan.filter(p => p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran');
+
+    if (pending.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400">Tidak ada pembayaran yang membutuhkan verifikasi.</td></tr>`;
+        return;
+    }
+
+    penyewaan.forEach((p, idx) => {
+        if (p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran') {
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-4 px-6 font-bold text-slate-900">${p.kode_transaksi}</td>
+                    <td class="py-4 px-6">${p.nama_pelanggan}</td>
+                    <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${parseInt(p.total_harga).toLocaleString('id-ID')}</td>
+                    <td class="py-4 px-6"><span class="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full">${p.status}</span></td>
+                    <td class="py-4 px-6 text-center">
+                        <div class="flex items-center justify-center gap-2">
+                            <button class="px-3.5 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-[11px] rounded-xl shadow-sm transition-all flex items-center gap-1" onclick="verifikasiSewa(${idx}, 'Disetujui')">
+                                <i class="fa-solid fa-check"></i> Setujui
+                            </button>
+                            <button class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 font-bold text-[11px] rounded-xl border border-rose-200 transition-all flex items-center gap-1" onclick="verifikasiSewa(${idx}, 'Dibatalkan')">
+                                <i class="fa-solid fa-xmark"></i> Tolak
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+}
+
+function verifikasiSewa(index, statusBaru) {
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    penyewaan[index].status = statusBaru;
+    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+    alert(`Status transaksi diubah menjadi: ${statusBaru}`);
+    renderVerifikasiAdmin();
+}
+
+function renderPengembalianAdmin() {
+    const tbody = document.querySelector('#tblPengembalian tbody');
+    if (!tbody) return;
+
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    tbody.innerHTML = '';
+
+    const aktif = penyewaan.filter(p => p.status === 'Disetujui' || p.status === 'Sedang Disewa');
+
+    if (aktif.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="py-12 text-center text-slate-400">Tidak ada pengembalian aktif.</td></tr>`;
+        return;
+    }
+
+    penyewaan.forEach((p, idx) => {
+        if (p.status === 'Disetujui' || p.status === 'Sedang Disewa') {
+            tbody.innerHTML += `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="py-4 px-6 font-bold">${p.kode_transaksi}</td>
+                    <td class="py-4 px-6">${p.nama_pelanggan}</td>
+                    <td class="py-4 px-6">${p.tgl_kembali_rencana}</td>
+                    <td class="py-4 px-6 text-center">
+                        <button class="px-3 py-1.5 bg-sicamp-700 text-white font-bold text-xs rounded-xl" onclick="prosesPengembalian(${idx})">Proses Kembali</button>
+                    </td>
+                </tr>
+            `;
+        }
+    });
+}
+
+function prosesPengembalian(index) {
+    const denda = prompt('Masukkan denda jika ada (Rp):', '0');
+    if (denda !== null) {
+        const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+        penyewaan[index].status = 'Selesai';
+        localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+        alert(`Pengembalian selesai dengan denda Rp ${parseInt(denda).toLocaleString('id-ID')}`);
+        renderPengembalianAdmin();
+    }
+}
+
+function renderDashboardStats() {
+    const alat = JSON.parse(localStorage.getItem('peralatan')) || [];
+    const kat = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    const sewa = JSON.parse(localStorage.getItem('penyewaan')) || [];
+
+    if(document.getElementById('countAlat')) document.getElementById('countAlat').innerText = alat.length;
+    if(document.getElementById('countKategori')) document.getElementById('countKategori').innerText = kat.length;
+    if(document.getElementById('countPenyewaan')) document.getElementById('countPenyewaan').innerText = sewa.length;
+}
+
+// Tambahkan fungsi ini tepat di atas DOMContentLoaded
+async function loadKategoriFromDB() {
+    try {
+        const response = await fetch('api_kategori.php');
+        const kategoris = await response.json();
+        
+        // Simpan data dari MySQL ke LocalStorage sebagai cache UI
+        localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
+        
+        renderCategoryOptionsAndTabs();
+        renderTabelKategoriAdmin();
+    } catch (error) {
+        console.error("Gagal mengambil data dari MySQL:", error);
+    }
+}
+
+// ==========================================
+// 5. EVENT LISTENERS & INITIAL LOAD
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     initDatabase();
+    loadKategoriFromDB();
     renderUserNavigation();
     renderCategoryOptionsAndTabs();
+    updateCartBadge();
 
+    // Login Form
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -79,11 +798,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (user) {
                 localStorage.setItem('session_user', JSON.stringify({ 
                     id: user.id_pelanggan,
-                    nama: user.nama_pelanggan, 
+                    nama: user.nama_pelanggan || user.nama, 
                     email: user.email,
                     role: 'pelanggan' 
                 }));
-                alert(`Selamat Datang, ${user.nama_pelanggan}!`);
+                alert(`Selamat Datang, ${user.nama_pelanggan || user.nama}!`);
                 window.location.href = 'index.html';
             } else {
                 alert('Username/Email atau Password salah!');
@@ -91,6 +810,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Register Form
     const regForm = document.getElementById('registerForm');
     if (regForm) {
         regForm.addEventListener('submit', (e) => {
@@ -125,533 +845,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const formP = document.getElementById('formPeralatan');
-    if (formP) {
-        formP.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('editAlatId').value;
-            const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-
-            const dataAlat = {
-                id_peralatan: editId ? parseInt(editId) : Date.now(),
-                nama_peralatan: document.getElementById('pNama').value,
-                id_kategori: parseInt(document.getElementById('pKategori').value),
-                harga_sewa: parseInt(document.getElementById('pHarga').value),
-                stok: parseInt(document.getElementById('pStok').value),
-                kondisi: document.getElementById('pKondisi').value,
-                status: document.getElementById('pStatus').value,
-                deskripsi: document.getElementById('pDeskripsi').value
-            };
-
-            if (editId) {
-                const idx = peralatan.findIndex(p => p.id_peralatan == editId);
-                if (idx !== -1) peralatan[idx] = dataAlat;
-                alert('Data peralatan berhasil diperbarui!');
-            } else {
-                peralatan.push(dataAlat);
-                alert('Peralatan baru berhasil ditambahkan!');
-            }
-
-            localStorage.setItem('peralatan', JSON.stringify(peralatan));
-            resetFormPeralatan();
-            renderPeralatanAdmin();
-        });
-    }
-
+    // Render Elemen Spesifik Halaman
     if (document.getElementById('equipmentGrid')) renderKatalog();
-    if (document.getElementById('tblKategoriMaster')) renderKategoriAdmin();
-    if (document.getElementById('tblKategoriAdmin')) renderTabelKategoriAdmin();
+    if (document.getElementById('tblKategoriAdmin') || document.getElementById('tblKategori')) renderTabelKategoriAdmin();
     if (document.getElementById('tblRiwayat')) renderRiwayatPelanggan();
     if (document.getElementById('tblVerifikasi')) renderVerifikasiAdmin();
     if (document.getElementById('tblPengembalian')) renderPengembalianAdmin();
     if (document.getElementById('statCards')) renderDashboardStats();
 });
 
-// ==========================================
-// 3. RENDER NAVIGASI & KATEGORI (MODERN UI)
-// ==========================================
-function renderCategoryOptionsAndTabs() {
-    const selectSelect = document.getElementById('searchKategoriSelect');
-    const tabContainer = document.getElementById('filterCategoryContainer');
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    const currentCategoryFilter = window.currentCategoryFilter || 'all';
-
-    if (selectSelect) {
-        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
-        kategoris.forEach(k => {
-            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
-        });
-        selectSelect.value = currentCategoryFilter;
-    }
-
-    if (tabContainer) {
-        tabContainer.innerHTML = `
-            <button onclick="setCategoryFilter('all')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                Semua Alat
-            </button>
-        `;
-        kategoris.forEach(k => {
-            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
-            tabContainer.innerHTML += `
-                <button onclick="setCategoryFilter('${k.id_kategori}')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                    ${k.nama_kategori}
-                </button>
-            `;
-        });
-    }
-}
-
-function renderUserNavigation() {
-    const navPelanggan = document.getElementById('navPelanggan');
-    const userIndicator = document.getElementById('userIndicator');
-    const sidebarMenu = document.getElementById('sidebarMenu');
-    const userInfo = document.getElementById('userInfo');
-
-    const session = JSON.parse(localStorage.getItem('session_user'));
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
-
-    if (userIndicator) {
-        if (!session) {
-            if (navPelanggan) navPelanggan.innerHTML = '';
-            userIndicator.innerHTML = `
-                <a href="login.html" class="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200">Masuk</a>
-                <a href="register.html" class="px-4 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20">Daftar</a>
-            `;
-        } else if (session.role === 'pelanggan') {
-            if (navPelanggan) {
-                navPelanggan.innerHTML = `
-                    <a href="riwayat-sewa.html" class="hover:text-sicamp-700 transition-colors flex items-center gap-1">
-                        <i class="fa-solid fa-clock-rotate-left text-xs text-sicamp-700"></i> Riwayat
-                    </a>
-                `;
-            }
-            userIndicator.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-800 hidden sm:inline">${session.nama}</span>
-                    <button onclick="logout()" class="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-full border border-rose-200 transition-all">Logout</button>
-                </div>
-            `;
-        } else if (session.role === 'admin') {
-            if (navPelanggan) {
-                navPelanggan.innerHTML = `<a href="dashboard.html" class="text-amber-600 font-bold hover:underline">Panel Admin</a>`;
-            }
-            userIndicator.innerHTML = `
-                <a href="dashboard.html" class="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all">Admin Dashboard</a>
-            `;
-        }
-    }
-
-    if (sidebarMenu && session && session.role === 'admin') {
-        const menuItems = [
-            { name: 'Dashboard Utama', url: 'dashboard.html', icon: 'fa-chart-pie' },
-            { name: 'Lihat Landing Page', url: 'index.html', icon: 'fa-globe' },
-            { name: 'Kelola Kategori & Alat', url: 'admin-dashboard.html', icon: 'fa-boxes-stacked' },
-            { name: 'Verifikasi Pembayaran', url: 'verifikasi-pembayaran.html', icon: 'fa-file-invoice-dollar' },
-            { name: 'Kelola Pengembalian', url: 'pengembalian.html', icon: 'fa-rotate-left' }
-        ];
-
-        sidebarMenu.innerHTML = '';
-        menuItems.forEach(item => {
-            const isActive = currentPath === item.url;
-            const activeClass = isActive 
-                ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' 
-                : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
-
-            sidebarMenu.innerHTML += `
-                <li>
-                    <a href="${item.url}" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all ${activeClass}">
-                        <i class="fa-solid ${item.icon} text-sm"></i>
-                        <span>${item.name}</span>
-                    </a>
-                </li>
-            `;
-        });
-
-        sidebarMenu.innerHTML += `
-            <li class="pt-4 mt-2 border-t border-slate-800">
-                <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold">
-                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                    <span>Logout</span>
-                </a>
-            </li>
-        `;
-
-        if (userInfo) {
-            userInfo.innerHTML = `User: <strong class="text-white">${session.nama}</strong><br>Role: <strong class="text-sicamp-500 uppercase">ADMIN</strong>`;
-        }
-    }
-}
-
-function logout() {
-    localStorage.removeItem('session_user');
-    alert('Anda telah logout.');
-    window.location.href = 'index.html';
-}
-
-// ==========================================
-// 4. RENDER KATALOG & RIWAYAT PELANGGAN
-// ==========================================
-function renderKatalog() {
-    const grid = document.getElementById('equipmentGrid');
-    if (!grid) return;
-    const items = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-
-    grid.innerHTML = '';
-    items.forEach(item => {
-        const kat = kategoris.find(k => k.id_kategori == item.id_kategori);
-        grid.innerHTML += `
-            <div class="card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
-                <div>
-                    <h3 class="font-bold text-slate-800 text-lg mb-1">${item.nama_peralatan}</h3>
-                    <p class="text-xs text-slate-400 mb-3">Kategori: ${kat ? kat.nama_kategori : '-'}</p>
-                    <p class="text-xs text-slate-600 mb-2"><strong>Deskripsi:</strong> ${item.deskripsi}</p>
-                    <p class="text-xs text-slate-600 mb-1"><strong>Harga:</strong> Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')} / hari</p>
-                    <p class="text-xs text-slate-600 mb-4"><strong>Stok:</strong> ${item.stok} unit</p>
-                </div>
-                <button class="w-full py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all" onclick="sewaItem('${item.nama_peralatan}')">Sewa Sekarang</button>
-            </div>
-        `;
-    });
-}
-
-function sewaItem(nama) {
-    const session = JSON.parse(localStorage.getItem('session_user'));
-    if (!session) {
-        alert('Silakan login terlebih dahulu untuk menyewa!');
-        window.location.href = 'login.html';
-    } else if (session.role === 'admin') {
-        alert('Admin tidak dapat melakukan penyewaan.');
-    } else {
-        alert(`Pengajuan penyewaan untuk "${nama}" berhasil! Cek pesanan pada menu Riwayat Penyewaan.`);
-    }
-}
-
-function renderRiwayatPelanggan() {
-    const tbody = document.querySelector('#tblRiwayat tbody');
-    if (!tbody) return;
-
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    tbody.innerHTML = '';
-
-    if (penyewaan.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="6" class="py-12 text-center text-slate-400">
-                    <i class="fa-solid fa-folder-open text-3xl mb-2 block"></i>
-                    Belum ada riwayat penyewaan peralatan.
-                </td>
-            </tr>
-        `;
-        return;
-    }
-
-    penyewaan.forEach((p, idx) => {
-        let statusBadge = '';
-        if (p.status === 'Menunggu Pembayaran') {
-            statusBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full">Menunggu Pembayaran</span>`;
-        } else if (p.status === 'Menunggu Verifikasi') {
-            statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-bold px-2.5 py-1 rounded-full">Menunggu Verifikasi</span>`;
-        } else if (p.status === 'Disetujui' || p.status === 'Selesai') {
-            statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">${p.status}</span>`;
-        } else {
-            statusBadge = `<span class="bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-bold px-2.5 py-1 rounded-full">${p.status}</span>`;
-        }
-
-        let aksi = '-';
-        if (p.status === 'Menunggu Pembayaran') {
-            aksi = `<button onclick="uploadBuktiSimulasi(${idx})" class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1 mx-auto">
-                        <i class="fa-solid fa-upload"></i> Unggah Bukti
-                    </button>`;
-        }
-
-        tbody.innerHTML += `
-            <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-4 px-6 font-bold text-slate-900">${p.kode_transaksi}</td>
-                <td class="py-4 px-6">${p.tgl_sewa || '-'}</td>
-                <td class="py-4 px-6">${p.tgl_kembali_rencana || '-'}</td>
-                <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${(p.total_harga || 0).toLocaleString('id-ID')}</td>
-                <td class="py-4 px-6">${statusBadge}</td>
-                <td class="py-4 px-6 text-center">${aksi}</td>
-            </tr>
-        `;
-    });
-}
-
-function uploadBuktiSimulasi(index) {
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    penyewaan[index].status = 'Menunggu Verifikasi';
-    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-    alert('Bukti pembayaran berhasil diunggah!');
-    renderRiwayatPelanggan();
-}
-
-// ==========================================
-// 5. RENDER FITUR ADMIN & KELOLA DATA
-// ==========================================
-function switchMasterTab(tabName) {
-    if (document.getElementById('tabKategori')) document.getElementById('tabKategori').style.display = (tabName === 'kategori') ? 'block' : 'none';
-    if (document.getElementById('tabPeralatan')) document.getElementById('tabPeralatan').style.display = (tabName === 'peralatan') ? 'block' : 'none';
-    if (document.getElementById('tabPelanggan')) document.getElementById('tabPelanggan').style.display = (tabName === 'pelanggan') ? 'block' : 'none';
-
-    if (tabName === 'kategori') renderKategoriAdmin();
-    if (tabName === 'peralatan') {
-        loadKategoriDropdown();
-        renderPeralatanAdmin();
-    }
-    if (tabName === 'pelanggan') renderPelangganAdmin();
-}
-
-function loadKategoriDropdown() {
-    const select = document.getElementById('pKategori');
-    if (!select) return;
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    select.innerHTML = '<option value="">-- Pilih Kategori --</option>';
-    kategoris.forEach(k => {
-        select.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
-    });
-}
-
-function renderPeralatanAdmin() {
-    const tbody = document.querySelector('#tblPeralatanMaster tbody');
-    if (!tbody) return;
-    const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    tbody.innerHTML = '';
-
-    peralatan.forEach((item, index) => {
-        const kat = kategoris.find(k => k.id_kategori == item.id_kategori);
-        tbody.innerHTML += `
-            <tr>
-                <td><strong>${item.nama_peralatan}</strong></td>
-                <td>${kat ? kat.nama_kategori : '-'}</td>
-                <td>Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}</td>
-                <td>${item.stok}</td>
-                <td>${item.kondisi}</td>
-                <td>${item.status || 'Aktif'}</td>
-                <td>
-                    <button class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded" onclick="editPeralatan(${index})">Edit</button>
-                    <button class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded" onclick="hapusPeralatan(${index})">Hapus</button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function editPeralatan(index) {
-    const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const item = peralatan[index];
-    if (!item) return;
-
-    document.getElementById('editAlatId').value = item.id_peralatan;
-    document.getElementById('pNama').value = item.nama_peralatan;
-    document.getElementById('pKategori').value = item.id_kategori;
-    document.getElementById('pHarga').value = item.harga_sewa;
-    document.getElementById('pStok').value = item.stok;
-    document.getElementById('pKondisi').value = item.kondisi;
-    document.getElementById('pStatus').value = item.status || 'Aktif';
-    document.getElementById('pDeskripsi').value = item.deskripsi;
-    document.getElementById('btnSimpanAlat').innerText = 'Update Peralatan';
-}
-
-function resetFormPeralatan() {
-    const formP = document.getElementById('formPeralatan');
-    if (formP) formP.reset();
-    if (document.getElementById('editAlatId')) document.getElementById('editAlatId').value = '';
-    if (document.getElementById('btnSimpanAlat')) document.getElementById('btnSimpanAlat').innerText = 'Simpan Peralatan';
-}
-
-function hapusPeralatan(index) {
-    if (confirm('Yakin ingin menghapus peralatan ini?')) {
-        const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-        peralatan.splice(index, 1);
-        localStorage.setItem('peralatan', JSON.stringify(peralatan));
-        renderPeralatanAdmin();
-    }
-}
-
-function renderPelangganAdmin() {
-    const tbody = document.querySelector('#tblPelangganMaster tbody');
-    if (!tbody) return;
-    const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
-    tbody.innerHTML = '';
-
-    if (pelanggan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada data pelanggan terdaftar.</td></tr>';
-        return;
-    }
-
-    pelanggan.forEach((p, idx) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.id_pelanggan}</td>
-                <td><strong>${p.nama_pelanggan}</strong></td>
-                <td>${p.email}</td>
-                <td>
-                    <button class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded" onclick="hapusPelanggan(${idx})">Hapus</button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function hapusPelanggan(index) {
-    if (confirm('Yakin ingin menghapus data pelanggan ini?')) {
-        const pelanggan = JSON.parse(localStorage.getItem('pelanggan')) || [];
-        pelanggan.splice(index, 1);
-        localStorage.setItem('pelanggan', JSON.stringify(pelanggan));
-        renderPelangganAdmin();
-    }
-}
-
-function renderTabelKategoriAdmin() {
-    const tbody = document.querySelector('#tblKategoriAdmin tbody');
-    if (!tbody) return;
-
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    tbody.innerHTML = '';
-
-    if (kategoris.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">Belum ada kategori.</td></tr>`;
-        return;
-    }
-
-    kategoris.forEach((k, idx) => {
-        tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="py-3.5 px-6 font-bold text-slate-900">${k.id_kategori}</td>
-                <td class="py-3.5 px-6 font-semibold">${k.nama_kategori}</td>
-                <td class="py-3.5 px-6 text-center">
-                    <button onclick="hapusKategoriAdmin(${idx})" class="p-1 text-rose-500 hover:text-rose-700 text-xs">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function openModalKategori() {
-    if (document.getElementById('inputNamaKategori')) document.getElementById('inputNamaKategori').value = '';
-    if (document.getElementById('modalKategori')) document.getElementById('modalKategori').classList.remove('hidden');
-}
-
-function closeModalKategori() {
-    if (document.getElementById('modalKategori')) document.getElementById('modalKategori').classList.add('hidden');
-}
-
-function saveKategoriHandler(e) {
-    e.preventDefault();
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    const nama = document.getElementById('inputNamaKategori').value.trim();
-
-    if (!nama) return;
-
-    const newKat = {
-        id_kategori: String(Date.now()),
-        nama_kategori: nama
-    };
-
-    kategoris.push(newKat);
-    localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
-    
-    alert('Kategori berhasil ditambahkan!');
-    closeModalKategori();
-    
-    renderTabelKategoriAdmin();
-    renderCategoryOptionsAndTabs();
-}
-
-function hapusKategoriAdmin(index) {
-    if (confirm('Yakin ingin menghapus kategori ini?')) {
-        const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-        kategoris.splice(index, 1);
-        localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
-        renderTabelKategoriAdmin();
-        renderCategoryOptionsAndTabs();
-    }
-}
-
-function renderVerifikasiAdmin() {
-    const tbody = document.querySelector('#tblVerifikasi tbody');
-    if (!tbody) return;
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    tbody.innerHTML = '';
-
-    penyewaan.filter(p => p.status === 'Menunggu Verifikasi').forEach((p, idx) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.kode_transaksi}</td>
-                <td>${p.nama_pelanggan}</td>
-                <td>Rp ${parseInt(p.total_harga).toLocaleString('id-ID')}</td>
-                <td><a href="#" class="text-blue-600 underline" onclick="alert('Bukti transfer terverifikasi.')">Lihat Bukti</a></td>
-                <td>
-                    <button class="px-2 py-1 bg-emerald-600 text-white text-xs font-bold rounded" onclick="verifikasiSewa(${idx}, 'Disetujui')">Setujui</button>
-                    <button class="px-2 py-1 bg-rose-600 text-white text-xs font-bold rounded" onclick="verifikasiSewa(${idx}, 'Dibatalkan')">Tolak</button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function verifikasiSewa(index, statusBaru) {
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    penyewaan[index].status = statusBaru;
-    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-    alert(`Status diubah menjadi: ${statusBaru}`);
-    renderVerifikasiAdmin();
-}
-
-function renderPengembalianAdmin() {
-    const tbody = document.querySelector('#tblPengembalian tbody');
-    if (!tbody) return;
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    tbody.innerHTML = '';
-
-    penyewaan.filter(p => p.status === 'Disetujui' || p.status === 'Sedang Disewa').forEach((p, idx) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.kode_transaksi}</td>
-                <td>${p.nama_pelanggan}</td>
-                <td>${p.tgl_kembali_rencana}</td>
-                <td><button class="px-3 py-1 bg-sicamp-700 text-white text-xs font-bold rounded" onclick="prosesPengembalian(${idx})">Proses Kembali</button></td>
-            </tr>
-        `;
-    });
-}
-
-function prosesPengembalian(index) {
-    const denda = prompt('Masukkan denda jika ada (Rp):', '0');
-    if (denda !== null) {
-        const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-        penyewaan[index].status = 'Selesai';
-        localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-        alert(`Pengembalian selesai dengan denda Rp ${parseInt(denda).toLocaleString('id-ID')}`);
-        renderPengembalianAdmin();
-    }
-}
-
-function renderDashboardStats() {
-    const alat = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const kat = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    const sewa = JSON.parse(localStorage.getItem('penyewaan')) || [];
-
-    if (document.getElementById('countAlat')) document.getElementById('countAlat').innerText = alat.length;
-    if (document.getElementById('countKategori')) document.getElementById('countKategori').innerText = kat.length;
-    if (document.getElementById('countPenyewaan')) document.getElementById('countPenyewaan').innerText = sewa.length;
-}
-
-// ==========================================
-// 6. REAL-TIME SYNC Antar Tab Browser
-// ==========================================
+// Storage Sync Inter-Tab
 window.addEventListener('storage', (e) => {
     if (e.key === 'kategori_peralatan' || e.key === 'peralatan') {
         renderCategoryOptionsAndTabs();
-        renderKatalog();
+        if (document.getElementById('equipmentGrid')) renderKatalog();
     }
 });
 
 window.addEventListener('focus', () => {
     renderCategoryOptionsAndTabs();
-    renderKatalog();
+    if (document.getElementById('equipmentGrid')) renderKatalog();
 });

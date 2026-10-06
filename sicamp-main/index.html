@@ -62,16 +62,17 @@
             <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
                 <a href="#katalog" class="hover:text-sicamp-700 transition-colors">Katalog</a>
                 <a href="#bundling" class="hover:text-sicamp-700 transition-colors">Paket Bundling</a>
-                <a href="#basecamp" class="hover:text-sicamp-700 transition-colors">Basecamp Solo</a>
+                <a href="#basecamp" class="hover:text-sicamp-700 transition-colors">Lokasi</a>
                 <span id="navPelanggan"></span>
             </nav>
 
             <!-- Cart & User Auth Indicator -->
             <div class="flex items-center gap-3">
+                
                 <!-- Button Keranjang -->
-                <button onclick="toggleCartModal()" class="relative p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-all flex items-center justify-center">
+                <button onclick="openModalKeranjang()" class="relative p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-all flex items-center justify-center">
                     <i class="fa-solid fa-basket-shopping text-base text-sicamp-700"></i>
-                    <span id="cartCount" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+                    <span id="cartBadgeCount" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
                 </button>
 
                 <div id="userIndicator" class="flex items-center gap-2">
@@ -207,7 +208,7 @@
             </div>
 
             <!-- Filter Tab Buttons (Di-render Dinamis via app.js) -->
-            <div id="filterCategoryContainer" class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+            <div id="filterCategoryContainer" class="flex items-center gap-2 overflow-x-auto pb-2">
                 <!-- Di-render oleh JS -->
             </div>
         </div>
@@ -326,39 +327,56 @@
                 <h3 class="text-xl font-bold">Mau Konsultasi Kebutuhan Alat Pendakian?</h3>
                 <p class="text-xs text-sicamp-200">Tim profesional kami siap membantu merekomendasikan perlengkapan yang sesuai untuk gunung tujuanmu.</p>
             </div>
-            <a href="https://wa.me/6281234567890" target="_blank" class="px-6 py-3 bg-white hover:bg-slate-100 text-sicamp-900 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 whitespace-nowrap">
-                <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i> Chat Admin WhatsApp
+            <a href="https://wa.me/6285559654080" target="_blank" 
+            style="color: #0f172a !important; background-color: #ffffff !important;" 
+            class="px-6 py-3.5 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:bg-slate-100 transition-all flex items-center gap-2.5 shrink-0 no-underline">
+                <i class="fa-brands fa-whatsapp text-emerald-600 text-lg sm:text-xl"></i>
+                <span style="color: #0f172a !important;">Chat Admin WhatsApp</span>
             </a>
         </div>
     </section>
 
-    <!-- 10. MODAL DRAWER KERANJANG BOOKING -->
-    <div id="cartModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end">
+    <!-- MODAL KERANJANG & CHECKOUT BOOKING -->
+    <div id="modalKeranjang" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end">
         <div class="w-full max-w-md bg-white h-full shadow-2xl flex flex-col justify-between">
             
             <!-- Cart Header -->
             <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-basket-shopping text-sicamp-700 text-lg"></i>
-                    <h3 class="text-base font-bold text-slate-900">Keranjang Booking</h3>
+                    <h3 class="text-base font-bold text-slate-900">Keranjang Booking Saya</h3>
                 </div>
-                <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg">
+                <button onclick="closeModalKeranjang()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
+            <!-- Tanggal Sewa & Kembali -->
+            <div class="px-5 pt-4">
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Mulai Sewa</label>
+                        <input type="date" id="checkoutTglSewa" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Rencana Kembali</label>
+                        <input type="date" id="checkoutTglKembali" class="w-full bg-white border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs font-bold text-slate-800 focus:outline-none">
+                    </div>
+                </div>
+            </div>
+
             <!-- Cart Items List -->
-            <div id="cartItemsContainer" class="p-5 flex-grow overflow-y-auto space-y-4">
-                <!-- Di-render via JS -->
+            <div id="cartItemsContainer" class="p-5 flex-grow overflow-y-auto space-y-3">
+                <!-- Di-render otomatis via app.js -->
             </div>
 
             <!-- Cart Summary & Checkout -->
             <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-4">
                 <div class="flex items-center justify-between text-sm font-bold">
                     <span class="text-slate-600">Total Estimasi:</span>
-                    <span id="cartTotalPrice" class="text-lg text-sicamp-700 font-extrabold">Rp 0</span>
+                    <span id="cartTotalHarga" class="text-lg text-sicamp-700 font-extrabold">Rp 0</span>
                 </div>
-                <button onclick="prosesCheckoutKeranjang()" class="w-full py-3.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
+                <button onclick="prosesCheckoutSewa()" class="w-full py-3.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
                     <i class="fa-solid fa-cash-register"></i> Lanjut Ke Pembayaran
                 </button>
             </div>
