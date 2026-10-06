@@ -1,4 +1,6 @@
-// Inisialisasi Database LocalStorage
+// ==========================================
+// 1. DATABASE LOCALSTORAGE & INISIALISASI
+// ==========================================
 function initDefaultData() {
     const defaultKategori = [
         { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
@@ -8,59 +10,19 @@ function initDefaultData() {
         { id_kategori: '5', nama_kategori: 'Aksesori & Penerangan' }
     ];
 
-    // Cek apakah key kategori belum pernah ada sama sekali di LocalStorage
     if (!localStorage.getItem('kategori_peralatan')) {
         localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
-    }
-}
-
-function renderCategoryOptionsAndTabs() {
-    const selectSelect = document.getElementById('searchKategoriSelect');
-    const tabContainer = document.getElementById('filterCategoryContainer');
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-
-    // 1. Render Dropdown Search
-    if (selectSelect) {
-        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
-        kategoris.forEach(k => {
-            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
-        });
-        selectSelect.value = currentCategoryFilter;
-    }
-
-    // 2. Render Filter Buttons (Pill Tab)
-    if (tabContainer) {
-        tabContainer.innerHTML = `
-            <button onclick="setCategoryFilter('all')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                Semua Alat
-            </button>
-        `;
-        kategoris.forEach(k => {
-            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
-            tabContainer.innerHTML += `
-                <button onclick="setCategoryFilter('${k.id_kategori}')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                    ${k.nama_kategori}
-                </button>
-            `;
-        });
     }
 }
 
 function initDatabase() {
-    if (!localStorage.getItem('kategori_peralatan')) {
-        const defaultKategori = [
-            { id_kategori: 1, nama_kategori: 'Tenda & Shelter' },
-            { id_kategori: 2, nama_kategori: 'Tas & Carrier' },
-            { id_kategori: 3, nama_kategori: 'Alat Tenda & Tidur' }
-        ];
-        localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
-    }
+    initDefaultData();
 
     if (!localStorage.getItem('peralatan')) {
         const defaultPeralatan = [
-            { id_peralatan: 1, id_kategori: 1, nama_peralatan: 'Tenda Dome 4P', harga_sewa: 50000, stok: 5, kondisi: 'Bagus', deskripsi: 'Tenda waterproof double layer.' },
-            { id_peralatan: 2, id_kategori: 2, nama_peralatan: 'Carrier Eiger 60L', harga_sewa: 35000, stok: 8, kondisi: 'Bagus', deskripsi: 'Tas gunung ergonomis.' },
-            { id_peralatan: 3, id_kategori: 3, nama_peralatan: 'Sleeping Bag Dacron', harga_sewa: 15000, stok: 12, kondisi: 'Bagus', deskripsi: 'Sleeping bag hangat.' }
+            { id_peralatan: 1, id_kategori: 1, nama_peralatan: 'Tenda Dome 4P', harga_sewa: 50000, stok: 5, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Tenda waterproof double layer.' },
+            { id_peralatan: 2, id_kategori: 2, nama_peralatan: 'Carrier Eiger 60L', harga_sewa: 35000, stok: 8, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Tas gunung ergonomis.' },
+            { id_peralatan: 3, id_kategori: 4, nama_peralatan: 'Sleeping Bag Dacron', harga_sewa: 15000, stok: 12, kondisi: 'Bagus', status: 'Aktif', deskripsi: 'Sleeping bag hangat.' }
         ];
         localStorage.setItem('peralatan', JSON.stringify(defaultPeralatan));
     }
@@ -85,30 +47,42 @@ function initDatabase() {
     }
 }
 
+// ==========================================
+// 2. EVENT LISTENER AWAL (DOM CONTENT LOADED)
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     initDatabase();
     renderUserNavigation();
+    renderCategoryOptionsAndTabs();
 
-    // Handler Form Login
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const username = document.getElementById('loginUser').value;
-            const pass = document.getElementById('loginPass').value;
+            const usernameInput = document.getElementById('loginUser').value.trim();
+            const passInput = document.getElementById('loginPass').value.trim();
 
-            if (username === 'admin' && pass === 'admin123') {
+            if (usernameInput === 'admin' && passInput === 'admin123') {
                 localStorage.setItem('session_user', JSON.stringify({ nama: 'Administrator', role: 'admin' }));
                 alert('Login Berhasil sebagai Admin!');
                 window.location.href = 'dashboard.html';
                 return;
             }
 
-            const pelangganList = JSON.parse(localStorage.getItem('pelanggan'));
-            const user = pelangganList.find(p => p.email === username && p.password === pass);
+            const pelangganList = JSON.parse(localStorage.getItem('pelanggan')) || [];
+            const user = pelangganList.find(p => {
+                const emailMatch = p.email && p.email.toLowerCase() === usernameInput.toLowerCase();
+                const namaMatch = p.nama_pelanggan && p.nama_pelanggan.toLowerCase() === usernameInput.toLowerCase();
+                return (emailMatch || namaMatch) && p.password === passInput;
+            });
 
             if (user) {
-                localStorage.setItem('session_user', JSON.stringify({ nama: user.nama_pelanggan, role: 'pelanggan' }));
+                localStorage.setItem('session_user', JSON.stringify({ 
+                    id: user.id_pelanggan,
+                    nama: user.nama_pelanggan, 
+                    email: user.email,
+                    role: 'pelanggan' 
+                }));
                 alert(`Selamat Datang, ${user.nama_pelanggan}!`);
                 window.location.href = 'index.html';
             } else {
@@ -117,42 +91,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handler Form Register
     const regForm = document.getElementById('registerForm');
     if (regForm) {
         regForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            const nama = document.getElementById('regNama').value;
-            const email = document.getElementById('regEmail').value;
-            const pass = document.getElementById('regPass').value;
+            const nama = document.getElementById('regNama').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const pass = document.getElementById('regPass').value.trim();
 
-            const pelangganList = JSON.parse(localStorage.getItem('pelanggan'));
-            pelangganList.push({ id_pelanggan: Date.now(), nama_pelanggan: nama, email: email, password: pass });
+            if (!nama || !email || !pass) {
+                alert('Harap isi semua bidang pendaftaran!');
+                return;
+            }
+
+            const pelangganList = JSON.parse(localStorage.getItem('pelanggan')) || [];
+            const emailExists = pelangganList.some(p => p.email && p.email.toLowerCase() === email.toLowerCase());
+            
+            if (emailExists) {
+                alert('Email sudah terdaftar! Gunakan email lain.');
+                return;
+            }
+
+            pelangganList.push({ 
+                id_pelanggan: Date.now(), 
+                nama_pelanggan: nama, 
+                email: email, 
+                password: pass 
+            });
+            
             localStorage.setItem('pelanggan', JSON.stringify(pelangganList));
-
             alert('Pendaftaran Berhasil! Silakan Login.');
             window.location.href = 'login.html';
         });
     }
 
-    // Render Konten Spesifik
+    const formP = document.getElementById('formPeralatan');
+    if (formP) {
+        formP.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const editId = document.getElementById('editAlatId').value;
+            const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
+
+            const dataAlat = {
+                id_peralatan: editId ? parseInt(editId) : Date.now(),
+                nama_peralatan: document.getElementById('pNama').value,
+                id_kategori: parseInt(document.getElementById('pKategori').value),
+                harga_sewa: parseInt(document.getElementById('pHarga').value),
+                stok: parseInt(document.getElementById('pStok').value),
+                kondisi: document.getElementById('pKondisi').value,
+                status: document.getElementById('pStatus').value,
+                deskripsi: document.getElementById('pDeskripsi').value
+            };
+
+            if (editId) {
+                const idx = peralatan.findIndex(p => p.id_peralatan == editId);
+                if (idx !== -1) peralatan[idx] = dataAlat;
+                alert('Data peralatan berhasil diperbarui!');
+            } else {
+                peralatan.push(dataAlat);
+                alert('Peralatan baru berhasil ditambahkan!');
+            }
+
+            localStorage.setItem('peralatan', JSON.stringify(peralatan));
+            resetFormPeralatan();
+            renderPeralatanAdmin();
+        });
+    }
+
     if (document.getElementById('equipmentGrid')) renderKatalog();
-    if (document.getElementById('tblKategori')) renderKategoriAdmin();
+    if (document.getElementById('tblKategoriMaster')) renderKategoriAdmin();
+    if (document.getElementById('tblKategoriAdmin')) renderTabelKategoriAdmin();
     if (document.getElementById('tblRiwayat')) renderRiwayatPelanggan();
     if (document.getElementById('tblVerifikasi')) renderVerifikasiAdmin();
     if (document.getElementById('tblPengembalian')) renderPengembalianAdmin();
     if (document.getElementById('statCards')) renderDashboardStats();
 });
 
-// Navigasi User & Sidebar Admin (Warna Hijau SiCamp & Active State)
+// ==========================================
+// 3. RENDER NAVIGASI & KATEGORI (MODERN UI)
+// ==========================================
+function renderCategoryOptionsAndTabs() {
+    const selectSelect = document.getElementById('searchKategoriSelect');
+    const tabContainer = document.getElementById('filterCategoryContainer');
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    const currentCategoryFilter = window.currentCategoryFilter || 'all';
+
+    if (selectSelect) {
+        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
+        kategoris.forEach(k => {
+            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
+        });
+        selectSelect.value = currentCategoryFilter;
+    }
+
+    if (tabContainer) {
+        tabContainer.innerHTML = `
+            <button onclick="setCategoryFilter('all')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                Semua Alat
+            </button>
+        `;
+        kategoris.forEach(k => {
+            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
+            tabContainer.innerHTML += `
+                <button onclick="setCategoryFilter('${k.id_kategori}')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                    ${k.nama_kategori}
+                </button>
+            `;
+        });
+    }
+}
+
 function renderUserNavigation() {
     const navPelanggan = document.getElementById('navPelanggan');
     const userIndicator = document.getElementById('userIndicator');
     const sidebarMenu = document.getElementById('sidebarMenu');
     const userInfo = document.getElementById('userInfo');
-    const session = JSON.parse(localStorage.getItem('session_user'));
 
-    // Cek halaman aktif saat ini
+    const session = JSON.parse(localStorage.getItem('session_user'));
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
 
     if (userIndicator) {
@@ -178,9 +233,7 @@ function renderUserNavigation() {
             `;
         } else if (session.role === 'admin') {
             if (navPelanggan) {
-                navPelanggan.innerHTML = `
-                    <a href="dashboard.html" class="text-amber-600 font-bold hover:underline">Panel Admin</a>
-                `;
+                navPelanggan.innerHTML = `<a href="dashboard.html" class="text-amber-600 font-bold hover:underline">Panel Admin</a>`;
             }
             userIndicator.innerHTML = `
                 <a href="dashboard.html" class="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all">Admin Dashboard</a>
@@ -188,7 +241,6 @@ function renderUserNavigation() {
         }
     }
 
-    // Render Sidebar Khusus Admin
     if (sidebarMenu && session && session.role === 'admin') {
         const menuItems = [
             { name: 'Dashboard Utama', url: 'dashboard.html', icon: 'fa-chart-pie' },
@@ -215,7 +267,6 @@ function renderUserNavigation() {
             `;
         });
 
-        // Logout Button
         sidebarMenu.innerHTML += `
             <li class="pt-4 mt-2 border-t border-slate-800">
                 <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold">
@@ -237,80 +288,28 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Render Katalog Peralatan Camping dengan Tampilan Card Modern
+// ==========================================
+// 4. RENDER KATALOG & RIWAYAT PELANGGAN
+// ==========================================
 function renderKatalog() {
     const grid = document.getElementById('equipmentGrid');
     if (!grid) return;
-    
     const items = JSON.parse(localStorage.getItem('peralatan')) || [];
     const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
 
     grid.innerHTML = '';
-
-    if (items.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3"></i>
-                <p class="text-slate-500 font-medium">Belum ada peralatan camping yang tersedia saat ini.</p>
-            </div>
-        `;
-        return;
-    }
-
-    // Gambar Default jika peralatan belum memiliki atribut URL gambar
-    const sampleImages = [
-        "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80",
-        "https://images.unsplash.com/photo-1517824806704-9040b037703b?auto=format&fit=crop&w=600&q=80"
-    ];
-
-    items.forEach((item, index) => {
+    items.forEach(item => {
         const kat = kategoris.find(k => k.id_kategori == item.id_kategori);
-        const imgUrl = sampleImages[index % sampleImages.length];
-
         grid.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
-                <!-- Thumbnail Image & Badges -->
-                <div class="relative h-48 overflow-hidden bg-slate-100">
-                    <img src="${imgUrl}" alt="${item.nama_peralatan}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                    <div class="absolute top-3 left-3 flex gap-2">
-                        <span class="bg-brand-900/80 backdrop-blur-md text-emerald-300 text-[11px] font-bold px-2.5 py-1 rounded-lg border border-brand-700/50">
-                            ${kat ? kat.nama_kategori : 'Umum'}
-                        </span>
-                    </div>
-                    <div class="absolute top-3 right-3">
-                        <span class="bg-emerald-500 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-md">
-                            Stok: ${item.stok}
-                        </span>
-                    </div>
+            <div class="card bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">${item.nama_peralatan}</h3>
+                    <p class="text-xs text-slate-400 mb-3">Kategori: ${kat ? kat.nama_kategori : '-'}</p>
+                    <p class="text-xs text-slate-600 mb-2"><strong>Deskripsi:</strong> ${item.deskripsi}</p>
+                    <p class="text-xs text-slate-600 mb-1"><strong>Harga:</strong> Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')} / hari</p>
+                    <p class="text-xs text-slate-600 mb-4"><strong>Stok:</strong> ${item.stok} unit</p>
                 </div>
-
-                <!-- Card Body -->
-                <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-slate-900 group-hover:text-brand-600 transition-colors line-clamp-1">
-                            ${item.nama_peralatan}
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-1.5 line-clamp-2 leading-relaxed">
-                            ${item.deskripsi || 'Peralatan kemping berkualitas tinggi, bersih, dan siap untuk digunakan.'}
-                        </p>
-                    </div>
-
-                    <!-- Price & Action Button -->
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                        <div>
-                            <span class="block text-[11px] font-medium text-slate-400 uppercase tracking-wider">Harga Sewa</span>
-                            <span class="text-lg font-extrabold text-brand-700">
-                                Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}
-                                <span class="text-xs text-slate-400 font-normal">/hari</span>
-                            </span>
-                        </div>
-                        <button onclick="sewaItem('${item.nama_peralatan}')" class="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 active:scale-95 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-600/20 transition-all flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-plus"></i> Sewa
-                        </button>
-                    </div>
-                </div>
+                <button class="w-full py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all" onclick="sewaItem('${item.nama_peralatan}')">Sewa Sekarang</button>
             </div>
         `;
     });
@@ -326,41 +325,6 @@ function sewaItem(nama) {
     } else {
         alert(`Pengajuan penyewaan untuk "${nama}" berhasil! Cek pesanan pada menu Riwayat Penyewaan.`);
     }
-}
-
-// Fungsi Admin & Pelanggan Lainnya
-function renderKategoriAdmin() {
-    const tbody = document.querySelector('#tblKategori tbody');
-    if (!tbody) return;
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan'));
-    tbody.innerHTML = '';
-    kategoris.forEach((k, index) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${k.id_kategori}</td>
-                <td>${k.nama_kategori}</td>
-                <td><button class="btn btn-danger" onclick="hapusKategori(${index})">Hapus</button></td>
-            </tr>
-        `;
-    });
-}
-
-function tambahKategori() {
-    const input = document.getElementById('namaKategoriBaru');
-    if (input.value.trim() === '') return;
-
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan'));
-    kategoris.push({ id_kategori: Date.now(), nama_kategori: input.value });
-    localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
-    input.value = '';
-    renderKategoriAdmin();
-}
-
-function hapusKategori(index) {
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan'));
-    kategoris.splice(index, 1);
-    localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
-    renderKategoriAdmin();
 }
 
 function renderRiwayatPelanggan() {
@@ -396,7 +360,7 @@ function renderRiwayatPelanggan() {
 
         let aksi = '-';
         if (p.status === 'Menunggu Pembayaran') {
-            aksi = `<button onclick="openUploadModal(${idx})" class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1 mx-auto">
+            aksi = `<button onclick="uploadBuktiSimulasi(${idx})" class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1 mx-auto">
                         <i class="fa-solid fa-upload"></i> Unggah Bukti
                     </button>`;
         }
@@ -415,87 +379,20 @@ function renderRiwayatPelanggan() {
 }
 
 function uploadBuktiSimulasi(index) {
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan'));
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
     penyewaan[index].status = 'Menunggu Verifikasi';
     localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
     alert('Bukti pembayaran berhasil diunggah!');
     renderRiwayatPelanggan();
 }
 
-function renderVerifikasiAdmin() {
-    const tbody = document.querySelector('#tblVerifikasi tbody');
-    if (!tbody) return;
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan'));
-    tbody.innerHTML = '';
-
-    penyewaan.filter(p => p.status === 'Menunggu Verifikasi').forEach((p, idx) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.kode_transaksi}</td>
-                <td>${p.nama_pelanggan}</td>
-                <td>Rp ${p.total_harga.toLocaleString('id-ID')}</td>
-                <td><a href="#" onclick="alert('Bukti transfer terverifikasi.')">Lihat Bukti</a></td>
-                <td>
-                    <button class="btn" onclick="verifikasiSewa(${idx}, 'Disetujui')">Setujui</button>
-                    <button class="btn btn-danger" onclick="verifikasiSewa(${idx}, 'Dibatalkan')">Tolak</button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function verifikasiSewa(index, statusBaru) {
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan'));
-    penyewaan[index].status = statusBaru;
-    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-    alert(`Status diubah menjadi: ${statusBaru}`);
-    renderVerifikasiAdmin();
-}
-
-function renderPengembalianAdmin() {
-    const tbody = document.querySelector('#tblPengembalian tbody');
-    if (!tbody) return;
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan'));
-    tbody.innerHTML = '';
-
-    penyewaan.filter(p => p.status === 'Disetujui' || p.status === 'Sedang Disewa').forEach((p, idx) => {
-        tbody.innerHTML += `
-            <tr>
-                <td>${p.kode_transaksi}</td>
-                <td>${p.nama_pelanggan}</td>
-                <td>${p.tgl_kembali_rencana}</td>
-                <td><button class="btn" onclick="prosesPengembalian(${idx})">Proses Kembali</button></td>
-            </tr>
-        `;
-    });
-}
-
-function prosesPengembalian(index) {
-    const denda = prompt('Masukkan denda jika ada (Rp):', '0');
-    if (denda !== null) {
-        const penyewaan = JSON.parse(localStorage.getItem('penyewaan'));
-        penyewaan[index].status = 'Selesai';
-        localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-        alert(`Pengembalian selesai dengan denda Rp ${parseInt(denda).toLocaleString('id-ID')}`);
-        renderPengembalianAdmin();
-    }
-}
-
-function renderDashboardStats() {
-    const alat = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const kat = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    const sewa = JSON.parse(localStorage.getItem('penyewaan')) || [];
-
-    if(document.getElementById('countAlat')) document.getElementById('countAlat').innerText = alat.length;
-    if(document.getElementById('countKategori')) document.getElementById('countKategori').innerText = kat.length;
-    if(document.getElementById('countPenyewaan')) document.getElementById('countPenyewaan').innerText = sewa.length;
-}
-
-// Function Navigasi Tab Data Master
+// ==========================================
+// 5. RENDER FITUR ADMIN & KELOLA DATA
+// ==========================================
 function switchMasterTab(tabName) {
-    document.getElementById('tabKategori').style.display = (tabName === 'kategori') ? 'block' : 'none';
-    document.getElementById('tabPeralatan').style.display = (tabName === 'peralatan') ? 'block' : 'none';
-    document.getElementById('tabPelanggan').style.display = (tabName === 'pelanggan') ? 'block' : 'none';
+    if (document.getElementById('tabKategori')) document.getElementById('tabKategori').style.display = (tabName === 'kategori') ? 'block' : 'none';
+    if (document.getElementById('tabPeralatan')) document.getElementById('tabPeralatan').style.display = (tabName === 'peralatan') ? 'block' : 'none';
+    if (document.getElementById('tabPelanggan')) document.getElementById('tabPelanggan').style.display = (tabName === 'pelanggan') ? 'block' : 'none';
 
     if (tabName === 'kategori') renderKategoriAdmin();
     if (tabName === 'peralatan') {
@@ -505,9 +402,6 @@ function switchMasterTab(tabName) {
     if (tabName === 'pelanggan') renderPelangganAdmin();
 }
 
-// ==========================================
-// 1. KELOLA DATA PERALATAN (CRUD)
-// ==========================================
 function loadKategoriDropdown() {
     const select = document.getElementById('pKategori');
     if (!select) return;
@@ -536,51 +430,13 @@ function renderPeralatanAdmin() {
                 <td>${item.kondisi}</td>
                 <td>${item.status || 'Aktif'}</td>
                 <td>
-                    <button class="btn btn-secondary" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="editPeralatan(${index})">Edit</button>
-                    <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="hapusPeralatan(${index})">Hapus</button>
+                    <button class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-xs font-semibold rounded" onclick="editPeralatan(${index})">Edit</button>
+                    <button class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded" onclick="hapusPeralatan(${index})">Hapus</button>
                 </td>
             </tr>
         `;
     });
 }
-
-// Form Handler Tambah / Edit Peralatan
-document.addEventListener('DOMContentLoaded', () => {
-    const formP = document.getElementById('formPeralatan');
-    if (formP) {
-        formP.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const editId = document.getElementById('editAlatId').value;
-            const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-
-            const dataAlat = {
-                id_peralatan: editId ? parseInt(editId) : Date.now(),
-                nama_peralatan: document.getElementById('pNama').value,
-                id_kategori: parseInt(document.getElementById('pKategori').value),
-                harga_sewa: parseInt(document.getElementById('pHarga').value),
-                stok: parseInt(document.getElementById('pStok').value),
-                kondisi: document.getElementById('pKondisi').value,
-                status: document.getElementById('pStatus').value,
-                deskripsi: document.getElementById('pDeskripsi').value
-            };
-
-            if (editId) {
-                // Proses Edit / Ubah
-                const idx = peralatan.findIndex(p => p.id_peralatan == editId);
-                if (idx !== -1) peralatan[idx] = dataAlat;
-                alert('Data peralatan berhasil diperbarui!');
-            } else {
-                // Proses Tambah Baru
-                peralatan.push(dataAlat);
-                alert('Peralatan baru berhasil ditambahkan!');
-            }
-
-            localStorage.setItem('peralatan', JSON.stringify(peralatan));
-            resetFormPeralatan();
-            renderPeralatanAdmin();
-        });
-    }
-});
 
 function editPeralatan(index) {
     const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
@@ -601,8 +457,8 @@ function editPeralatan(index) {
 function resetFormPeralatan() {
     const formP = document.getElementById('formPeralatan');
     if (formP) formP.reset();
-    document.getElementById('editAlatId').value = '';
-    document.getElementById('btnSimpanAlat').innerText = 'Simpan Peralatan';
+    if (document.getElementById('editAlatId')) document.getElementById('editAlatId').value = '';
+    if (document.getElementById('btnSimpanAlat')) document.getElementById('btnSimpanAlat').innerText = 'Simpan Peralatan';
 }
 
 function hapusPeralatan(index) {
@@ -614,9 +470,6 @@ function hapusPeralatan(index) {
     }
 }
 
-// ==========================================
-// 2. KELOLA DATA PELANGGAN
-// ==========================================
 function renderPelangganAdmin() {
     const tbody = document.querySelector('#tblPelangganMaster tbody');
     if (!tbody) return;
@@ -624,7 +477,7 @@ function renderPelangganAdmin() {
     tbody.innerHTML = '';
 
     if (pelanggan.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">Belum ada data pelanggan terdaftar.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4" class="p-4 text-center text-slate-400">Belum ada data pelanggan terdaftar.</td></tr>';
         return;
     }
 
@@ -635,7 +488,7 @@ function renderPelangganAdmin() {
                 <td><strong>${p.nama_pelanggan}</strong></td>
                 <td>${p.email}</td>
                 <td>
-                    <button class="btn btn-danger" style="padding:0.3rem 0.6rem; font-size:0.8rem;" onclick="hapusPelanggan(${idx})">Hapus</button>
+                    <button class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-semibold rounded" onclick="hapusPelanggan(${idx})">Hapus</button>
                 </td>
             </tr>
         `;
@@ -651,7 +504,6 @@ function hapusPelanggan(index) {
     }
 }
 
-// Render Tabel Kategori di Admin Dashboard
 function renderTabelKategoriAdmin() {
     const tbody = document.querySelector('#tblKategoriAdmin tbody');
     if (!tbody) return;
@@ -680,12 +532,12 @@ function renderTabelKategoriAdmin() {
 }
 
 function openModalKategori() {
-    document.getElementById('inputNamaKategori').value = '';
-    document.getElementById('modalKategori').classList.remove('hidden');
+    if (document.getElementById('inputNamaKategori')) document.getElementById('inputNamaKategori').value = '';
+    if (document.getElementById('modalKategori')) document.getElementById('modalKategori').classList.remove('hidden');
 }
 
 function closeModalKategori() {
-    document.getElementById('modalKategori').classList.add('hidden');
+    if (document.getElementById('modalKategori')) document.getElementById('modalKategori').classList.add('hidden');
 }
 
 function saveKategoriHandler(e) {
@@ -706,7 +558,6 @@ function saveKategoriHandler(e) {
     alert('Kategori berhasil ditambahkan!');
     closeModalKategori();
     
-    // Refresh Tampilan Admin & Options
     renderTabelKategoriAdmin();
     renderCategoryOptionsAndTabs();
 }
@@ -721,7 +572,78 @@ function hapusKategoriAdmin(index) {
     }
 }
 
-// Detect Perubahan LocalStorage dari Tab Lain (Real-time Sync)
+function renderVerifikasiAdmin() {
+    const tbody = document.querySelector('#tblVerifikasi tbody');
+    if (!tbody) return;
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    tbody.innerHTML = '';
+
+    penyewaan.filter(p => p.status === 'Menunggu Verifikasi').forEach((p, idx) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${p.kode_transaksi}</td>
+                <td>${p.nama_pelanggan}</td>
+                <td>Rp ${parseInt(p.total_harga).toLocaleString('id-ID')}</td>
+                <td><a href="#" class="text-blue-600 underline" onclick="alert('Bukti transfer terverifikasi.')">Lihat Bukti</a></td>
+                <td>
+                    <button class="px-2 py-1 bg-emerald-600 text-white text-xs font-bold rounded" onclick="verifikasiSewa(${idx}, 'Disetujui')">Setujui</button>
+                    <button class="px-2 py-1 bg-rose-600 text-white text-xs font-bold rounded" onclick="verifikasiSewa(${idx}, 'Dibatalkan')">Tolak</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function verifikasiSewa(index, statusBaru) {
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    penyewaan[index].status = statusBaru;
+    localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+    alert(`Status diubah menjadi: ${statusBaru}`);
+    renderVerifikasiAdmin();
+}
+
+function renderPengembalianAdmin() {
+    const tbody = document.querySelector('#tblPengembalian tbody');
+    if (!tbody) return;
+    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    tbody.innerHTML = '';
+
+    penyewaan.filter(p => p.status === 'Disetujui' || p.status === 'Sedang Disewa').forEach((p, idx) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${p.kode_transaksi}</td>
+                <td>${p.nama_pelanggan}</td>
+                <td>${p.tgl_kembali_rencana}</td>
+                <td><button class="px-3 py-1 bg-sicamp-700 text-white text-xs font-bold rounded" onclick="prosesPengembalian(${idx})">Proses Kembali</button></td>
+            </tr>
+        `;
+    });
+}
+
+function prosesPengembalian(index) {
+    const denda = prompt('Masukkan denda jika ada (Rp):', '0');
+    if (denda !== null) {
+        const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+        penyewaan[index].status = 'Selesai';
+        localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+        alert(`Pengembalian selesai dengan denda Rp ${parseInt(denda).toLocaleString('id-ID')}`);
+        renderPengembalianAdmin();
+    }
+}
+
+function renderDashboardStats() {
+    const alat = JSON.parse(localStorage.getItem('peralatan')) || [];
+    const kat = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    const sewa = JSON.parse(localStorage.getItem('penyewaan')) || [];
+
+    if (document.getElementById('countAlat')) document.getElementById('countAlat').innerText = alat.length;
+    if (document.getElementById('countKategori')) document.getElementById('countKategori').innerText = kat.length;
+    if (document.getElementById('countPenyewaan')) document.getElementById('countPenyewaan').innerText = sewa.length;
+}
+
+// ==========================================
+// 6. REAL-TIME SYNC Antar Tab Browser
+// ==========================================
 window.addEventListener('storage', (e) => {
     if (e.key === 'kategori_peralatan' || e.key === 'peralatan') {
         renderCategoryOptionsAndTabs();
@@ -729,7 +651,6 @@ window.addEventListener('storage', (e) => {
     }
 });
 
-// Detect Saat Tab/Halaman Kembali Fokus
 window.addEventListener('focus', () => {
     renderCategoryOptionsAndTabs();
     renderKatalog();
