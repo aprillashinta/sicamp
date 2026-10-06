@@ -1,4 +1,51 @@
 // Inisialisasi Database LocalStorage
+function initDefaultData() {
+    const defaultKategori = [
+        { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
+        { id_kategori: '2', nama_kategori: 'Carrier & Tas' },
+        { id_kategori: '3', nama_kategori: 'Alat Masak & Makan' },
+        { id_kategori: '4', nama_kategori: 'Tidur & Matras' },
+        { id_kategori: '5', nama_kategori: 'Aksesori & Penerangan' }
+    ];
+
+    // Cek apakah key kategori belum pernah ada sama sekali di LocalStorage
+    if (!localStorage.getItem('kategori_peralatan')) {
+        localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
+    }
+}
+
+function renderCategoryOptionsAndTabs() {
+    const selectSelect = document.getElementById('searchKategoriSelect');
+    const tabContainer = document.getElementById('filterCategoryContainer');
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+
+    // 1. Render Dropdown Search
+    if (selectSelect) {
+        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
+        kategoris.forEach(k => {
+            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
+        });
+        selectSelect.value = currentCategoryFilter;
+    }
+
+    // 2. Render Filter Buttons (Pill Tab)
+    if (tabContainer) {
+        tabContainer.innerHTML = `
+            <button onclick="setCategoryFilter('all')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                Semua Alat
+            </button>
+        `;
+        kategoris.forEach(k => {
+            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
+            tabContainer.innerHTML += `
+                <button onclick="setCategoryFilter('${k.id_kategori}')" class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                    ${k.nama_kategori}
+                </button>
+            `;
+        });
+    }
+}
+
 function initDatabase() {
     if (!localStorage.getItem('kategori_peralatan')) {
         const defaultKategori = [
@@ -97,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('statCards')) renderDashboardStats();
 });
 
-// Render Header Top Navigation & Indikator User (Disesuaikan untuk Navbar Putih)
+// Navigasi User & Sidebar Admin (Warna Hijau SiCamp & Active State)
 function renderUserNavigation() {
     const navPelanggan = document.getElementById('navPelanggan');
     const userIndicator = document.getElementById('userIndicator');
@@ -105,67 +152,82 @@ function renderUserNavigation() {
     const userInfo = document.getElementById('userInfo');
     const session = JSON.parse(localStorage.getItem('session_user'));
 
-    // 1. Jika di Halaman Landing / Publik (Navbar Putih)
+    // Cek halaman aktif saat ini
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+
     if (userIndicator) {
         if (!session) {
             if (navPelanggan) navPelanggan.innerHTML = '';
             userIndicator.innerHTML = `
-                <span class="hidden sm:inline-flex items-center gap-1.5 text-xs font-semibold text-sicamp-800 bg-sicamp-50 px-3 py-1.5 rounded-full border border-sicamp-200">
-                    <span class="w-2 h-2 rounded-full bg-sicamp-500"></span> Status: Tamu
-                </span>
-                <a href="login.html" class="px-5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200">
-                    Login
-                </a>
-                <a href="register.html" class="px-5 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20">
-                    Daftar
-                </a>
+                <a href="login.html" class="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200">Masuk</a>
+                <a href="register.html" class="px-4 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20">Daftar</a>
             `;
         } else if (session.role === 'pelanggan') {
             if (navPelanggan) {
                 navPelanggan.innerHTML = `
-                    <a href="riwayat-sewa.html" class="text-sm font-semibold text-slate-600 hover:text-sicamp-700 transition-colors flex items-center gap-1.5">
-                        <i class="fa-solid fa-clock-rotate-left text-xs text-sicamp-700"></i> Riwayat Penyewaan
+                    <a href="riwayat-sewa.html" class="hover:text-sicamp-700 transition-colors flex items-center gap-1">
+                        <i class="fa-solid fa-clock-rotate-left text-xs text-sicamp-700"></i> Riwayat
                     </a>
                 `;
             }
             userIndicator.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="text-right hidden sm:block">
-                        <span class="block text-[10px] text-slate-400 font-medium">Selamat Datang,</span>
-                        <span class="text-xs font-bold text-slate-800 leading-none">${session.nama}</span>
-                    </div>
-                    <button onclick="logout()" class="px-4 py-2 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-full border border-rose-200 transition-all flex items-center gap-1.5">
-                        <i class="fa-solid fa-right-from-bracket"></i> Logout
-                    </button>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-800 hidden sm:inline">${session.nama}</span>
+                    <button onclick="logout()" class="px-3 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-full border border-rose-200 transition-all">Logout</button>
                 </div>
             `;
         } else if (session.role === 'admin') {
             if (navPelanggan) {
                 navPelanggan.innerHTML = `
-                    <a href="dashboard.html" class="text-sm font-bold text-amber-600 hover:text-amber-700 transition-colors flex items-center gap-1.5 bg-amber-50 px-3 py-1 rounded-lg border border-amber-200">
-                        <i class="fa-solid fa-gauge"></i> Panel Admin
-                    </a>
+                    <a href="dashboard.html" class="text-amber-600 font-bold hover:underline">Panel Admin</a>
                 `;
             }
             userIndicator.innerHTML = `
-                <a href="dashboard.html" class="px-5 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all shadow-md shadow-amber-500/20 flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield"></i> Admin
-                </a>
+                <a href="dashboard.html" class="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all">Admin Dashboard</a>
             `;
         }
     }
 
-    // 2. Jika di Halaman Panel Admin (Pakai Sidebar)
+    // Render Sidebar Khusus Admin
     if (sidebarMenu && session && session.role === 'admin') {
-        sidebarMenu.innerHTML = `
-            <li><a href="dashboard.html" class="block px-4 py-2.5 rounded-xl font-medium hover:bg-brand-800 transition-colors">Dashboard Utama</a></li>
-            <li><a href="index.html" class="block px-4 py-2.5 rounded-xl font-medium hover:bg-brand-800 transition-colors">Lihat Landing Page</a></li>
-            <li><a href="admin-dashboard.html" class="block px-4 py-2.5 rounded-xl font-medium hover:bg-brand-800 transition-colors">Kelola Kategori & Alat</a></li>
-            <li><a href="verifikasi-pembayaran.html" class="block px-4 py-2.5 rounded-xl font-medium hover:bg-brand-800 transition-colors">Verifikasi Pembayaran</a></li>
-            <li><a href="pengembalian.html" class="block px-4 py-2.5 rounded-xl font-medium hover:bg-brand-800 transition-colors">Kelola Pengembalian</a></li>
-            <li class="mt-4"><a href="#" onclick="logout()" class="block px-4 py-2.5 rounded-xl font-medium text-rose-300 hover:bg-rose-600 hover:text-white transition-colors">Logout</a></li>
+        const menuItems = [
+            { name: 'Dashboard Utama', url: 'dashboard.html', icon: 'fa-chart-pie' },
+            { name: 'Lihat Landing Page', url: 'index.html', icon: 'fa-globe' },
+            { name: 'Kelola Kategori & Alat', url: 'admin-dashboard.html', icon: 'fa-boxes-stacked' },
+            { name: 'Verifikasi Pembayaran', url: 'verifikasi-pembayaran.html', icon: 'fa-file-invoice-dollar' },
+            { name: 'Kelola Pengembalian', url: 'pengembalian.html', icon: 'fa-rotate-left' }
+        ];
+
+        sidebarMenu.innerHTML = '';
+        menuItems.forEach(item => {
+            const isActive = currentPath === item.url;
+            const activeClass = isActive 
+                ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' 
+                : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium';
+
+            sidebarMenu.innerHTML += `
+                <li>
+                    <a href="${item.url}" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all ${activeClass}">
+                        <i class="fa-solid ${item.icon} text-sm"></i>
+                        <span>${item.name}</span>
+                    </a>
+                </li>
+            `;
+        });
+
+        // Logout Button
+        sidebarMenu.innerHTML += `
+            <li class="pt-4 mt-2 border-t border-slate-800">
+                <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold">
+                    <i class="fa-solid fa-right-from-bracket text-sm"></i>
+                    <span>Logout</span>
+                </a>
+            </li>
         `;
-        if (userInfo) userInfo.innerHTML = `User: <strong>${session.nama}</strong><br>Role: <strong>ADMIN</strong>`;
+
+        if (userInfo) {
+            userInfo.innerHTML = `User: <strong class="text-white">${session.nama}</strong><br>Role: <strong class="text-sicamp-500 uppercase">ADMIN</strong>`;
+        }
     }
 }
 
@@ -175,7 +237,6 @@ function logout() {
     window.location.href = 'index.html';
 }
 
-// Render Katalog Peralatan
 // Render Katalog Peralatan Camping dengan Tampilan Card Modern
 function renderKatalog() {
     const grid = document.getElementById('equipmentGrid');
@@ -312,7 +373,7 @@ function renderRiwayatPelanggan() {
     if (penyewaan.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="5" class="py-8 text-center text-slate-400">
+                <td colspan="6" class="py-12 text-center text-slate-400">
                     <i class="fa-solid fa-folder-open text-3xl mb-2 block"></i>
                     Belum ada riwayat penyewaan peralatan.
                 </td>
@@ -324,27 +385,28 @@ function renderRiwayatPelanggan() {
     penyewaan.forEach((p, idx) => {
         let statusBadge = '';
         if (p.status === 'Menunggu Pembayaran') {
-            statusBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-200 text-xs font-bold px-2.5 py-1 rounded-lg">Menunggu Pembayaran</span>`;
+            statusBadge = `<span class="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full">Menunggu Pembayaran</span>`;
         } else if (p.status === 'Menunggu Verifikasi') {
-            statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold px-2.5 py-1 rounded-lg">Menunggu Verifikasi</span>`;
+            statusBadge = `<span class="bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-bold px-2.5 py-1 rounded-full">Menunggu Verifikasi</span>`;
         } else if (p.status === 'Disetujui' || p.status === 'Selesai') {
-            statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold px-2.5 py-1 rounded-lg">${p.status}</span>`;
+            statusBadge = `<span class="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">${p.status}</span>`;
         } else {
-            statusBadge = `<span class="bg-rose-100 text-rose-800 border border-rose-200 text-xs font-bold px-2.5 py-1 rounded-lg">${p.status}</span>`;
+            statusBadge = `<span class="bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-bold px-2.5 py-1 rounded-full">${p.status}</span>`;
         }
 
         let aksi = '-';
         if (p.status === 'Menunggu Pembayaran') {
-            aksi = `<button class="px-3.5 py-1.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5 mx-auto" onclick="uploadBuktiSimulasi(${idx})">
+            aksi = `<button onclick="openUploadModal(${idx})" class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-sm transition-all flex items-center gap-1 mx-auto">
                         <i class="fa-solid fa-upload"></i> Unggah Bukti
                     </button>`;
         }
 
         tbody.innerHTML += `
             <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-4 px-6 font-bold text-brand-900">${p.kode_transaksi}</td>
-                <td class="py-4 px-6">${p.tgl_kembali_rencana}</td>
-                <td class="py-4 px-6 font-bold text-slate-900">Rp ${p.total_harga.toLocaleString('id-ID')}</td>
+                <td class="py-4 px-6 font-bold text-slate-900">${p.kode_transaksi}</td>
+                <td class="py-4 px-6">${p.tgl_sewa || '-'}</td>
+                <td class="py-4 px-6">${p.tgl_kembali_rencana || '-'}</td>
+                <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${(p.total_harga || 0).toLocaleString('id-ID')}</td>
                 <td class="py-4 px-6">${statusBadge}</td>
                 <td class="py-4 px-6 text-center">${aksi}</td>
             </tr>
@@ -588,3 +650,87 @@ function hapusPelanggan(index) {
         renderPelangganAdmin();
     }
 }
+
+// Render Tabel Kategori di Admin Dashboard
+function renderTabelKategoriAdmin() {
+    const tbody = document.querySelector('#tblKategoriAdmin tbody');
+    if (!tbody) return;
+
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    tbody.innerHTML = '';
+
+    if (kategoris.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400">Belum ada kategori.</td></tr>`;
+        return;
+    }
+
+    kategoris.forEach((k, idx) => {
+        tbody.innerHTML += `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="py-3.5 px-6 font-bold text-slate-900">${k.id_kategori}</td>
+                <td class="py-3.5 px-6 font-semibold">${k.nama_kategori}</td>
+                <td class="py-3.5 px-6 text-center">
+                    <button onclick="hapusKategoriAdmin(${idx})" class="p-1 text-rose-500 hover:text-rose-700 text-xs">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function openModalKategori() {
+    document.getElementById('inputNamaKategori').value = '';
+    document.getElementById('modalKategori').classList.remove('hidden');
+}
+
+function closeModalKategori() {
+    document.getElementById('modalKategori').classList.add('hidden');
+}
+
+function saveKategoriHandler(e) {
+    e.preventDefault();
+    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    const nama = document.getElementById('inputNamaKategori').value.trim();
+
+    if (!nama) return;
+
+    const newKat = {
+        id_kategori: String(Date.now()),
+        nama_kategori: nama
+    };
+
+    kategoris.push(newKat);
+    localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
+    
+    alert('Kategori berhasil ditambahkan!');
+    closeModalKategori();
+    
+    // Refresh Tampilan Admin & Options
+    renderTabelKategoriAdmin();
+    renderCategoryOptionsAndTabs();
+}
+
+function hapusKategoriAdmin(index) {
+    if (confirm('Yakin ingin menghapus kategori ini?')) {
+        const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+        kategoris.splice(index, 1);
+        localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
+        renderTabelKategoriAdmin();
+        renderCategoryOptionsAndTabs();
+    }
+}
+
+// Detect Perubahan LocalStorage dari Tab Lain (Real-time Sync)
+window.addEventListener('storage', (e) => {
+    if (e.key === 'kategori_peralatan' || e.key === 'peralatan') {
+        renderCategoryOptionsAndTabs();
+        renderKatalog();
+    }
+});
+
+// Detect Saat Tab/Halaman Kembali Fokus
+window.addEventListener('focus', () => {
+    renderCategoryOptionsAndTabs();
+    renderKatalog();
+});

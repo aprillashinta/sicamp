@@ -255,3 +255,17 @@ body {
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 200ms;
 }
+
+/* Reset Aksen & Focus Warna SiCamp */
+:root {
+    accent-color: #15803d; /* sicamp-700 */
+}
+
+*:focus {
+    outline: none !important;
+}
+
+a, a:visited, a:hover, a:active {
+    color: inherit;
+    text-decoration: none;
+}

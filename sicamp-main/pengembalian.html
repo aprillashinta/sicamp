@@ -2,33 +2,167 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Kelola Pengembalian - Admin</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="sidebar">
-        <div class="brand">OutdoorRent</div>
-        <ul class="menu" id="sidebarMenu"></ul>
-        <div class="user-info" id="userInfo"></div>
-    </div>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Pengembalian - Admin SiCamp</title>
 
-    <div class="main-content">
-        <div class="card">
-            <h2>Proses Pengembalian Peralatan</h2>
-            <table id="tblPengembalian">
-                <thead>
-                    <tr>
-                        <th>Kode Transaksi</th>
-                        <th>Pelanggan</th>
-                        <th>Tanggal Kembali Rencana</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sicamp: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#0e622f',
+                            900: '#0a4b23',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-5">
+        <div class="space-y-6">
+            <a href="index.html" class="flex items-center gap-2.5 px-2">
+                <div class="w-9 h-9 bg-sicamp-700 rounded-xl flex items-center justify-center text-white font-black text-lg">
+                    <i class="fa-solid fa-tree"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-extrabold text-white block leading-none">Si<span class="text-sicamp-500">Camp</span></span>
+                    <span class="text-[9px] text-slate-400 font-semibold tracking-wider uppercase">Admin Control</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul id="sidebarMenu" class="space-y-1 text-xs font-semibold">
+                    <!-- Di-render via app.js -->
+                </ul>
+            </nav>
         </div>
-    </div>
+
+        <div class="pt-6 border-t border-slate-800 text-[11px] text-slate-400" id="userInfo">
+            <!-- Info Admin -->
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+        <div class="mb-8">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                <i class="fa-solid fa-rotate-left text-sicamp-700"></i> Kelola Pengembalian Alat
+            </h1>
+            <p class="text-xs text-slate-500 mt-1">Konfirmasi pengembalian barang sewa dari pelanggan dan kembalikan stok unit.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table id="tblPengembalian" class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 text-slate-700 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200">
+                            <th class="py-4 px-6">Kode TRX</th>
+                            <th class="py-4 px-6">Pelanggan</th>
+                            <th class="py-4 px-6">Tgl Selesai Rencana</th>
+                            <th class="py-4 px-6">Status Saat Ini</th>
+                            <th class="py-4 px-6 text-center">Tindakan Admin</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                        <!-- Content di-render via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderUserNavigation();
+            renderTabelPengembalian();
+        });
+
+        function renderTabelPengembalian() {
+            const tbody = document.querySelector('#tblPengembalian tbody');
+            if (!tbody) return;
+
+            const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+            tbody.innerHTML = '';
+
+            const disetujuiList = penyewaan.filter(p => p.status === 'Disetujui');
+
+            if (disetujuiList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-12 text-center text-slate-400">
+                            Tidak ada barang sewa aktif yang perlu dikembalikan.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            penyewaan.forEach((p, idx) => {
+                if (p.status === 'Disetujui') {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-4 px-6 font-bold text-slate-900">${p.kode_transaksi}</td>
+                            <td class="py-4 px-6">${p.nama_pelanggan || 'Pelanggan'}</td>
+                            <td class="py-4 px-6">${p.tgl_kembali_rencana || '-'}</td>
+                            <td class="py-4 px-6">
+                                <span class="bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold px-2.5 py-1 rounded-full">
+                                    Disetujui (Sedang Disewa)
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                <button onclick="prosesPengembalian(${idx})" class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-[11px] rounded-xl shadow-sm transition-all flex items-center gap-1 mx-auto">
+                                    <i class="fa-solid fa-box-archive"></i> Tandai Selesai & Kembalikan Stok
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+        }
+
+        function prosesPengembalian(index) {
+            const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+            const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
+
+            if (penyewaan[index]) {
+                penyewaan[index].status = 'Selesai';
+                
+                // Kembalikan stok unit
+                if (penyewaan[index].detail_items) {
+                    penyewaan[index].detail_items.forEach(di => {
+                        const target = peralatan.find(i => String(i.id_peralatan) === String(di.id_peralatan));
+                        if (target) {
+                            target.stok += di.qty;
+                        }
+                    });
+                }
+
+                localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
+                localStorage.setItem('peralatan', JSON.stringify(peralatan));
+
+                alert(`Pengembalian transaksi ${penyewaan[index].kode_transaksi} berhasil diproses! Stok unit telah dikembalikan.`);
+                renderTabelPengembalian();
+            }
+        }
+    </script>
 </body>
 </html>

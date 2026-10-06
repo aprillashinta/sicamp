@@ -2,45 +2,161 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard - OutdoorRent</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Utama - Admin SiCamp</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sicamp: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#0e622f',
+                            900: '#0a4b23',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
-    <!-- Sidebar Navigasi -->
-    <div class="sidebar">
-        <div class="brand">OutdoorRent</div>
-        <ul class="menu" id="sidebarMenu">
-            <!-- Render Menu Berdasarkan Role via JS -->
-        </ul>
-        <div class="user-info" id="userInfo">
-            <!-- Render Nama & Role via JS -->
-        </div>
-    </div>
+<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
 
-    <!-- Konten Utama -->
-    <div class="main-content">
-        <div class="card">
-            <h2 id="welcomeText">Selamat Datang!</h2>
-            <p style="color:#666; margin-top:0.5rem;">Sistem Informasi Penyewaan Peralatan Camping</p>
+    <!-- Sidebar -->
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-5">
+        <div class="space-y-6">
+            <a href="index.html" class="flex items-center gap-2.5 px-2">
+                <div class="w-9 h-9 bg-sicamp-700 rounded-xl flex items-center justify-center text-white font-black text-lg">
+                    <i class="fa-solid fa-tree"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-extrabold text-white block leading-none">Si<span class="text-sicamp-500">Camp</span></span>
+                    <span class="text-[9px] text-slate-400 font-semibold tracking-wider uppercase">Admin Control</span>
+                </div>
+            </a>
+
+            <nav>
+                <ul id="sidebarMenu" class="space-y-1 text-xs font-semibold">
+                    <!-- Di-render via app.js -->
+                </ul>
+            </nav>
         </div>
 
-        <!-- Ringkasan Statistik -->
-        <div class="grid" id="statCards">
-            <div class="stat-card">
-                <p>Total Peralatan</p>
-                <h3 id="countAlat">0</h3>
+        <div class="pt-6 border-t border-slate-800 text-[11px] text-slate-400" id="userInfo">
+            <!-- Info Admin -->
+        </div>
+    </aside>
+
+    <!-- Content -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto">
+        <div class="mb-8">
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Overview</h1>
+            <p class="text-xs text-slate-500 mt-1">Ringkasan aktivitas sistem penyewaan peralatan camping SiCamp Surakarta.</p>
+        </div>
+
+        <!-- 4 Stats Card -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-sicamp-100 text-sicamp-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-sack-dollar"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Total Omset</span>
+                    <span id="statOmset" class="text-lg font-extrabold text-slate-900">Rp 0</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <p>Total Kategori</p>
-                <h3 id="countKategori">0</h3>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-blue-100 text-blue-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-receipt"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Total TRX</span>
+                    <span id="statTotalTrx" class="text-lg font-extrabold text-slate-900">0</span>
+                </div>
             </div>
-            <div class="stat-card">
-                <p>Total Penyewaan</p>
-                <h3 id="countPenyewaan">0</h3>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-amber-100 text-amber-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Perlu Verifikasi</span>
+                    <span id="statPending" class="text-lg font-extrabold text-slate-900">0</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 bg-purple-100 text-purple-700 rounded-2xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-boxes-packing"></i>
+                </div>
+                <div>
+                    <span class="block text-[10px] font-bold text-slate-400 uppercase">Total Jenis Alat</span>
+                    <span id="statTotalAlat" class="text-lg font-extrabold text-slate-900">0</span>
+                </div>
             </div>
         </div>
-    </div>
+
+        <!-- Quick Nav Card Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <a href="admin-dashboard.html" class="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                <i class="fa-solid fa-boxes-stacked text-2xl text-sicamp-700 group-hover:scale-110 transition-transform mb-3 block"></i>
+                <h3 class="font-bold text-sm text-slate-900">Kelola Kategori & Stok Alat</h3>
+                <p class="text-xs text-slate-500 mt-1">Tambah barang sewa baru, ubah harga, atau perbarui stok.</p>
+            </a>
+
+            <a href="verifikasi-pembayaran.html" class="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                <i class="fa-solid fa-file-circle-check text-2xl text-sicamp-700 group-hover:scale-110 transition-transform mb-3 block"></i>
+                <h3 class="font-bold text-sm text-slate-900">Verifikasi Pembayaran</h3>
+                <p class="text-xs text-slate-500 mt-1">Setujui bukti transfer pembayaran sewa dari pelanggan.</p>
+            </a>
+
+            <a href="pengembalian.html" class="p-6 bg-white border border-slate-200/80 rounded-2xl shadow-sm hover:shadow-md transition-all group">
+                <i class="fa-solid fa-rotate-left text-2xl text-sicamp-700 group-hover:scale-110 transition-transform mb-3 block"></i>
+                <h3 class="font-bold text-sm text-slate-900">Pencatatan Pengembalian</h3>
+                <p class="text-xs text-slate-500 mt-1">Proses pengembalian unit dan kelola keterlambatan/denda.</p>
+            </a>
+        </div>
+    </main>
 
     <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderUserNavigation();
+            
+            const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+            const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
+
+            let totalOmset = 0;
+            let countPending = 0;
+
+            penyewaan.forEach(p => {
+                if (p.status === 'Disetujui' || p.status === 'Selesai') {
+                    totalOmset += (p.total_harga || 0);
+                }
+                if (p.status === 'Menunggu Verifikasi') {
+                    countPending++;
+                }
+            });
+
+            document.getElementById('statOmset').innerText = `Rp ${totalOmset.toLocaleString('id-ID')}`;
+            document.getElementById('statTotalTrx').innerText = penyewaan.length;
+            document.getElementById('statPending').innerText = countPending;
+            document.getElementById('statTotalAlat').innerText = peralatan.length;
+        });
+    </script>
 </body>
 </html>
