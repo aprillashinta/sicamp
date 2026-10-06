@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Riwayat Penyewaan - OutdoorRent</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf5',
+                            100: '#d1fae5',
+                            500: '#10b981',
+                            600: '#059669',
+                            700: '#047857',
+                            800: '#065f46',
+                            900: '#064e3b',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- Header Navbar -->
+    <header class="sticky top-0 z-50 bg-brand-900/95 backdrop-blur-md border-b border-brand-800 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <a href="index.html" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 bg-emerald-500 rounded-xl flex items-center justify-center text-brand-900 text-xl font-bold shadow-md shadow-emerald-500/30 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-campground"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-extrabold tracking-tight text-white block leading-none">Outdoor<span class="text-emerald-400">Rent</span></span>
+                    <span class="text-[10px] text-emerald-200 tracking-wider uppercase font-medium">Camping Gear Solutions</span>
+                </div>
+            </a>
+
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="index.html" class="text-sm font-medium text-emerald-100 hover:text-white transition-colors flex items-center gap-2">
+                    <i class="fa-solid fa-store text-xs text-emerald-400"></i> Katalog Peralatan
+                </a>
+                <a href="riwayat-sewa.html" class="text-sm font-bold text-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> Riwayat Penyewaan
+                </a>
+            </nav>
+
+            <div id="userIndicator" class="flex items-center gap-3">
+                <!-- User Info di-render via app.js -->
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content: Dashboard Riwayat Pelanggan -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+        <div class="mb-8">
+            <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+                <i class="fa-solid fa-receipt text-brand-600"></i> Riwayat Penyewaan Saya
+            </h1>
+            <p class="text-sm text-slate-500 mt-1">Pantau status pesanan, jadwal pengembalian, dan unggah bukti transfer pembayaran Anda.</p>
+        </div>
+
+        <!-- Card Tabel Pesanan -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+                <table id="tblRiwayat" class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-100/80 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                            <th class="py-4 px-6">Kode Transaksi</th>
+                            <th class="py-4 px-6">Rencana Kembali</th>
+                            <th class="py-4 px-6">Total Harga</th>
+                            <th class="py-4 px-6">Status Pesanan</th>
+                            <th class="py-4 px-6 text-center">Aksi / Tindakan</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-sm text-slate-700 font-medium">
+                        <!-- Content di-render via app.js -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 py-8 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-xs">
+            &copy; 2026 OutdoorRent. Sistem Informasi Penyewaan Peralatan Camping.
+        </div>
+    </footer>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

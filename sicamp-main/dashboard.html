@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - OutdoorRent</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Sidebar Navigasi -->
+    <div class="sidebar">
+        <div class="brand">OutdoorRent</div>
+        <ul class="menu" id="sidebarMenu">
+            <!-- Render Menu Berdasarkan Role via JS -->
+        </ul>
+        <div class="user-info" id="userInfo">
+            <!-- Render Nama & Role via JS -->
+        </div>
+    </div>
+
+    <!-- Konten Utama -->
+    <div class="main-content">
+        <div class="card">
+            <h2 id="welcomeText">Selamat Datang!</h2>
+            <p style="color:#666; margin-top:0.5rem;">Sistem Informasi Penyewaan Peralatan Camping</p>
+        </div>
+
+        <!-- Ringkasan Statistik -->
+        <div class="grid" id="statCards">
+            <div class="stat-card">
+                <p>Total Peralatan</p>
+                <h3 id="countAlat">0</h3>
+            </div>
+            <div class="stat-card">
+                <p>Total Kategori</p>
+                <h3 id="countKategori">0</h3>
+            </div>
+            <div class="stat-card">
+                <p>Total Penyewaan</p>
+                <h3 id="countPenyewaan">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

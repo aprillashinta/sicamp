@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SiCamp - Jelajah Alam Bebas, Tanpa Beban Beli Alat!</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sicamp: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#0e622f',
+                            900: '#0a4b23',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+
+    <!-- 1. NAVBAR / HEADER TOP -->
+    <header class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- Logo SiCamp -->
+            <a href="index.html" class="flex items-center gap-2.5">
+                <div class="w-10 h-10 bg-sicamp-700 rounded-xl flex items-center justify-center text-white text-xl font-black">
+                    <i class="fa-solid fa-tree"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-extrabold tracking-tight text-slate-900 block leading-none">Si<span class="text-sicamp-700">Camp</span></span>
+                    <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Outdoor Gear Rental</span>
+                </div>
+            </a>
+
+            <!-- Search Bar Navigation -->
+            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+                <input type="text" placeholder="Cari tenda, carrier, kompor, SB..." class="w-full pl-11 pr-4 py-2.5 bg-slate-100/80 border border-slate-200/80 rounded-full text-xs focus:outline-none focus:border-sicamp-700 focus:bg-white transition-all">
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+                <a href="#katalog" class="hover:text-sicamp-700 transition-colors">Katalog</a>
+                <a href="#bundling" class="hover:text-sicamp-700 transition-colors">Paket Bundling</a>
+                <a href="#basecamp" class="hover:text-sicamp-700 transition-colors">Cek Resi</a>
+                <span id="navPelanggan">
+                    <!-- Navigasi khusus Pelanggan/Admin di-render via app.js -->
+                </span>
+            </nav>
+
+            <!-- User Auth Indicator (Di-render via app.js) -->
+            <div id="userIndicator" class="flex items-center gap-3">
+                <a href="login.html" class="px-5 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all">Masuk</a>
+                <a href="register.html" class="px-5 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20">Daftar</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. HERO SECTION -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6">
+        <div class="grid lg:grid-cols-12 gap-8 items-center">
+            
+            <!-- Hero Left Content -->
+            <div class="lg:col-span-7 space-y-5">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sicamp-100 text-sicamp-800 text-xs font-bold border border-sicamp-200">
+                    <i class="fa-solid fa-shield-check text-sicamp-700"></i> Rental Alat Pendakian Terpercaya
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-5xl font-black text-slate-900 tracking-tight leading-tight">
+                    Jelajah Alam Bebas,<br><span class="text-slate-900">Tanpa Beban</span> <span class="text-slate-900">Beli Alat!</span>
+                </h1>
+                <p class="text-sm sm:text-base text-slate-500 max-w-xl font-normal leading-relaxed">
+                    Peralatan pendakian & kemping terlengkap, higienis, dan terawat. Bebas khawatir dengan pre-check barang dan fleksibilitas jadwal rental di seluruh area Basecamp SiCamp.
+                </p>
+                
+                <div class="flex flex-wrap items-center gap-4 pt-2">
+                    <a href="#katalog" class="px-6 py-3.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-compass"></i> Sewa Sekarang
+                    </a>
+                    <a href="#bundling" class="px-6 py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-all">
+                        Lihat Paket Hemat
+                    </a>
+                </div>
+
+                <!-- Feature Mini Badges -->
+                <div class="pt-4 flex flex-wrap gap-6 text-xs text-slate-500 font-medium">
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-sicamp-700"></i> Sewa Cepat & Bebas Ribet</span>
+                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-sicamp-700"></i> 100% Alat Steril & Terawat</span>
+                </div>
+            </div>
+
+            <!-- Hero Right Card Image -->
+            <div class="lg:col-span-5 relative">
+                <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
+                    <img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1000&q=80" alt="SiCamp Camping" class="w-full h-[320px] object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-between p-6">
+                        <span class="self-start bg-sicamp-700 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
+                            <i class="fa-solid fa-sparkles"></i> Rekomendasi
+                        </span>
+                        <div class="text-white">
+                            <h3 class="text-lg font-bold">Siap Pakai & Bebas Ribet</h3>
+                            <p class="text-xs text-slate-200 mt-0.5">Semua perlengkapan dijamin steril dan lolos QC sebelum diserahkan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. SEARCH & FILTER CARD MELAYANG -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+            
+            <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-location-dot text-sicamp-700 mr-1"></i> Lokasi Basecamp</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-sicamp-700">
+                    <option>Basecamp Dago, Bandung</option>
+                    <option>Basecamp Surakarta / Solo</option>
+                </select>
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-calendar-days text-sicamp-700 mr-1"></i> Tanggal Sewa</label>
+                <input type="text" value="06 Okt - 08 Okt 2026" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-sicamp-700">
+            </div>
+
+            <div class="space-y-1">
+                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-layer-group text-sicamp-700 mr-1"></i> Kategori Peralatan</label>
+                <select class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-700 focus:outline-none focus:border-sicamp-700">
+                    <option>Semua Kategori</option>
+                    <option>Tenda & Shelter</option>
+                    <option>Tas & Carrier</option>
+                    <option>Alat Masak & Makan</option>
+                </select>
+            </div>
+
+            <button class="w-full h-full min-h-[44px] bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md shadow-sicamp-700/20 transition-all flex items-center justify-center gap-2 mt-2 md:mt-0">
+                <i class="fa-solid fa-magnifying-glass"></i> Cari Alat
+            </button>
+        </div>
+    </section>
+
+    <!-- 4. PAKET BUNDLING PROMO BANNER -->
+    <section id="bundling" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-gradient-to-r from-sicamp-50 via-emerald-50/50 to-white border border-sicamp-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+            <div class="space-y-3 max-w-2xl">
+                <span class="bg-amber-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-md uppercase tracking-wider">
+                    <i class="fa-solid fa-fire mr-1"></i> Promo Bundling Hemat
+                </span>
+                <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Paket Bundling Muncak Starter 4P</h3>
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Solusi kemping praktis untuk kelompok 4 orang! Sudah termasuk tenda waterproof, carrier ergonomis, cooking set komplit, dan kompor portable mini.
+                </p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-campground text-sicamp-700 mr-1"></i> 1x Tenda Dome 4P</span>
+                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-backpack text-sicamp-700 mr-1"></i> 1x Carrier 60L</span>
+                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-kitchen-set text-sicamp-700 mr-1"></i> 1x Cooking Set</span>
+                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-fire-burner text-sicamp-700 mr-1"></i> 1x Kompor Mini</span>
+                </div>
+            </div>
+
+            <div class="text-center md:text-right space-y-3 min-w-[200px]">
+                <div>
+                    <span class="text-xs text-slate-400 line-through">Rp 110.000</span>
+                    <div class="text-3xl font-black text-sicamp-700">Rp 85.000 <span class="text-xs text-slate-500 font-normal">/hari</span></div>
+                </div>
+                <button onclick="sewaItem('Paket Bundling Muncak Starter 4P')" class="w-full px-6 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-cart-shopping"></i> Sewa Paket Group
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. KATALOG PERALATAN RENTAL -->
+    <main id="katalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+            <div>
+                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Katalog Rental Outdoor SiCamp</h2>
+                <p class="text-xs text-slate-500 mt-1">Semua alat bersih, harum, terawat, dan siap digunakan untuk ekspedisi kamu.</p>
+            </div>
+
+            <!-- Filter Tab Buttons -->
+            <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+                <button class="px-4 py-2 bg-sicamp-700 text-white text-xs font-bold rounded-full shadow-sm whitespace-nowrap">Semua Alat</button>
+                <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold rounded-full whitespace-nowrap">Tenda & Shelter</button>
+                <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold rounded-full whitespace-nowrap">Carrier & Tas</button>
+                <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold rounded-full whitespace-nowrap">Alat Masak & Makan</button>
+                <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold rounded-full whitespace-nowrap">Tidur & Matras</button>
+            </div>
+        </div>
+
+        <!-- Dynamic Grid Produk (Di-render dari app.js) -->
+        <div id="equipmentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Render oleh app.js -->
+        </div>
+    </main>
+
+    <!-- 6. KENAPA MEMILIH SICAMP (VALUE PROPOSITION) -->
+    <section class="bg-slate-100/60 border-y border-slate-200/80 py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kenapa Ribuan Pendaki Memilih SiCamp?</h2>
+            <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto">Pengalaman rental alat outdoor terbaik dengan standar higienis dan keamanan tertinggi.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
+                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-900">Higienis & Smells Fresh</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Tenda dan SB di-laundry khusus anti-bakteri setelah dipakai.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
+                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-clipboard-check"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-900">QC Gratis Pre-Check</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Pengujian fungsi tenda, zipper, dan kompor langsung di lokasi pengambilan.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
+                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-900">Tarif Pelajar Tanpa Deposit</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Cukup tunjukkan Kartu Pelajar/KTM aktif tanpa perlu biaya deposit jaminan.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
+                    <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-lg font-bold">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h4 class="text-sm font-bold text-slate-900">Ambil 24 Jam via Smart QR</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">Layanan pengambilan mandiri via locker pintar jika ambil subuh/malam.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. CARA SEWA (4 STEPS) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-12">
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Cara Sewa di SiCamp</h2>
+            <p class="text-xs text-slate-500 mt-1">4 Langkah praktis menyiapkan peralatan pendakian kamu</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">01</span>
+                <h4 class="text-sm font-bold text-slate-900 mt-4">Pilih Alat & Tanggal</h4>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Tentukan peralatan dan durasi tanggal sewa sesuai rencana mendaki.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">02</span>
+                <h4 class="text-sm font-bold text-slate-900 mt-4">Konfirmasi & Bayar</h4>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Upload bukti pembayaran secara online untuk amankan stok barang.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">03</span>
+                <h4 class="text-sm font-bold text-slate-900 mt-4">Ambil di Basecampnya</h4>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Ambil di basecamp terdekat atau gunakan layanan pengantaran instant.</p>
+            </div>
+
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">04</span>
+                <h4 class="text-sm font-bold text-slate-900 mt-4">Kembalikan Santai</h4>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Kembalikan peralatan dalam kondisi utuh, tidak perlu dicuci sendiri!</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. LOKASI BASECAMP & PETA -->
+    <section id="basecamp" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 grid lg:grid-cols-12 gap-8 items-center shadow-sm">
+            <div class="lg:col-span-6 space-y-4">
+                <span class="bg-sicamp-100 text-sicamp-800 text-[10px] font-extrabold px-3 py-1 rounded-md uppercase tracking-wider">
+                    Lokasi Utama
+                </span>
+                <h3 class="text-2xl font-extrabold text-slate-900">Basecamp SiCamp Dago, Bandung</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    Terletak strategis di jalur utama menuju kawasan pegunungan Bandung Utara. Dilengkapi area parking luas, musholla, dan ruang test mendirikan tenda.
+                </p>
+
+                <div class="space-y-2 pt-2 text-xs text-slate-600">
+                    <p class="flex items-center gap-2"><i class="fa-solid fa-clock text-sicamp-700"></i> <strong>Buka Setiap Hari:</strong> 06.00 - 22.00 WIB</p>
+                    <p class="flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-sicamp-700"></i> <strong>Alamat:</strong> Jl. Ir. H. Juanda No. 120, Dago, Bandung</p>
+                </div>
+
+                <div class="pt-2 flex flex-wrap gap-3">
+                    <a href="https://maps.google.com" target="_blank" class="px-5 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-diamond-turn-right"></i> Petunjuk Arah Basecamp
+                    </a>
+                </div>
+            </div>
+
+            <!-- Map Preview Frame -->
+            <div class="lg:col-span-6 h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.026786016142!2d107.6133883!3d-6.8874657!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e68e6f800000001%3A0x123456789abcdef!2sDago%2C%20Bandung!5e0!3m2!1sid!2sid!4v1600000000000!5m2!1sid!2sid" class="w-full h-full border-0" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. CTA WHATSAPP BANNER -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="bg-sicamp-800 text-white rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+            <div class="space-y-1 text-center md:text-left">
+                <h3 class="text-xl font-bold">Mau Konsultasi Kebutuhan Alat Pendakian?</h3>
+                <p class="text-xs text-sicamp-200">Tim profesional kami siap membantu merekomendasikan perlengkapan yang sesuai untuk gunung tujuanmu.</p>
+            </div>
+            <a href="https://wa.me/6281234567890" target="_blank" class="px-6 py-3 bg-white hover:bg-slate-100 text-sicamp-900 font-extrabold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 whitespace-nowrap">
+                <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i> Chat Admin WhatsApp
+            </a>
+        </div>
+    </section>
+
+    <!-- 10. FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-12 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-slate-100">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 bg-sicamp-700 rounded-lg flex items-center justify-center text-white text-base font-black">
+                            <i class="fa-solid fa-tree"></i>
+                        </div>
+                        <span class="text-xl font-black text-slate-900">Si<span class="text-sicamp-700">Camp</span></span>
+                    </div>
+                    <p class="text-xs text-slate-500 leading-relaxed">Penyedia layanan rental peralatan outdoor dan kemping terpercaya dengan standar kebersihan terbaik.</p>
+                </div>
+
+                <div class="space-y-2">
+                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Layanan Rental</h5>
+                    <ul class="space-y-1.5 text-xs text-slate-500">
+                        <li><a href="#katalog" class="hover:text-sicamp-700">Sewa Tenda Dome</a></li>
+                        <li><a href="#katalog" class="hover:text-sicamp-700">Sewa Carrier & Backpack</a></li>
+                        <li><a href="#katalog" class="hover:text-sicamp-700">Cooking Set & Kompor</a></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Informasi</h5>
+                    <ul class="space-y-1.5 text-xs text-slate-500">
+                        <li><a href="#basecamp" class="hover:text-sicamp-700">Syarat & Ketentuan Sewa</a></li>
+                        <li><a href="#basecamp" class="hover:text-sicamp-700">Panduan Booking Online</a></li>
+                        <li><a href="#basecamp" class="hover:text-sicamp-700">Lokasi Basecamp</a></li>
+                    </ul>
+                </div>
+
+                <div class="space-y-2">
+                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Basecamp Utama</h5>
+                    <p class="text-xs text-slate-500 leading-relaxed">Jl. Ir. H. Juanda No. 120, Dago, Kota Bandung, Jawa Barat</p>
+                </div>
+            </div>
+
+            <div class="pt-6 text-center text-xs text-slate-400">
+                &copy; 2026 SiCamp. All rights reserved. Built for Outdoor Enthusiasts.
+            </div>
+        </div>
+    </footer>
+
+    <!-- App Logic JavaScript -->
+    <script src="js/app.js"></script>
+</body>
+</html>
