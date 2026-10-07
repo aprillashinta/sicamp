@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Penyewaan Saya - SiCamp Surakarta</title>
+    <title>Riwayat Penyewaan - SiCamp Surakarta</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -30,19 +30,18 @@
             }
         }
     </script>
-    <!-- Google Fonts & FontAwesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased flex flex-col min-h-screen">
 
-    <!-- Header Navbar -->
+    <!-- Topbar Navigation -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
             
             <!-- Logo SiCamp -->
-            <a href="index.html" class="flex items-center gap-2.5">
+            <a href="index.html" class="flex items-center gap-2.5 no-underline">
                 <div class="w-10 h-10 bg-sicamp-700 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-md shadow-sicamp-700/20">
                     <i class="fa-solid fa-tree"></i>
                 </div>
@@ -52,135 +51,52 @@
                 </div>
             </a>
 
-            <!-- Navigasi Pelanggan -->
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
-                <a href="index.html#katalog" class="hover:text-sicamp-700 transition-colors flex items-center gap-1.5">
-                    <i class="fa-solid fa-store text-xs text-sicamp-700"></i> Katalog Alat
+            <!-- Navigation Links -->
+            <nav class="flex items-center gap-6 text-xs font-bold text-slate-600">
+                <a href="index.html#katalog" class="hover:text-sicamp-700 transition-colors flex items-center gap-1.5 no-underline">
+                    <i class="fa-solid fa-store text-sicamp-700"></i> Katalog Alat
                 </a>
-                <a href="riwayat-sewa.html" class="text-sicamp-700 font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-clock-rotate-left text-xs"></i> Riwayat Penyewaan
+                <a href="riwayat-sewa.html" class="text-sicamp-700 font-bold flex items-center gap-1.5 no-underline">
+                    <i class="fa-solid fa-clock-rotate-left"></i> Riwayat Penyewaan
                 </a>
             </nav>
 
-            <!-- User Auth Status -->
-            <div id="userIndicator" class="flex items-center gap-3">
-                <!-- Di-render oleh app.js -->
+            <!-- User Auth Indicator -->
+            <div id="userIndicator" class="flex items-center gap-2">
+                <!-- Di-render otomatis via app.js -->
             </div>
         </div>
     </header>
 
-    <!-- Main Content: Riwayat Pesanan Pelanggan -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-grow w-full">
+    <!-- Main Content Area -->
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full space-y-6">
         
-        <!-- Header Title -->
-        <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- Header Judul -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
             <div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
-                    <i class="fa-solid fa-receipt text-sicamp-700"></i> Riwayat Penyewaan Saya
+                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                    Riwayat Penyewaan Saya
                 </h1>
-                <p class="text-xs text-slate-500 mt-1">Pantau status pesanan, rincian tanggal sewa, dan unggah bukti pembayaran transfer Anda.</p>
+                <p class="text-xs text-slate-500 mt-1">Daftar pesanan sewa peralatan camping dan status pembayarannya.</p>
             </div>
 
-            <a href="index.html#katalog" class="inline-flex items-center gap-2 px-4 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all self-start sm:self-auto">
-                <i class="fa-solid fa-plus"></i> Tambah Sewa Alat
+            <a href="index.html#katalog" class="px-4 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0 no-underline">
+                <i class="fa-solid fa-plus"></i> Sewa Alat Baru
             </a>
         </div>
 
-        <!-- Tabel Transaksi -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="tblRiwayat" class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="bg-slate-50 text-slate-700 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200/80">
-                            <th class="py-4 px-6">Kode Transaksi</th>
-                            <th class="py-4 px-6">Tanggal Sewa</th>
-                            <th class="py-4 px-6">Rencana Kembali</th>
-                            <th class="py-4 px-6">Total Harga</th>
-                            <th class="py-4 px-6">Status Pesanan</th>
-                            <th class="py-4 px-6 text-center">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs text-slate-700 font-medium">
-                        <!-- Data di-render otomatis dari app.js -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Wadah Card List Pesanan Shopee-Style -->
+        <div id="riwayatListContainer" class="space-y-4">
+            <!-- Di-render via app.js -->
         </div>
+
     </main>
 
-    <!-- Modal Unggah Bukti Pembayaran -->
-    <div id="uploadModal" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-slate-100">
-            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
-                <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                    <i class="fa-solid fa-upload text-sicamp-700"></i> Unggah Bukti Transfer
-                </h3>
-                <button onclick="closeUploadModal()" class="text-slate-400 hover:text-slate-600">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <p class="text-xs text-slate-500 mb-4 leading-relaxed">
-                Silakan lakukan transfer sesuai total biaya ke rekening berikut:<br>
-                <strong class="text-slate-800">BCA: 123-456-7890 (a.n SiCamp Surakarta)</strong>
-            </p>
-
-            <form id="formUploadBukti" onsubmit="submitBuktiHandler(event)" class="space-y-4">
-                <input type="hidden" id="uploadTrxIndex">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-2">Pilih File Bukti Transfer (JPG/PNG)</label>
-                    <input type="file" required accept="image/*" class="w-full text-xs text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sicamp-50 file:text-sicamp-700 hover:file:bg-sicamp-100 cursor-pointer border border-slate-200 rounded-xl p-1">
-                </div>
-
-                <div class="pt-2 flex gap-2">
-                    <button type="button" onclick="closeUploadModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all">
-                        Batal
-                    </button>
-                    <button type="submit" class="flex-1 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all">
-                        Kirim Bukti
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-8 text-center text-xs text-slate-400 mt-auto">
+    <footer class="bg-white border-t border-slate-200 py-6 mt-auto text-center text-xs text-slate-400">
         &copy; 2026 SiCamp Surakarta. All rights reserved.
     </footer>
 
     <script src="js/app.js"></script>
-    <script>
-        // Trigger Render Riwayat saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof renderRiwayatPelanggan === 'function') {
-                renderRiwayatPelanggan();
-            }
-        });
-
-        let currentTrxIdx = null;
-
-        function openUploadModal(idx) {
-            currentTrxIdx = idx;
-            document.getElementById('uploadTrxIndex').value = idx;
-            document.getElementById('uploadModal').classList.remove('hidden');
-        }
-
-        function closeUploadModal() {
-            document.getElementById('uploadModal').classList.add('hidden');
-        }
-
-        function submitBuktiHandler(e) {
-            e.preventDefault();
-            const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-            if (currentTrxIdx !== null && penyewaan[currentTrxIdx]) {
-                penyewaan[currentTrxIdx].status = 'Menunggu Verifikasi';
-                localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
-                alert('Bukti pembayaran berhasil diunggah! Menunggu verifikasi dari Admin SiCamp.');
-                closeUploadModal();
-                renderRiwayatPelanggan();
-            }
-        }
-    </script>
 </body>
 </html>

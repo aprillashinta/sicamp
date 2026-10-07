@@ -221,8 +221,8 @@ table th, table td {
 }
 
 table th {
-    background-color: #2d6a4f;
-    color: white;
+    background-color: #f8fafc !important;
+    color: #64748b !important;            
 }
 
 /* Custom Styles Pelengkap Tailwind CSS */

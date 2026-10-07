@@ -613,31 +613,108 @@ function hapusPelanggan(index) {
 }
 
 function renderRiwayatPelanggan() {
-    const tbody = document.querySelector('#tblRiwayat tbody');
-    if (!tbody) return;
+    const container = document.getElementById('riwayatListContainer');
+    if (!container) return;
 
     const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
-    tbody.innerHTML = '';
+    container.innerHTML = '';
 
     if (penyewaan.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400">Belum ada riwayat penyewaan.</td></tr>`;
+        container.innerHTML = `
+            <div class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-slate-400 shadow-sm">
+                <i class="fa-solid fa-bag-shopping text-4xl mb-3 block text-slate-300"></i>
+                <p class="font-bold text-slate-700 text-sm">Belum Ada Transaksi</p>
+                <p class="text-xs text-slate-400 mt-1">Kamu belum pernah melakukan penyewaan alat kemping.</p>
+                <a href="index.html#katalog" class="inline-block mt-4 px-5 py-2.5 bg-sicamp-700 text-white font-bold text-xs rounded-xl shadow-md no-underline">Mulai Sewa Alat</a>
+            </div>
+        `;
         return;
     }
 
     penyewaan.forEach((p, idx) => {
-        let aksi = '-';
-        if (p.status === 'Menunggu Pembayaran') {
-            aksi = `<button class="px-3 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl" onclick="uploadBuktiSimulasi(${idx})">Unggah Bukti</button>`;
+        // Status Badge Style
+        let statusClass = "bg-amber-50 text-amber-700 border-amber-200";
+        let statusIcon = "fa-clock";
+        if (p.status === 'Menunggu Verifikasi') {
+            statusClass = "bg-blue-50 text-blue-700 border-blue-200";
+            statusIcon = "fa-spinner fa-spin";
+        } else if (p.status === 'Disetujui' || p.status === 'Selesai') {
+            statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
+            statusIcon = "fa-circle-check";
+        } else if (p.status === 'Dibatalkan' || p.status === 'Ditolak') {
+            statusClass = "bg-rose-50 text-rose-700 border-rose-200";
+            statusIcon = "fa-circle-xmark";
         }
 
-        tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="py-4 px-6 font-bold">${p.kode_transaksi}</td>
-                <td class="py-4 px-6">${p.tgl_kembali_rencana || '-'}</td>
-                <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${parseInt(p.total_harga).toLocaleString('id-ID')}</td>
-                <td class="py-4 px-6 font-bold">${p.status}</td>
-                <td class="py-4 px-6 text-center">${aksi}</td>
-            </tr>
+        // Info Produk yang Disewa
+        const itemsCount = p.detail_items ? p.detail_items.length : 1;
+        const sampleItemName = (p.detail_items && p.detail_items[0]) ? p.detail_items[0].nama_peralatan : 'Peralatan Camping';
+        const sampleImg = (p.detail_items && p.detail_items[0] && p.detail_items[0].gambar) 
+            ? p.detail_items[0].gambar 
+            : 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80';
+
+        // Tombol Aksi
+        let actionBtn = '';
+        if (p.status === 'Menunggu Pembayaran') {
+            actionBtn = `
+                <button onclick="uploadBuktiSimulasi(${idx})" class="px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                    <i class="fa-solid fa-upload"></i> Unggah Bukti Transfer
+                </button>
+            `;
+        } else {
+            actionBtn = `
+                <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
+                    <i class="fa-solid fa-circle-info"></i> Diproses Admin
+                </span>
+            `;
+        }
+
+        // Render Card ala Shopee
+        container.innerHTML += `
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden hover:shadow-md transition-all">
+                <!-- Card Header -->
+                <div class="p-4 sm:px-6 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-extrabold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                            ${p.kode_transaksi}
+                        </span>
+                        <span class="text-[11px] font-medium text-slate-400">
+                            <i class="fa-regular fa-calendar mr-1"></i> Sewa: ${p.tgl_sewa || '-'} s/d ${p.tgl_kembali_rencana || '-'}
+                        </span>
+                    </div>
+                    <span class="text-[11px] font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${statusClass}">
+                        <i class="fa-solid ${statusIcon}"></i> ${p.status}
+                    </span>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-4 sm:p-6 flex items-center gap-4">
+                    <img src="${sampleImg}" alt="Item" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-slate-100 shrink-0">
+                    <div class="flex-grow min-w-0">
+                        <h4 class="text-sm font-bold text-slate-900 truncate">${sampleItemName}</h4>
+                        <p class="text-xs text-slate-400 mt-1">
+                            ${itemsCount > 1 ? `+${itemsCount - 1} peralatan kemping lainnya` : '1 Item Perlengkapan'}
+                        </p>
+                        <span class="inline-block mt-2 text-[11px] font-semibold text-sicamp-700 bg-sicamp-50 px-2 py-0.5 rounded-md border border-sicamp-200">
+                            Durasi Sewa Terjadwal
+                        </span>
+                    </div>
+                    <div class="text-right shrink-0">
+                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Biaya</span>
+                        <span class="text-base sm:text-lg font-black text-slate-900">
+                            Rp ${(p.total_harga || 0).toLocaleString('id-ID')}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Card Footer -->
+                <div class="px-4 sm:px-6 py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between gap-4">
+                    <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">
+                        Silakan unggah bukti transfer sebelum batas waktu sewa.
+                    </span>
+                    <div class="ml-auto">${actionBtn}</div>
+                </div>
+            </div>
         `;
     });
 }
@@ -848,7 +925,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Render Elemen Spesifik Halaman
     if (document.getElementById('equipmentGrid')) renderKatalog();
     if (document.getElementById('tblKategoriAdmin') || document.getElementById('tblKategori')) renderTabelKategoriAdmin();
-    if (document.getElementById('tblRiwayat')) renderRiwayatPelanggan();
+    if (document.getElementById('riwayatListContainer') || document.getElementById('tblRiwayat')) renderRiwayatPelanggan();
     if (document.getElementById('tblVerifikasi')) renderVerifikasiAdmin();
     if (document.getElementById('tblPengembalian')) renderPengembalianAdmin();
     if (document.getElementById('statCards')) renderDashboardStats();
