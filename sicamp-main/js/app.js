@@ -27,7 +27,7 @@ function setCheckoutStep(step) {
         const inputKTP = document.getElementById('checkoutKTP');
 
         if (!nama || !waPenyewa || !kontakDarurat || !alamat) {
-            alert('Harap isi Nama, No. WA, No. HP Darurat, dan Alamat Lengkap!');
+            alert('Harap isi Nama Lengkap, No. WA, No. HP Darurat, dan Alamat Lengkap!');
             return;
         }
         if (!inputKTP || inputKTP.files.length === 0) {
@@ -122,6 +122,7 @@ function renderStepButtons(step) {
 // ==========================================
 
 // 1. Tambah Barang ke Keranjang
+// 1. Tambah Barang dari Katalog ke Keranjang & Buka Modal
 function tambahKeranjang(idPeralatan) {
     const session = JSON.parse(localStorage.getItem('session_user'));
     
@@ -165,7 +166,7 @@ function tambahKeranjang(idPeralatan) {
 
     localStorage.setItem('keranjang', JSON.stringify(keranjang));
     updateCartBadge();
-    alert(`"${targetAlat.nama_peralatan}" berhasil ditambahkan ke keranjang!`);
+
 }
 
 // 2. Update Jumlah Badge Keranjang di Navbar
@@ -176,7 +177,6 @@ function updateCartBadge() {
 
     if (badge) {
         badge.innerText = totalQty;
-        // Hapus kelas 'hidden' agar angka 0 tetap kelihatan sejak awal
         badge.classList.remove('hidden'); 
     }
 }
@@ -221,7 +221,7 @@ function hitungkanTotalCheckout() {
     return { durasiHari, grandTotal };
 }
 
-/// 3. Render Modal Keranjang
+// 3. Render Modal Keranjang
 function openModalKeranjang() {
     const modal = document.getElementById('modalKeranjang');
     const container = document.getElementById('cartItemsContainer');
@@ -274,11 +274,11 @@ function openModalKeranjang() {
         }
     }
 
-    // 3. PANGGIL DI SINI: hitung durasi hari & grand total otomatis
+    // Hitung durasi hari & grand total otomatis
     hitungkanTotalCheckout();
     setCheckoutStep(1);
 
-    // 4. Tampilkan Modal
+    // Tampilkan Modal
     modal.classList.remove('hidden');
 }
 
@@ -308,6 +308,38 @@ function hapusItemKeranjang(index) {
     updateCartBadge();
 }
 
+// PERBAIKAN: Fungsi Sewa Paket Bundling (Masuk Keranjang & Buka Modal Step 1)
+function sewaItem(namaItem) {
+    const session = JSON.parse(localStorage.getItem('session_user'));
+    if (!session) {
+        alert('Silakan login terlebih dahulu untuk menyewa!');
+        window.location.href = 'login.html';
+        return;
+    } 
+    if (session.role === 'admin') {
+        alert('Admin tidak dapat melakukan penyewaan.');
+        return;
+    }
+
+    let keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    const itemIndex = keranjang.findIndex(item => item.nama_peralatan === namaItem);
+
+    if (itemIndex > -1) {
+        keranjang[itemIndex].qty += 1;
+    } else {
+        keranjang.push({
+            id_peralatan: 'bundling-' + Date.now(),
+            nama_peralatan: namaItem,
+            harga_sewa: 85000,
+            qty: 1,
+            gambar: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'
+        });
+    }
+
+    localStorage.setItem('keranjang', JSON.stringify(keranjang));
+    updateCartBadge();
+}
+
 // 4. Proses Checkout (Masuk ke Riwayat Transaksi)
 function prosesCheckoutSewa() {
     const session = JSON.parse(localStorage.getItem('session_user'));
@@ -328,13 +360,13 @@ function prosesCheckoutSewa() {
     const nama = document.getElementById('checkoutNama')?.value.trim();
     const waPenyewa = document.getElementById('checkoutWA')?.value.trim();
     const kontakDarurat = document.getElementById('checkoutKontakDarurat')?.value.trim();
-    const alamat = document.getElementById('checkoutAlamat')?.value.trim(); // <-- BARU
+    const alamat = document.getElementById('checkoutAlamat')?.value.trim();
     const tglSewa = document.getElementById('checkoutTglSewa')?.value;
     const tglKembali = document.getElementById('checkoutTglKembali')?.value;
     const inputKTP = document.getElementById('checkoutKTP');
     const inputBukti = document.getElementById('checkoutBukti');
 
-    // Validasi Wajib Isi
+    // Validasi Seluruh Field Wajib
     if (!nama || !waPenyewa || !kontakDarurat || !alamat) {
         alert('Harap isi Nama Lengkap, No. WhatsApp, Kontak Darurat, dan Alamat Lengkap!');
         return;
@@ -346,44 +378,57 @@ function prosesCheckoutSewa() {
     }
 
     if (!inputKTP || inputKTP.files.length === 0) {
-        alert('Harap unggah Foto KTP/KTM sebagai Jaminan Digital!');
+        alert('Foto KTP/KTM sebagai Jaminan Digital wajib diunggah!');
+        return;
+    }
+
+    if (!inputBukti || inputBukti.files.length === 0) {
+        alert('Foto Bukti Transfer/Pembayaran wajib diunggah!');
         return;
     }
 
     // Hitung Total Pembayaran
     const { durasiHari, grandTotal } = hitungkanTotalCheckout();
 
-    // Tentukan Status Awal
-    const hasBukti = inputBukti && inputBukti.files.length > 0;
-    const statusAwal = hasBukti ? 'Menunggu Verifikasi' : 'Menunggu Pembayaran';
+    // 1. POTONG STOK PERALATAN DI DATABASE LOCALSTORAGE
+    let peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
+    keranjang.forEach(cartItem => {
+        const indexAlat = peralatan.findIndex(p => String(p.id_peralatan) === String(cartItem.id_peralatan));
+        if (indexAlat !== -1) {
+            peralatan[indexAlat].stok = Math.max(0, peralatan[indexAlat].stok - cartItem.qty);
+        }
+    });
+    localStorage.setItem('peralatan', JSON.stringify(peralatan));
 
+    // 2. SIMPAN TRANSAKSI PENYEWAAN
     const newTransaksi = {
         id_penyewaan: Date.now(),
         kode_transaksi: 'TRX-' + String(Date.now()).slice(-6),
         nama_pelanggan: nama,
         no_wa: waPenyewa,
         kontak_darurat: kontakDarurat,
-        alamat: alamat, // <-- DITERUSKAN KE DATA TRANSAKSI
+        alamat: alamat,
         total_harga: grandTotal,
         durasi_hari: durasiHari,
         tgl_sewa: tglSewa,
         tgl_kembali_rencana: tglKembali,
-        status: statusAwal,
+        status: 'Menunggu Verifikasi',
         detail_items: keranjang,
         ktp_terupload: inputKTP.files[0].name,
-        bukti: hasBukti ? inputBukti.files[0].name : null
+        bukti: inputBukti.files[0].name
     };
 
     let penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
     penyewaan.unshift(newTransaksi);
     localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
 
-    // Reset Keranjang & Tutup Modal
+    // Reset Keranjang & Refresh UI
     localStorage.removeItem('keranjang');
     updateCartBadge();
     closeModalKeranjang();
+    if (typeof renderKatalog === 'function') renderKatalog();
 
-    alert('Sewa Berhasil Diajukan! Status pesanan dapat dipantau di halaman Riwayat Penyewaan.');
+    alert('Sewa Berhasil Diajukan! Stok peralatan telah diperbarui.');
     window.location.href = 'riwayat-sewa.html';
 }
 
@@ -391,7 +436,6 @@ function prosesCheckoutSewa() {
 // 1. DATABASE INITIALIZATION & SEEDING
 // ==========================================
 function initDatabase() {
-    // 1. Setup 5 Kategori Peralatan Standar SiCamp
     if (!localStorage.getItem('kategori_peralatan')) {
         const defaultKategori = [
             { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
@@ -403,7 +447,6 @@ function initDatabase() {
         localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
     }
 
-    // 2. Setup Peralatan Standar SiCamp
     if (!localStorage.getItem('peralatan')) {
         const defaultPeralatan = [
             {
@@ -480,7 +523,6 @@ function renderUserNavigation() {
     const session = JSON.parse(localStorage.getItem('session_user'));
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
 
-    // Topbar User / Tamu / Admin
     if (userIndicator) {
         if (!session) {
             if (navPelanggan) navPelanggan.innerHTML = '';
@@ -514,7 +556,6 @@ function renderUserNavigation() {
         }
     }
 
-    // Sidebar Khusus Admin
     if (sidebarMenu && session && session.role === 'admin') {
         const menuItems = [
             { name: 'Dashboard Utama', url: 'dashboard.html', icon: 'fa-chart-pie' },
@@ -573,7 +614,6 @@ function renderCategoryOptionsAndTabs() {
     const selectSelect = document.getElementById('searchKategoriSelect');
     const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
 
-    // Render Tombol Pill Filter
     if (tabContainer) {
         tabContainer.innerHTML = `
             <button onclick="setCategoryFilter('all')" 
@@ -593,7 +633,6 @@ function renderCategoryOptionsAndTabs() {
         });
     }
 
-    // Render Dropdown Search (jika ada)
     if (selectSelect) {
         selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
         kategoris.forEach(k => {
@@ -609,93 +648,131 @@ function setCategoryFilter(catId) {
     renderKatalog();
 }
 
+// Fungsi Filter & Pencarian dari Card Filter Hero
+function cariAlatSubmit() {
+    const selectKategori = document.getElementById('searchKategoriSelect')?.value;
+    const tglMulai = document.getElementById('tglMulai')?.value;
+    const tglSelesai = document.getElementById('tglSelesai')?.value;
+
+    // 1. Sync Filter Kategori ke Tab Katalog
+    if (selectKategori) {
+        currentCategoryFilter = selectKategori;
+        renderCategoryOptionsAndTabs();
+    }
+
+    // 2. Sync Tanggal ke Input Modal Checkout
+    if (tglMulai) {
+        const modalSewa = document.getElementById('checkoutTglSewa');
+        if (modalSewa) modalSewa.value = tglMulai;
+    }
+    if (tglSelesai) {
+        const modalKembali = document.getElementById('checkoutTglKembali');
+        if (modalKembali) modalKembali.value = tglSelesai;
+    }
+
+    // Hitung ulang durasi & total jika tanggal diisi
+    if (typeof hitungkanTotalCheckout === 'function') {
+        hitungkanTotalCheckout();
+    }
+
+    // 3. Re-render Katalog Peralatan
+    renderKatalog();
+
+    // 4. Scroll Otomatis ke Bagian Katalog
+    const katalogEl = document.getElementById('katalog');
+    if (katalogEl) {
+        katalogEl.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
 function searchKeywordHandler() {
     const input = document.getElementById('searchInput');
     searchKeyword = input ? input.value.toLowerCase().trim() : '';
     renderKatalog();
 }
 
-function renderKatalog() {
+async function renderKatalog() {
     const grid = document.getElementById('equipmentGrid');
     if (!grid) return;
 
-    const items = JSON.parse(localStorage.getItem('peralatan')) || [];
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
+    try {
+        const response = await fetch('api_peralatan.php');
+        const items = await response.json();
+        
+        // Simpan cache lokal untuk operasi keranjang
+        localStorage.setItem('peralatan', JSON.stringify(items));
 
-    grid.innerHTML = '';
+        grid.innerHTML = '';
+        const filtered = items.filter(item => {
+            const matchCategory = (currentCategoryFilter === 'all') || (String(item.id_kategori) === String(currentCategoryFilter));
+            const matchKeyword = !searchKeyword || item.nama_peralatan.toLowerCase().includes(searchKeyword);
+            return matchCategory && matchKeyword;
+        });
 
-    const filtered = items.filter(item => {
-        const matchCategory = (currentCategoryFilter === 'all') || (String(item.id_kategori) === String(currentCategoryFilter));
-        const matchKeyword = !searchKeyword || item.nama_peralatan.toLowerCase().includes(searchKeyword);
-        return matchCategory && matchKeyword;
-    });
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i>
-                <p class="text-slate-500 text-xs font-medium">Belum ada peralatan yang sesuai dengan pencarian Anda.</p>
-            </div>
-        `;
-        return;
-    }
-
-    filtered.forEach((item) => {
-        const kat = kategoris.find(k => String(k.id_kategori) === String(item.id_kategori));
-
-        grid.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
-                <div class="relative h-48 overflow-hidden bg-slate-100">
-                    <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" alt="${item.nama_peralatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute top-3 left-3">
-                        <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
-                            ${kat ? kat.nama_kategori : 'Umum'}
-                        </span>
-                    </div>
-                    <div class="absolute top-3 right-3">
-                        <span class="bg-sicamp-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
-                            Stok: ${item.stok}
-                        </span>
-                    </div>
+        if (filtered.length === 0) {
+            grid.innerHTML = `
+                <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200">
+                    <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i>
+                    <p class="text-slate-500 text-xs font-medium">Belum ada peralatan yang sesuai dengan pencarian Anda.</p>
                 </div>
+            `;
+            return;
+        }
 
-                <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-sicamp-700 transition-colors line-clamp-1">
-                            ${item.nama_peralatan}
-                        </h3>
-                        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
-                            ${item.deskripsi || 'Peralatan pendakian berkualitas tinggi, terawat, dan siap pakai.'}
-                        </p>
-                    </div>
+        filtered.forEach((item) => {
+            const isStokAvailable = item.stok > 0;
+            const stokBadge = isStokAvailable 
+                ? `<span class="bg-sicamp-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Stok: ${item.stok}</span>`
+                : `<span class="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Stok Habis</span>`;
 
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                        <div>
-                            <span class="block text-[10px] font-semibold text-slate-400 uppercase">Harga Sewa</span>
-                            <span class="text-base font-black text-slate-900">
-                                Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}
-                                <span class="text-xs text-slate-400 font-normal">/hari</span>
+            const btnSewa = isStokAvailable
+                ? `<button onclick="tambahKeranjang('${item.id_peralatan}')" class="px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                        <i class="fa-solid fa-cart-plus"></i> Sewa
+                   </button>`
+                : `<button disabled class="px-4 py-2 bg-slate-200 text-slate-400 text-xs font-bold rounded-xl cursor-not-allowed flex items-center gap-1.5">
+                        <i class="fa-solid fa-ban"></i> Habis
+                   </button>`;
+
+            grid.innerHTML += `
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
+                    <div class="relative h-48 overflow-hidden bg-slate-100">
+                        <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" alt="${item.nama_peralatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute top-3 left-3">
+                            <span class="bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-lg">
+                                ${item.nama_kategori || 'Umum'}
                             </span>
                         </div>
-                        <button onclick="tambahKeranjang('${item.id_peralatan}')" class="px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-plus"></i> Sewa
-                        </button>
+                        <div class="absolute top-3 right-3">
+                            ${stokBadge}
+                        </div>
+                    </div>
+
+                    <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 group-hover:text-sicamp-700 transition-colors line-clamp-1">
+                                ${item.nama_peralatan}
+                            </h3>
+                            <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+                                ${item.deskripsi || 'Peralatan pendakian berkualitas tinggi, terawat, dan siap pakai.'}
+                            </p>
+                        </div>
+
+                        <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
+                            <div>
+                                <span class="block text-[10px] font-semibold text-slate-400 uppercase">Harga Sewa</span>
+                                <span class="text-base font-black text-slate-900">
+                                    Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}
+                                    <span class="text-xs text-slate-400 font-normal">/hari</span>
+                                </span>
+                            </div>
+                            ${btnSewa}
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-    });
-}
-
-function sewaItem(nama) {
-    const session = JSON.parse(localStorage.getItem('session_user'));
-    if (!session) {
-        alert('Silakan login terlebih dahulu untuk menyewa!');
-        window.location.href = 'login.html';
-    } else if (session.role === 'admin') {
-        alert('Admin tidak dapat melakukan penyewaan.');
-    } else {
-        alert(`Pengajuan penyewaan untuk "${nama}" berhasil! Cek pesanan pada menu Riwayat Penyewaan.`);
+            `;
+        });
+    } catch (err) {
+        console.error("Gagal memuat katalog dari MySQL:", err);
     }
 }
 
@@ -749,7 +826,6 @@ async function saveKategoriHandler(e) {
     if (!nama) return;
 
     try {
-        // Kirim data ke PHP MySQL
         const response = await fetch('api_kategori.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -760,7 +836,7 @@ async function saveKategoriHandler(e) {
         if (result.status === 'success') {
             alert('Kategori berhasil ditambahkan ke Database MySQL!');
             closeModalKategori();
-            loadKategoriFromDB(); // Tarik data terbaru dari MySQL
+            loadKategoriFromDB();
         } else {
             alert('Gagal menyimpan kategori ke Database.');
         }
@@ -814,108 +890,195 @@ function hapusPelanggan(index) {
     }
 }
 
+// ==========================================
+// RENDER RIWAYAT PENYEWAAN PELANGGAN (URUTAN TERBARU DI ATAS)
+// ==========================================
+// Variable state untuk Tab Filter Riwayat
+let currentRiwayatTab = 'all';
+
+function filterRiwayatTab(tabStatus) {
+    currentRiwayatTab = tabStatus;
+    renderRiwayatPelanggan();
+}
+
+// ==========================================
+// RENDER RIWAYAT PENYEWAAN PELANGGAN (REDESIGN & SYNCED UI)
+// ==========================================
+// ==========================================
+// RENDER RIWAYAT PENYEWAAN PELANGGAN (TANPA TOMBOL RINCIAN)
+// ==========================================
 function renderRiwayatPelanggan() {
     const container = document.getElementById('riwayatListContainer');
+    const tabsContainer = document.getElementById('riwayatFilterTabs');
     if (!container) return;
 
-    const penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+    let penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
+
+    // 1. URUTKAN KRONOLOGIS: Terbaru di Paling Atas
+    penyewaan.sort((a, b) => (Number(b.id_penyewaan) || 0) - (Number(a.id_penyewaan) || 0));
+
+    // 2. HITUNG BADGE JUMLAH STATUS UNTUK TAB
+    const countAll = penyewaan.length;
+    const countVerifikasi = penyewaan.filter(p => p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran').length;
+    const countBerjalan = penyewaan.filter(p => p.status === 'Disetujui' || p.status === 'Sedang Disewa').length;
+    const countSelesai = penyewaan.filter(p => p.status === 'Selesai').length;
+
+    // 3. RENDER FILTER TABS
+    if (tabsContainer) {
+        const tabs = [
+            { id: 'all', label: 'Semua Pesanan', count: countAll },
+            { id: 'verifikasi', label: 'Menunggu Verifikasi', count: countVerifikasi },
+            { id: 'berjalan', label: 'Sedang Berjalan', count: countBerjalan },
+            { id: 'selesai', label: 'Selesai', count: countSelesai }
+        ];
+
+        tabsContainer.innerHTML = tabs.map(t => {
+            const isActive = currentRiwayatTab === t.id;
+            const bgClass = isActive ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200';
+            const badgeBg = isActive ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700';
+
+            return `
+                <button onclick="filterRiwayatTab('${t.id}')" class="px-4 py-2 rounded-full font-bold text-xs flex items-center gap-2 whitespace-nowrap transition-all cursor-pointer ${bgClass}">
+                    <span>${t.label}</span>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badgeBg}">${t.count}</span>
+                </button>
+            `;
+        }).join('');
+    }
+
+    // 4. FILTER PENYEWAAN BERDASARKAN TAB DIPILIH
+    let filteredPenyewaan = penyewaan.filter(p => {
+        if (currentRiwayatTab === 'verifikasi') return p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran';
+        if (currentRiwayatTab === 'berjalan') return p.status === 'Disetujui' || p.status === 'Sedang Disewa';
+        if (currentRiwayatTab === 'selesai') return p.status === 'Selesai';
+        return true;
+    });
+
     container.innerHTML = '';
 
-    if (penyewaan.length === 0) {
+    if (filteredPenyewaan.length === 0) {
         container.innerHTML = `
-            <div class="bg-white rounded-2xl border border-slate-200/80 p-12 text-center text-slate-400 shadow-sm">
-                <i class="fa-solid fa-bag-shopping text-4xl mb-3 block text-slate-300"></i>
-                <p class="font-bold text-slate-700 text-sm">Belum Ada Transaksi</p>
-                <p class="text-xs text-slate-400 mt-1">Kamu belum pernah melakukan penyewaan alat kemping.</p>
-                <a href="index.html#katalog" class="inline-block mt-4 px-5 py-2.5 bg-sicamp-700 text-white font-bold text-xs rounded-xl shadow-md no-underline">Mulai Sewa Alat</a>
+            <div class="bg-white rounded-3xl border border-slate-200/80 p-12 text-center text-slate-400 shadow-xs">
+                <i class="fa-solid fa-box-open text-4xl mb-3 block text-slate-300"></i>
+                <p class="font-bold text-slate-700 text-sm">Tidak Ada Transaksi</p>
+                <p class="text-xs text-slate-400 mt-1">Belum ada pesanan pada kategori filter ini.</p>
+                <a href="index.html#katalog" class="inline-block mt-4 px-5 py-2.5 bg-sicamp-700 text-white font-bold text-xs rounded-xl shadow-md no-underline hover:bg-sicamp-800 transition-all">Mulai Sewa Alat</a>
             </div>
         `;
         return;
     }
 
-    penyewaan.forEach((p, idx) => {
+    // 5. RENDER KARTU TRANSAKSI
+    filteredPenyewaan.forEach((p, idx) => {
         // Status Badge Style
-        let statusClass = "bg-amber-50 text-amber-700 border-amber-200";
-        let statusIcon = "fa-clock";
-        if (p.status === 'Menunggu Verifikasi') {
-            statusClass = "bg-blue-50 text-blue-700 border-blue-200";
-            statusIcon = "fa-spinner fa-spin";
-        } else if (p.status === 'Disetujui' || p.status === 'Selesai') {
-            statusClass = "bg-emerald-50 text-emerald-700 border-emerald-200";
-            statusIcon = "fa-circle-check";
-        } else if (p.status === 'Dibatalkan' || p.status === 'Ditolak') {
-            statusClass = "bg-rose-50 text-rose-700 border-rose-200";
-            statusIcon = "fa-circle-xmark";
-        }
+        let statusBadge = '';
+        let showPickupBanner = false;
 
-        // Info Produk yang Disewa
-        const itemsCount = p.detail_items ? p.detail_items.length : 1;
-        const sampleItemName = (p.detail_items && p.detail_items[0]) ? p.detail_items[0].nama_peralatan : 'Peralatan Camping';
-        const sampleImg = (p.detail_items && p.detail_items[0] && p.detail_items[0].gambar) 
-            ? p.detail_items[0].gambar 
-            : 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80';
-
-        // Tombol Aksi
-        let actionBtn = '';
-        if (p.status === 'Menunggu Pembayaran') {
-            actionBtn = `
-                <button onclick="uploadBuktiSimulasi(${idx})" class="px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
-                    <i class="fa-solid fa-upload"></i> Unggah Bukti Transfer
-                </button>
+        if (p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran') {
+            statusBadge = `
+                <span class="bg-amber-50 text-amber-700 border border-amber-200/80 text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-hourglass-half text-amber-500"></i> Menunggu Verifikasi
+                </span>
+            `;
+        } else if (p.status === 'Disetujui' || p.status === 'Sedang Disewa') {
+            showPickupBanner = true;
+            statusBadge = `
+                <span class="bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-emerald-600"></i> Siap Diambil di Basecamp
+                </span>
+            `;
+        } else if (p.status === 'Selesai') {
+            statusBadge = `
+                <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-check text-slate-500"></i> Selesai &amp; Dikembalikan
+                </span>
             `;
         } else {
-            actionBtn = `
-                <span class="text-xs font-semibold text-slate-400 flex items-center gap-1">
-                    <i class="fa-solid fa-circle-info"></i> Diproses Admin
+            statusBadge = `
+                <span class="bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-extrabold px-3 py-1 rounded-full flex items-center gap-1.5">
+                    <i class="fa-solid fa-circle-xmark text-rose-500"></i> Dibatalkan
                 </span>
             `;
         }
 
-        // Render Card ala Shopee
+        // Detail Produk Pertama
+        const itemsCount = p.detail_items ? p.detail_items.length : 1;
+        const sampleItem = (p.detail_items && p.detail_items[0]) ? p.detail_items[0] : {
+            nama_peralatan: 'Paket Peralatan Camping',
+            gambar: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80'
+        };
+
+        const durasiText = p.durasi_hari ? `${p.durasi_hari} Hari` : '1 Hari';
+
         container.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden hover:shadow-md transition-all">
-                <!-- Card Header -->
-                <div class="p-4 sm:px-6 bg-slate-50/70 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2">
+            <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all overflow-hidden p-5 space-y-4">
+                
+                <!-- Card Header Top Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                     <div class="flex items-center gap-3">
-                        <span class="text-xs font-extrabold text-slate-900 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
-                            ${p.kode_transaksi}
+                        <span class="text-xs font-black text-slate-800 bg-slate-100 px-3 py-1 rounded-lg border border-slate-200/60 flex items-center gap-1.5">
+                            <i class="fa-regular fa-file-lines text-slate-400"></i> ${p.kode_transaksi}
                         </span>
-                        <span class="text-[11px] font-medium text-slate-400">
-                            <i class="fa-regular fa-calendar mr-1"></i> Sewa: ${p.tgl_sewa || '-'} s/d ${p.tgl_kembali_rencana || '-'}
+                        <span class="text-xs font-semibold text-slate-500 flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar text-sicamp-700"></i> ${p.tgl_sewa || '-'} - ${p.tgl_kembali_rencana || '-'} • <strong class="text-slate-800">${durasiText}</strong>
                         </span>
                     </div>
-                    <span class="text-[11px] font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${statusClass}">
-                        <i class="fa-solid ${statusIcon}"></i> ${p.status}
-                    </span>
+                    <div>${statusBadge}</div>
                 </div>
 
-                <!-- Card Body -->
-                <div class="p-4 sm:p-6 flex items-center gap-4">
-                    <img src="${sampleImg}" alt="Item" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-slate-100 shrink-0">
-                    <div class="flex-grow min-w-0">
-                        <h4 class="text-sm font-bold text-slate-900 truncate">${sampleItemName}</h4>
-                        <p class="text-xs text-slate-400 mt-1">
-                            ${itemsCount > 1 ? `+${itemsCount - 1} peralatan kemping lainnya` : '1 Item Perlengkapan'}
-                        </p>
-                        <span class="inline-block mt-2 text-[11px] font-semibold text-sicamp-700 bg-sicamp-50 px-2 py-0.5 rounded-md border border-sicamp-200">
-                            Durasi Sewa Terjadwal
-                        </span>
+                <!-- Main Content Body -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    
+                    <!-- Left Item Info -->
+                    <div class="flex items-start sm:items-center gap-4 flex-grow min-w-0">
+                        <img src="${sampleItem.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=300&q=80'}" alt="${sampleItem.nama_peralatan}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-2xl border border-slate-100 shrink-0">
+                        
+                        <div class="min-w-0 space-y-1">
+                            <span class="text-[10px] font-extrabold text-sicamp-700 uppercase tracking-wider block">PERLENGKAPAN CAMPING</span>
+                            <h3 class="text-sm sm:text-base font-bold text-slate-900 truncate">${sampleItem.nama_peralatan}</h3>
+                            <p class="text-xs text-slate-400 font-medium">
+                                <i class="fa-solid fa-box-archive text-slate-300 mr-1"></i> ${itemsCount > 1 ? `1 Set (${itemsCount} Item Peralatan)` : '1 Set Perlengkapan'} • Durasi Sewa Terjadwal
+                            </p>
+                            
+                            <div class="pt-1 flex flex-wrap items-center gap-2">
+                                <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                                    <i class="fa-solid fa-circle-check text-[9px]"></i> Kondisi Siap Pakai 98%
+                                </span>
+                                ${p.status === 'Selesai' ? `
+                                    <span class="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200">
+                                        <i class="fa-solid fa-star text-amber-500"></i> 5.0 (Review Terkirim)
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
                     </div>
-                    <div class="text-right shrink-0">
-                        <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Biaya</span>
-                        <span class="text-base sm:text-lg font-black text-slate-900">
-                            Rp ${(p.total_harga || 0).toLocaleString('id-ID')}
-                        </span>
+
+                    <!-- Right Price Block -->
+                    <div class="text-left sm:text-right shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0 border-slate-100 w-full sm:w-auto flex sm:flex-col justify-between items-center sm:items-end">
+                        <div>
+                            <span class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider">Total Biaya Sewa</span>
+                            <span class="text-lg sm:text-xl font-black text-slate-900">
+                                Rp ${(p.total_harga || 0).toLocaleString('id-ID')}
+                            </span>
+                            <span class="block text-[10px] text-slate-400 font-medium">Termasuk Jaminan Alat</span>
+                        </div>
+
+                        ${p.status === 'Menunggu Pembayaran' ? `
+                            <button onclick="uploadBuktiSimulasi(${idx})" class="mt-2 px-4 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center gap-1.5">
+                                <i class="fa-solid fa-upload"></i> Unggah Bukti
+                            </button>
+                        ` : ''}
                     </div>
                 </div>
 
-                <!-- Card Footer -->
-                <div class="px-4 sm:px-6 py-3.5 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between gap-4">
-                    <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">
-                        Silakan unggah bukti transfer sebelum batas waktu sewa.
-                    </span>
-                    <div class="ml-auto">${actionBtn}</div>
-                </div>
+                <!-- Banner Informasi Loket Pickup (Khusus Status Siap Diambil) -->
+                ${showPickupBanner ? `
+                    <div class="bg-sicamp-50/90 border border-sicamp-200 rounded-2xl p-3 text-xs text-sicamp-800 font-medium flex items-center gap-2.5">
+                        <i class="fa-solid fa-circle-check text-sicamp-600 text-sm shrink-0"></i>
+                        <span>Alat telah disanitasi &amp; diuji fungsi oleh tim mekanik. Tunjukkan kode QR pickup di loket pelayanan basecamp saat serah terima.</span>
+                    </div>
+                ` : ''}
+
             </div>
         `;
     });
@@ -1026,13 +1189,11 @@ function renderDashboardStats() {
     if(document.getElementById('countPenyewaan')) document.getElementById('countPenyewaan').innerText = sewa.length;
 }
 
-// Tambahkan fungsi ini tepat di atas DOMContentLoaded
 async function loadKategoriFromDB() {
     try {
         const response = await fetch('api_kategori.php');
         const kategoris = await response.json();
         
-        // Simpan data dari MySQL ke LocalStorage sebagai cache UI
         localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
         
         renderCategoryOptionsAndTabs();

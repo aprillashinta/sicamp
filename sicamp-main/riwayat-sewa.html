@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Penyewaan - SiCamp Surakarta</title>
+    <title>Riwayat Penyewaan Saya - SiCamp Surakarta</title>
 
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -16,6 +16,7 @@
                             50: '#f0fdf4',
                             100: '#dcfce7',
                             200: '#bbf7d0',
+                            300: '#86efac',
                             500: '#22c55e',
                             600: '#16a34a',
                             700: '#15803d',
@@ -34,25 +35,25 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased flex flex-col min-h-screen">
+<body class="bg-[#f8faf8] text-slate-800 font-sans antialiased flex flex-col min-h-screen">
 
     <!-- Topbar Navigation -->
     <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
             
             <!-- Logo SiCamp -->
             <a href="index.html" class="flex items-center gap-2.5 no-underline">
-                <div class="w-10 h-10 bg-sicamp-700 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-md shadow-sicamp-700/20">
+                <div class="w-9 h-9 bg-sicamp-700 rounded-xl flex items-center justify-center text-white text-lg font-black shadow-md shadow-sicamp-700/20">
                     <i class="fa-solid fa-tree"></i>
                 </div>
                 <div>
-                    <span class="text-2xl font-extrabold tracking-tight text-slate-900 block leading-none">Si<span class="text-sicamp-700">Camp</span></span>
-                    <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Outdoor Gear Rental</span>
+                    <span class="text-xl font-extrabold tracking-tight text-slate-900 block leading-none">Si<span class="text-sicamp-700">Camp</span></span>
+                    <span class="text-[9px] text-slate-400 font-bold tracking-wider uppercase">Outdoor Gear Rental</span>
                 </div>
             </a>
 
             <!-- Navigation Links -->
-            <nav class="flex items-center gap-6 text-xs font-bold text-slate-600">
+            <nav id="navPelanggan" class="hidden sm:flex items-center gap-6 text-xs font-bold text-slate-600">
                 <a href="index.html#katalog" class="hover:text-sicamp-700 transition-colors flex items-center gap-1.5 no-underline">
                     <i class="fa-solid fa-store text-sicamp-700"></i> Katalog Alat
                 </a>
@@ -69,32 +70,80 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full space-y-6">
+    <main class="max-w-5xl mx-auto px-4 sm:px-6 py-6 flex-grow w-full space-y-5">
         
-        <!-- Header Judul -->
+        <!-- Tombol Kembali -->
+        <div>
+            <a href="index.html" class="inline-flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-sicamp-700 transition-colors no-underline">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+            </a>
+        </div>
+
+        <!-- Header Judul & Tombol Tambah Sewa -->
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
             <div>
-                <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                <h1 class="text-2xl font-black text-slate-900 tracking-tight">
                     Riwayat Penyewaan Saya
                 </h1>
-                <p class="text-xs text-slate-500 mt-1">Daftar pesanan sewa peralatan camping dan status pembayarannya.</p>
+                <p class="text-xs text-slate-500 mt-1">Daftar pesanan sewa peralatan camping, pembaruan status pickup, dan riwayat pembayaran Anda.</p>
             </div>
 
-            <a href="index.html#katalog" class="px-4 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0 no-underline">
+            <a href="index.html#katalog" class="px-4 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md shadow-sicamp-700/20 transition-all flex items-center gap-2 shrink-0 no-underline">
                 <i class="fa-solid fa-plus"></i> Sewa Alat Baru
             </a>
         </div>
 
-        <!-- Wadah Card List Pesanan Shopee-Style -->
-        <div id="riwayatListContainer" class="space-y-4">
+        <!-- Tab Filter Status Pesanan (Pill Tabs dengan Badges) -->
+        <div id="riwayatFilterTabs" class="flex items-center gap-2 overflow-x-auto pb-2 text-xs font-bold scrollbar-none">
+            <!-- Di-render otomatis via app.js -->
+        </div>
+
+        <!-- Wadah List Card Transaksi -->
+        <div id="riwayatListContainer" class="space-y-4 pt-1">
             <!-- Di-render via app.js -->
+        </div>
+
+        <!-- 3 Poin Garansi & Layanan -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-4">
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/70 shadow-xs flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-sicamp-50 text-sicamp-700 flex items-center justify-center text-sm shrink-0 font-bold">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900">Fleksibilitas Pengambilan</h4>
+                    <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Ambil mulai pukul 07:00 WIB di hari pertama sewa tanpa biaya overtime pagi.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/70 shadow-xs flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-sicamp-50 text-sicamp-700 flex items-center justify-center text-sm shrink-0 font-bold">
+                    <i class="fa-solid fa-pump-medical"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900">Garansi Alat Bersih &amp; Kering</h4>
+                    <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Semua tenda dan sleeping bag di-laundry &amp; di-disinfektan sebelum diserahkan.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-4 rounded-2xl border border-slate-200/70 shadow-xs flex items-start gap-3">
+                <div class="w-8 h-8 rounded-xl bg-sicamp-50 text-sicamp-700 flex items-center justify-center text-sm shrink-0 font-bold">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900">Deposit Kembali Instan</h4>
+                    <p class="text-[11px] text-slate-500 mt-1 leading-relaxed">Uang jaminan dikembalikan 100% via transfer sesaat setelah cek fisik selesai.</p>
+                </div>
+            </div>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-6 mt-auto text-center text-xs text-slate-400">
-        &copy; 2026 SiCamp Surakarta. All rights reserved.
+    <footer class="bg-white border-t border-slate-200/80 py-6 mt-10 text-center text-xs text-slate-400">
+        <div class="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <span class="font-bold text-slate-600">SiCamp Outdoor Equipment Rental</span>
+            <span>&copy; 2026 SiCamp. Menemani petualangan alam terbuka Anda dengan aman dan terpercaya.</span>
+        </div>
     </footer>
 
     <script src="js/app.js"></script>

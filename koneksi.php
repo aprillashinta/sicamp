@@ -1,11 +1,20 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Headers: *");
+header("Content-Type: application/json; charset=UTF-8");
+
 $host = "localhost";
 $user = "root";
 $pass = "";
-$db   = "db_penyewaan_camping";
+$db   = "db_penyewaan_camping"; // Sesuaikan dengan nama database di phpMyAdmin Anda
 
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) {
-    die("Koneksi gagal: " . $conn->connect_error);
+$conn = mysqli_connect($host, $user, $pass, $db);
+
+if (!$conn) {
+    echo json_encode([
+        "status" => "error",
+        "message" => "Koneksi Database Gagal: " . mysqli_connect_error()
+    ]);
+    exit();
 }
 ?>
