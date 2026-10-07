@@ -1,3 +1,122 @@
+let currentCheckoutStep = 1;
+
+// 1. Fungsi Navigasi Pindah Tahap (1 -> 2 -> 3)
+function setCheckoutStep(step) {
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+
+    // Validasi saat mau pindah dari Tahap 1 ke Tahap 2
+    if (step === 2 && currentCheckoutStep === 1) {
+        if (keranjang.length === 0) {
+            alert('Keranjang sewa kamu masih kosong!');
+            return;
+        }
+        const tglSewa = document.getElementById('checkoutTglSewa')?.value;
+        const tglKembali = document.getElementById('checkoutTglKembali')?.value;
+        if (!tglSewa || !tglKembali) {
+            alert('Harap tentukan Tanggal Mulai Sewa dan Rencana Kembali!');
+            return;
+        }
+    }
+
+    // Validasi saat mau pindah dari Tahap 2 ke Tahap 3
+    if (step === 3 && currentCheckoutStep === 2) {
+        const nama = document.getElementById('checkoutNama')?.value.trim();
+        const waPenyewa = document.getElementById('checkoutWA')?.value.trim();
+        const kontakDarurat = document.getElementById('checkoutKontakDarurat')?.value.trim();
+        const alamat = document.getElementById('checkoutAlamat')?.value.trim();
+        const inputKTP = document.getElementById('checkoutKTP');
+
+        if (!nama || !waPenyewa || !kontakDarurat || !alamat) {
+            alert('Harap isi Nama, No. WA, No. HP Darurat, dan Alamat Lengkap!');
+            return;
+        }
+        if (!inputKTP || inputKTP.files.length === 0) {
+            alert('Harap unggah Foto KTP/KTM sebagai Jaminan Digital!');
+            return;
+        }
+    }
+
+    currentCheckoutStep = step;
+
+    // Sembunyikan semua step, tampilkan yang aktif
+    document.getElementById('checkoutStep1')?.classList.add('hidden');
+    document.getElementById('checkoutStep2')?.classList.add('hidden');
+    document.getElementById('checkoutStep3')?.classList.add('hidden');
+    document.getElementById(`checkoutStep${step}`)?.classList.remove('hidden');
+
+    // Update Header Text & Stepper Indicator
+    updateStepperHeader(step);
+
+    // Update Tombol Bawah
+    renderStepButtons(step);
+}
+
+// 2. Update Tampilan Stepper Header Visual
+function updateStepperHeader(step) {
+    const subtitle = document.getElementById('stepSubtitle');
+    const labels = {
+        1: "Tahap 1 dari 3: Ringkasan Keranjang",
+        2: "Tahap 2 dari 3: Isi Data Penyewa",
+        3: "Tahap 3 dari 3: Pembayaran & Unggah Bukti"
+    };
+    if (subtitle) subtitle.innerText = labels[step];
+
+    for (let i = 1; i <= 3; i++) {
+        const indicator = document.getElementById(`stepIndicator${i}`);
+        const badge = document.getElementById(`stepBadge${i}`);
+        
+        if (i === step) {
+            indicator?.classList.remove('text-slate-400');
+            indicator?.classList.add('text-sicamp-700');
+            badge?.classList.remove('bg-slate-200', 'text-slate-600');
+            badge?.classList.add('bg-sicamp-700', 'text-white');
+        } else if (i < step) {
+            indicator?.classList.remove('text-slate-400');
+            indicator?.classList.add('text-sicamp-700');
+            badge?.classList.remove('bg-slate-200', 'text-slate-600');
+            badge?.classList.add('bg-sicamp-700', 'text-white');
+        } else {
+            indicator?.classList.remove('text-sicamp-700');
+            indicator?.classList.add('text-slate-400');
+            badge?.classList.remove('bg-sicamp-700', 'text-white');
+            badge?.classList.add('bg-slate-200', 'text-slate-600');
+        }
+    }
+}
+
+// 3. Render Tombol Navigasi Bawah
+function renderStepButtons(step) {
+    const area = document.getElementById('stepButtonsArea');
+    if (!area) return;
+
+    if (step === 1) {
+        area.innerHTML = `
+            <button onclick="closeModalKeranjang()" class="w-1/3 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all">Batal</button>
+            <button onclick="setCheckoutStep(2)" class="w-2/3 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
+                Lanjut ke Data Penyewa <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        `;
+    } else if (step === 2) {
+        area.innerHTML = `
+            <button onclick="setCheckoutStep(1)" class="w-1/3 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </button>
+            <button onclick="setCheckoutStep(3)" class="w-2/3 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
+                Lanjut ke Pembayaran <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        `;
+    } else if (step === 3) {
+        area.innerHTML = `
+            <button onclick="setCheckoutStep(2)" class="w-1/3 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-1">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </button>
+            <button onclick="prosesCheckoutSewa()" class="w-2/3 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Kirim Sewa Sekarang
+            </button>
+        `;
+    }
+}
+
 // ==========================================
 // LOGIKA KERANJANG & CHECKOUT SEWA
 // ==========================================
@@ -157,6 +276,7 @@ function openModalKeranjang() {
 
     // 3. PANGGIL DI SINI: hitung durasi hari & grand total otomatis
     hitungkanTotalCheckout();
+    setCheckoutStep(1);
 
     // 4. Tampilkan Modal
     modal.classList.remove('hidden');

@@ -336,19 +336,20 @@
         </div>
     </section>
 
-    <!-- MODAL CHECKOUT & KERANJANG SKEMA 3 -->
-    <div id="modalKeranjang" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end">
-        <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
-            
-            <!-- Header Modal -->
-            <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+    <!-- MODAL CHECKOUT MULTI-STEP (3 TAHAP) -->
+<div id="modalKeranjang" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end">
+    <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
+        
+        <!-- Header Modal & Stepper -->
+        <div class="border-b border-slate-100 bg-slate-50">
+            <div class="p-4 px-5 flex items-center justify-between border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 bg-sicamp-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md">
                         <i class="fa-solid fa-cart-flatbed"></i>
                     </div>
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Form Penyewaan &amp; Checkout</h3>
-                        <p class="text-[10px] text-slate-400">Isi data lengkap &amp; lakukan pembayaran</p>
+                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Checkout Penyewaan</h3>
+                        <p id="stepSubtitle" class="text-[10px] text-slate-400">Tahap 1 dari 3: Ringkasan Keranjang</p>
                     </div>
                 </div>
                 <button onclick="closeModalKeranjang()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg">
@@ -356,120 +357,134 @@
                 </button>
             </div>
 
-            <!-- Form Wrapper -->
-            <form id="formCheckout" onsubmit="event.preventDefault(); prosesCheckoutSewa();" class="flex flex-col flex-grow overflow-hidden">
-                
-                <!-- Scrollable Form Container -->
-                <div class="p-5 flex-grow overflow-y-auto space-y-5">
-                    
-                    <!-- 1. Daftar Item Keranjang -->
+            <!-- Stepper Indicator (Visual 1 - 2 - 3) -->
+            <div class="px-5 py-3 bg-white flex items-center justify-between text-xs font-bold">
+                <div id="stepIndicator1" class="flex items-center gap-1.5 text-sicamp-700">
+                    <span id="stepBadge1" class="w-5 h-5 rounded-full bg-sicamp-700 text-white text-[10px] flex items-center justify-center">1</span>
+                    <span>Keranjang</span>
+                </div>
+                <div id="stepLine1" class="h-0.5 w-8 bg-slate-200"></div>
+                <div id="stepIndicator2" class="flex items-center gap-1.5 text-slate-400">
+                    <span id="stepBadge2" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">2</span>
+                    <span>Data Penyewa</span>
+                </div>
+                <div id="stepLine2" class="h-0.5 w-8 bg-slate-200"></div>
+                <div id="stepIndicator3" class="flex items-center gap-1.5 text-slate-400">
+                    <span id="stepBadge3" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">3</span>
+                    <span>Pembayaran</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Form Container -->
+        <div class="p-5 flex-grow overflow-y-auto">
+            
+            <!-- TAHAP 1: KERANJANG & TANGGAL SEWA -->
+            <div id="checkoutStep1" class="space-y-4">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fa-solid fa-boxes-stacked text-sicamp-700"></i> Peralatan Disewa
+                    </h4>
+                    <div id="cartItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        <!-- Di-render via JS -->
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 space-y-2">
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-days text-sicamp-700"></i> Tanggal Durasi Sewa
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mulai Sewa <span class="text-rose-500">*</span></label>
+                            <input type="date" id="checkoutTglSewa" oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Rencana Kembali <span class="text-rose-500">*</span></label>
+                            <input type="date" id="checkoutTglKembali" oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAHAP 2: ISI DATA PENYEWA & JAMINAN -->
+            <div id="checkoutStep2" class="space-y-3 hidden">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-id-card text-sicamp-700"></i> Data Lengkap &amp; Jaminan Digital
+                </h4>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap Penyewa <span class="text-rose-500">*</span></label>
+                    <input type="text" id="checkoutNama" placeholder="Sesuai KTP/KTM" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                            <i class="fa-solid fa-boxes-stacked text-sicamp-700"></i> Peralatan Disewa
-                        </h4>
-                        <div id="cartItemsContainer" class="space-y-2 max-h-40 overflow-y-auto pr-1">
-                            <!-- Di-render via JS -->
-                        </div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. WhatsApp <span class="text-rose-500">*</span></label>
+                        <input type="tel" id="checkoutWA" placeholder="08xxxxxxxxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
                     </div>
-
-                    <!-- 2. Data Penyewa & Jaminan -->
-                    <div class="space-y-3 pt-2 border-t border-slate-100">
-                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-id-card text-sicamp-700"></i> Data Penyewa &amp; Jaminan
-                        </h4>
-
-                        <!-- Nama & WA Penyewa -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap <span class="text-rose-500">*</span></label>
-                                <input type="text" id="checkoutNama" required placeholder="Sesuai KTP/KTM" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. WhatsApp <span class="text-rose-500">*</span></label>
-                                <input type="tel" id="checkoutWA" required placeholder="08xxxxxxxxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                            </div>
-                        </div>
-
-                        <!-- Kontak Darurat -->
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Kontak Darurat &amp; Hubungan <span class="text-rose-500">*</span></label>
-                            <input type="text" id="checkoutKontakDarurat" required placeholder="Contoh: 08123456789 (Orang Tua / Kakak)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                        </div>
-
-                        <!-- Alamat Lengkap -->
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Alamat Lengkap Domisili <span class="text-rose-500">*</span></label>
-                            <textarea id="checkoutAlamat" required rows="2" placeholder="Jl. Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 resize-none"></textarea>
-                        </div>
-
-                        <!-- Tanggal Sewa & Kembali -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mulai Sewa <span class="text-rose-500">*</span></label>
-                                <input type="date" id="checkoutTglSewa" required oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Rencana Kembali <span class="text-rose-500">*</span></label>
-                                <input type="date" id="checkoutTglKembali" required oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
-                            </div>
-                        </div>
-
-                        <!-- Upload KTP/KTM -->
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload KTP / KTM (Jaminan Digital) <span class="text-rose-500">*</span></label>
-                            <input type="file" id="checkoutKTP" required accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
-                        </div>
-                    </div>
-
-                    <!-- 3. Info Pembayaran Direct & Upload Bukti -->
-                    <div class="space-y-3 pt-2 border-t border-slate-100">
-                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-qrcode text-sicamp-700"></i> Pembayaran QRIS / Transfer
-                        </h4>
-
-                        <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-4">
-                            <div class="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1 shrink-0 flex items-center justify-center text-center shadow-sm">
-                                <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
-                            </div>
-                            <div class="text-xs space-y-0.5">
-                                <span class="font-extrabold text-slate-900 block">QRIS SiCamp Surakarta</span>
-                                <p class="text-[11px] text-slate-500">BCA: <strong class="text-slate-800">123-456-7890</strong> a.n SiCamp</p>
-                                <p class="text-[10px] text-slate-400">Scan via GoPay, OVO, Dana, ShopeePay, Mobile Banking.</p>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload Bukti Transfer <span class="text-rose-500">*</span></label>
-                            <input type="file" id="checkoutBukti" required accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
-                            <p class="text-[10px] text-slate-400 mt-1">*Wajib unggah bukti pembayaran sebelum mengirim pesanan.</p>
-                        </div>
-                    </div>
-
-                </div>
-
-                <!-- Total Summary & Submit Footer -->
-                <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="font-semibold text-slate-500">Rincian Durasi:</span>
-                        <span id="checkoutRincianDurasi" class="font-bold text-slate-800">1 Hari</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="text-xs font-semibold text-slate-500">Total Pembayaran:</span>
-                        <span id="cartTotalHarga" class="text-lg font-extrabold text-sicamp-700">Rp 0</span>
-                    </div>
-
-                    <div class="flex gap-2">
-                        <button type="button" onclick="closeModalKeranjang()" class="w-1/3 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition-all">Batal</button>
-                        <button type="submit" class="w-2/3 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-paper-plane"></i> Kirim Sewa Sekarang
-                        </button>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. HP Darurat <span class="text-rose-500">*</span></label>
+                        <input type="tel" id="checkoutKontakDarurat" placeholder="08xxx (Ortu/Kakak)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
                     </div>
                 </div>
 
-            </form>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Alamat Lengkap Domisili <span class="text-rose-500">*</span></label>
+                    <textarea id="checkoutAlamat" rows="2" placeholder="Jl. Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 resize-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload KTP / KTM (Jaminan Digital) <span class="text-rose-500">*</span></label>
+                    <input type="file" id="checkoutKTP" accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- TAHAP 3: PEMBAYARAN -->
+            <div id="checkoutStep3" class="space-y-3 hidden">
+                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-qrcode text-sicamp-700"></i> Transfer &amp; Unggah Bukti
+                </h4>
+
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-4">
+                    <div class="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1 shrink-0 flex items-center justify-center text-center shadow-sm">
+                        <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
+                    </div>
+                    <div class="text-xs space-y-0.5">
+                        <span class="font-extrabold text-slate-900 block">QRIS SiCamp Surakarta</span>
+                        <p class="text-[11px] text-slate-500">BCA: <strong class="text-slate-800">123-456-7890</strong> a.n SiCamp</p>
+                        <p class="text-[10px] text-slate-400">Scan via GoPay, OVO, Dana, ShopeePay, Mobile Banking.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload Bukti Transfer <span class="text-rose-500">*</span></label>
+                    <input type="file" id="checkoutBukti" accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
+                    <p class="text-[10px] text-slate-400 mt-1">*Wajib unggah resi/bukti pembayaran sebelum mengirim pesanan.</p>
+                </div>
+            </div>
 
         </div>
+
+        <!-- Total Summary & Dynamic Navigation Buttons -->
+        <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
+            <div class="flex justify-between items-center text-xs">
+                <span class="font-semibold text-slate-500">Rincian Durasi:</span>
+                <span id="checkoutRincianDurasi" class="font-bold text-slate-800">1 Hari</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-semibold text-slate-500">Total Pembayaran:</span>
+                <span id="cartTotalHarga" class="text-lg font-extrabold text-sicamp-700">Rp 0</span>
+            </div>
+
+            <!-- Tombol Navigasi Berubah Sesuai Tahap -->
+            <div id="stepButtonsArea" class="flex gap-2">
+                <!-- Di-render via JS -->
+            </div>
+        </div>
+
     </div>
+</div>
 
     <!-- 11. FOOTER -->
     <footer class="bg-white border-t border-slate-200 py-12 mt-auto">
