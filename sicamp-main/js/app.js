@@ -62,7 +62,47 @@ function updateCartBadge() {
     }
 }
 
-// 3. Render Modal Keranjang
+// Fungsi Menghitung Durasi Hari & Total Harga Sewa Otomatis
+function hitungkanTotalCheckout() {
+    const tglSewaInput = document.getElementById('checkoutTglSewa');
+    const tglKembaliInput = document.getElementById('checkoutTglKembali');
+    const rincianDurasi = document.getElementById('checkoutRincianDurasi');
+    const totalElement = document.getElementById('cartTotalHarga');
+
+    const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
+    const totalHargaPerHari = keranjang.reduce((sum, item) => sum + (item.harga_sewa * item.qty), 0);
+
+    let durasiHari = 1;
+
+    if (tglSewaInput && tglKembaliInput && tglSewaInput.value && tglKembaliInput.value) {
+        const d1 = new Date(tglSewaInput.value);
+        const d2 = new Date(tglKembaliInput.value);
+
+        // Normalisasi waktu ke jam 00:00:00 agar hitungan hari akurat
+        d1.setHours(0, 0, 0, 0);
+        d2.setHours(0, 0, 0, 0);
+
+        const diffTime = d2.getTime() - d1.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+        durasiHari = diffDays > 0 ? diffDays : 1;
+    }
+
+    // Update Teks Durasi di Modal
+    if (rincianDurasi) {
+        rincianDurasi.innerText = `${durasiHari} Hari`;
+    }
+
+    // Update Total Harga (Harga per Hari x Jumlah Hari)
+    const grandTotal = totalHargaPerHari * durasiHari;
+    if (totalElement) {
+        totalElement.innerText = `Rp ${grandTotal.toLocaleString('id-ID')}`;
+    }
+
+    return { durasiHari, grandTotal };
+}
+
+/// 3. Render Modal Keranjang
 function openModalKeranjang() {
     const modal = document.getElementById('modalKeranjang');
     const container = document.getElementById('cartItemsContainer');
@@ -71,6 +111,16 @@ function openModalKeranjang() {
 
     if (!modal) return;
 
+    // 1. Set default tanggal jika belum terisi (Hari ini & Besok)
+    const tglSewaInput = document.getElementById('checkoutTglSewa');
+    const tglKembaliInput = document.getElementById('checkoutTglKembali');
+    const today = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+
+    if (tglSewaInput && !tglSewaInput.value) tglSewaInput.value = today;
+    if (tglKembaliInput && !tglKembaliInput.value) tglKembaliInput.value = tomorrow;
+
+    // 2. Render item di keranjang
     if (container) {
         container.innerHTML = '';
 
@@ -83,11 +133,7 @@ function openModalKeranjang() {
             `;
             if (totalElement) totalElement.innerText = 'Rp 0';
         } else {
-            let total = 0;
             keranjang.forEach((item, idx) => {
-                const subtotal = item.harga_sewa * item.qty;
-                total += subtotal;
-
                 container.innerHTML += `
                     <div class="flex items-center justify-between gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
                         <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" class="w-12 h-12 object-cover rounded-xl shrink-0">
@@ -106,10 +152,13 @@ function openModalKeranjang() {
                     </div>
                 `;
             });
-            if (totalElement) totalElement.innerText = `Rp ${total.toLocaleString('id-ID')}`;
         }
     }
 
+    // 3. PANGGIL DI SINI: hitung durasi hari & grand total otomatis
+    hitungkanTotalCheckout();
+
+    // 4. Tampilkan Modal
     modal.classList.remove('hidden');
 }
 
@@ -145,43 +194,76 @@ function prosesCheckoutSewa() {
     const keranjang = JSON.parse(localStorage.getItem('keranjang')) || [];
 
     if (!session) {
-        alert('Silakan login terlebih dahulu!');
+        alert('Silakan login terlebih dahulu untuk menyewa!');
         window.location.href = 'login.html';
         return;
     }
 
     if (keranjang.length === 0) {
-        alert('Keranjang sewa masih kosong!');
+        alert('Keranjang sewa masih kosong! Pilih alat di katalog terlebih dahulu.');
         return;
     }
 
-    const tglSewa = document.getElementById('checkoutTglSewa')?.value || new Date().toISOString().split('T')[0];
-    const tglKembali = document.getElementById('checkoutTglKembali')?.value || new Date(Date.now() + 86400000).toISOString().split('T')[0];
+    // Ambil Input Form
+    const nama = document.getElementById('checkoutNama')?.value.trim();
+    const waPenyewa = document.getElementById('checkoutWA')?.value.trim();
+    const kontakDarurat = document.getElementById('checkoutKontakDarurat')?.value.trim();
+    const alamat = document.getElementById('checkoutAlamat')?.value.trim(); // <-- BARU
+    const tglSewa = document.getElementById('checkoutTglSewa')?.value;
+    const tglKembali = document.getElementById('checkoutTglKembali')?.value;
+    const inputKTP = document.getElementById('checkoutKTP');
+    const inputBukti = document.getElementById('checkoutBukti');
 
-    const totalHargaPerHari = keranjang.reduce((sum, item) => sum + (item.harga_sewa * item.qty), 0);
+    // Validasi Wajib Isi
+    if (!nama || !waPenyewa || !kontakDarurat || !alamat) {
+        alert('Harap isi Nama Lengkap, No. WhatsApp, Kontak Darurat, dan Alamat Lengkap!');
+        return;
+    }
+
+    if (!tglSewa || !tglKembali) {
+        alert('Harap pilih Tanggal Sewa dan Rencana Kembali!');
+        return;
+    }
+
+    if (!inputKTP || inputKTP.files.length === 0) {
+        alert('Harap unggah Foto KTP/KTM sebagai Jaminan Digital!');
+        return;
+    }
+
+    // Hitung Total Pembayaran
+    const { durasiHari, grandTotal } = hitungkanTotalCheckout();
+
+    // Tentukan Status Awal
+    const hasBukti = inputBukti && inputBukti.files.length > 0;
+    const statusAwal = hasBukti ? 'Menunggu Verifikasi' : 'Menunggu Pembayaran';
 
     const newTransaksi = {
         id_penyewaan: Date.now(),
         kode_transaksi: 'TRX-' + String(Date.now()).slice(-6),
-        nama_pelanggan: session.nama || session.nama_pelanggan,
-        total_harga: totalHargaPerHari,
+        nama_pelanggan: nama,
+        no_wa: waPenyewa,
+        kontak_darurat: kontakDarurat,
+        alamat: alamat, // <-- DITERUSKAN KE DATA TRANSAKSI
+        total_harga: grandTotal,
+        durasi_hari: durasiHari,
         tgl_sewa: tglSewa,
         tgl_kembali_rencana: tglKembali,
-        status: 'Menunggu Pembayaran',
+        status: statusAwal,
         detail_items: keranjang,
-        bukti: null
+        ktp_terupload: inputKTP.files[0].name,
+        bukti: hasBukti ? inputBukti.files[0].name : null
     };
 
     let penyewaan = JSON.parse(localStorage.getItem('penyewaan')) || [];
     penyewaan.unshift(newTransaksi);
     localStorage.setItem('penyewaan', JSON.stringify(penyewaan));
 
-    // Kosongkan keranjang setelah checkout
+    // Reset Keranjang & Tutup Modal
     localStorage.removeItem('keranjang');
     updateCartBadge();
     closeModalKeranjang();
 
-    alert('Checkout Berhasil! Silakan unggah bukti pembayaran di halaman Riwayat Penyewaan.');
+    alert('Sewa Berhasil Diajukan! Status pesanan dapat dipantau di halaman Riwayat Penyewaan.');
     window.location.href = 'riwayat-sewa.html';
 }
 
