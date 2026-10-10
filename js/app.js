@@ -437,52 +437,43 @@ function prosesCheckoutSewa() {
 // ==========================================
 function initDatabase() {
     if (!localStorage.getItem('kategori_peralatan')) {
-        const defaultKategori = [
-            { id_kategori: '1', nama_kategori: 'Tenda & Shelter' },
-            { id_kategori: '2', nama_kategori: 'Carrier & Tas' },
-            { id_kategori: '3', nama_kategori: 'Alat Masak & Makan' },
-            { id_kategori: '4', nama_kategori: 'Tidur & Matras' },
-            { id_kategori: '5', nama_kategori: 'Aksesori & Penerangan' }
-        ];
-        localStorage.setItem('kategori_peralatan', JSON.stringify(defaultKategori));
+        // Cukup ganti array defaultPeralatan di dalam initDatabase():
+const defaultPeralatan = [
+    {
+        id_peralatan: '1001', // Ubah dari '1'
+        id_kategori: '1',
+        nama_peralatan: 'Tenda Dome 4P',
+        harga_sewa: 50000,
+        stok: 5,
+        kondisi: 'Bagus',
+        status: 'Aktif',
+        deskripsi: 'Tenda waterproof double layer muat hingga 4 orang.',
+        gambar: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'
+    },
+    {
+        id_peralatan: '2001', // Ubah dari '2'
+        id_kategori: '2',
+        nama_peralatan: 'Carrier Eiger 60L',
+        harga_sewa: 35000,
+        stok: 8,
+        kondisi: 'Bagus',
+        status: 'Aktif',
+        deskripsi: 'Tas gunung ergonomis nyaman untuk pendakian jauh.',
+        gambar: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=600&q=80'
+    },
+    {
+        id_peralatan: '4001', // Ubah dari '3'
+        id_kategori: '4',
+        nama_peralatan: 'Sleeping Bag Dacron',
+        harga_sewa: 15000,
+        stok: 12,
+        kondisi: 'Bagus',
+        status: 'Aktif',
+        deskripsi: 'Sleeping bag hangat menjaga suhu tubuh malam hari.',
+        gambar: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80'
     }
-
-    if (!localStorage.getItem('peralatan')) {
-        const defaultPeralatan = [
-            {
-                id_peralatan: '1',
-                id_kategori: '1',
-                nama_peralatan: 'Tenda Dome 4P',
-                harga_sewa: 50000,
-                stok: 5,
-                kondisi: 'Bagus',
-                status: 'Aktif',
-                deskripsi: 'Tenda waterproof double layer muat hingga 4 orang.',
-                gambar: 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'
-            },
-            {
-                id_peralatan: '2',
-                id_kategori: '2',
-                nama_peralatan: 'Carrier Eiger 60L',
-                harga_sewa: 35000,
-                stok: 8,
-                kondisi: 'Bagus',
-                status: 'Aktif',
-                deskripsi: 'Tas gunung ergonomis nyaman untuk pendakian jauh.',
-                gambar: 'https://images.unsplash.com/photo-1526772662000-3f88f10405ff?auto=format&fit=crop&w=600&q=80'
-            },
-            {
-                id_peralatan: '3',
-                id_kategori: '4',
-                nama_peralatan: 'Sleeping Bag Dacron',
-                harga_sewa: 15000,
-                stok: 12,
-                kondisi: 'Bagus',
-                status: 'Aktif',
-                deskripsi: 'Sleeping bag hangat menjaga suhu tubuh malam hari.',
-                gambar: 'https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=600&q=80'
-            }
-        ];
+];
+        
         localStorage.setItem('peralatan', JSON.stringify(defaultPeralatan));
     }
 
@@ -696,7 +687,7 @@ async function renderKatalog() {
     if (!grid) return;
 
     try {
-        const response = await fetch('api_peralatan.php');
+        const response = await fetch('api/api_peralatan.php');
         const items = await response.json();
         
         // Simpan cache lokal untuk operasi keranjang
@@ -826,7 +817,7 @@ async function saveKategoriHandler(e) {
     if (!nama) return;
 
     try {
-        const response = await fetch('api_kategori.php', {
+        const response = await fetch('api/api_kategori.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nama_kategori: nama })
@@ -1191,13 +1182,13 @@ function renderDashboardStats() {
 
 async function loadKategoriFromDB() {
     try {
-        const response = await fetch('api_kategori.php');
+        const response = await fetch('api/api_kategori.php')
         const kategoris = await response.json();
         
         localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
         
-        renderCategoryOptionsAndTabs();
-        renderTabelKategoriAdmin();
+        if (typeof renderCategoryOptionsAndTabs === 'function') renderCategoryOptionsAndTabs();
+        if (typeof renderTabelKategoriAdmin === 'function') renderTabelKategoriAdmin();
     } catch (error) {
         console.error("Gagal mengambil data dari MySQL:", error);
     }

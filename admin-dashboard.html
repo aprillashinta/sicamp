@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kelola Peralatan - Admin SiCamp</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sicamp: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#0e622f',
+                            900: '#0a4b23',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden">
+
+    <!-- SIDEBAR ADMIN UPDATED -->
+    <aside class="w-64 bg-[#0F172A] text-slate-300 min-h-screen p-4 flex flex-col justify-between">
+    <div>
+        <!-- Logo & Header SiCamp -->
+        <div class="flex items-center gap-3 px-3 py-4 mb-6 border-b border-slate-800">
+        <div class="bg-emerald-500 p-2 rounded-xl text-white">
+            <!-- Icon Bell/Tent -->
+            <i class="fa-solid font-bold fa-campground text-xl"></i>
+        </div>
+        <div>
+            <h1 class="font-bold text-white text-lg leading-none">SiCamp</h1>
+            <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">ADMIN CONTROL</span>
+        </div>
+        </div>
+
+        <!-- Menu Navigasi -->
+        <nav class="space-y-1.5 font-medium text-sm">
+        <!-- 1. Dashboard Utama -->
+        <a href="admin-dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-xl bg-emerald-600 text-white font-semibold">
+            <i class="fa-solid fa-gauge w-5 text-center"></i>
+            <span>Dashboard Utama</span>
+        </a>
+
+        <!-- 2. Kelola Peralatan -->
+        <a href="kelola-peralatan.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <i class="fa-solid fa-boxes-stacked w-5 text-center"></i>
+            <span>Kelola Peralatan</span>
+        </a>
+
+        <!-- 3. Kelola Kategori -->
+        <a href="kelola-kategori.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <i class="fa-solid fa-tags w-5 text-center"></i>
+            <span>Kelola Kategori</span>
+        </a>
+
+        <!-- 4. Verifikasi Pembayaran -->
+        <a href="verifikasi-pembayaran.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <i class="fa-solid fa-file-invoice-dollar w-5 text-center"></i>
+            <span>Verifikasi Pembayaran</span>
+        </a>
+
+        <!-- 5. Kelola Pengembalian -->
+        <a href="pengembalian.html" class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200">
+            <i class="fa-solid fa-rotate-left w-5 text-center"></i>
+            <span>Kelola Pengembalian</span>
+        </a>
+        </nav>
+    </div>
+
+    <!-- Bagian Bawah: Logout & User Status -->
+    <div class="border-t border-slate-800 pt-4 space-y-4">
+        <!-- Logout Button -->
+        <a href="#" onclick="logoutAdmin()" class="flex items-center gap-3 px-4 py-2.5 text-rose-400 hover:bg-rose-500/10 rounded-xl transition font-medium text-sm">
+        <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
+        <span>Logout</span>
+        </a>
+
+        <!-- Info User Administrator -->
+        <div class="px-3 pt-2 text-xs text-slate-400">
+        <p class="mb-0.5">User: <span class="text-white font-medium">Administrator</span></p>
+        <p>Role: <span class="bg-amber-500/20 text-amber-400 font-bold px-1.5 py-0.5 rounded text-[10px]">ADMIN</span></p>
+        </div>
+    </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-full space-y-10">
+        
+        <!-- 1. KELOLA INVENTARIS PERALATAN -->
+        <section>
+            <div class="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2.5">
+                        Kelola Inventaris Alat
+                    </h1>
+                    <p class="text-xs text-slate-500 mt-1">Atur daftar peralatan sewa, penentuan harga, dan perbarui sisa stok barang.</p>
+                </div>
+
+                <button onclick="openModalTambahAlat()" class="px-4 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer">
+                    <i class="fa-solid fa-plus"></i> Tambah Peralatan Baru
+                </button>
+            </div>
+
+            <!-- Tabel Inventaris -->
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="tblInventarisAdmin" class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-700 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3.5 px-6 text-left">ID Alat</th>
+                                <th class="py-4 px-6">Nama Peralatan</th>
+                                <th class="py-4 px-6">Kategori</th>
+                                <th class="py-4 px-6">Harga Sewa / Hari</th>
+                                <th class="py-4 px-6">Sisa Stok</th>
+                                <th class="py-4 px-6 text-center">Aksi Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            <!-- Content di-render via JS dari MySQL -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. KELOLA KATEGORI PERALATAN -->
+        <section>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-900">Daftar Kategori Peralatan</h2>
+                    <p class="text-xs text-slate-500">Tambah atau hapus kategori untuk menyaring katalog produk.</p>
+                </div>
+                <button onclick="openModalTambahKategori()" class="px-3.5 py-2 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-1.5 self-start sm:self-auto cursor-pointer">
+                    <i class="fa-solid fa-plus"></i> Tambah Kategori
+                </button>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table id="tblKategoriAdmin" class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-700 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200">
+                                <th class="py-3.5 px-6">ID Kategori</th>
+                                <th class="py-3.5 px-6">Nama Kategori</th>
+                                <th class="py-3.5 px-6 text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
+                            <!-- Di-render via app.js -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL FORM TAMBAH ALAT -->
+    <div id="modalAlat" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <h3 id="modalAlatTitle" class="text-base font-bold text-slate-900">Tambah Peralatan Baru</h3>
+                <button onclick="closeModalAlat()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <form id="formAlat" onsubmit="saveAlatHandler(event)" class="space-y-4">
+                <input type="hidden" id="editAlatId">
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Peralatan</label>
+                    <input type="text" id="inputNamaAlat" required placeholder="Contoh: Tenda Dome 4P" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Kategori Peralatan</label>
+                    <select id="inputKategoriAlat" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                        <!-- Di-render via JS -->
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Harga Sewa (Rp)</label>
+                        <input type="number" id="inputHargaAlat" required placeholder="50000" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Stok Unit</label>
+                        <input type="number" id="inputStokAlat" required placeholder="5" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Upload Foto Peralatan</label>
+                    <input type="file" id="inputGambarAlat" accept="image/*" class="w-full px-3.5 py-2 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Deskripsi Singkat</label>
+                    <textarea id="inputDeskripsiAlat" rows="2" placeholder="Detail spesifikasi alat..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700"></textarea>
+                </div>
+
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModalAlat()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">Simpan Alat</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL TAMBAH KATEGORI -->
+    <div id="modalKategori" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="w-full max-w-sm bg-white rounded-3xl shadow-2xl p-6 border border-slate-100">
+            <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-900">Tambah Kategori Baru</h3>
+                <button onclick="closeModalKategori()" class="text-slate-400 hover:text-slate-600 cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="saveKategoriHandler(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nama Kategori</label>
+                    <input type="text" id="inputNamaKategori" required placeholder="Contoh: Penerangan & Headlamp" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:border-sicamp-700">
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeModalKategori()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl cursor-pointer">Batal</button>
+                    <button type="submit" class="flex-1 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            renderUserNavigation();        // Render sidebar & user info
+            renderTabelInventarisAdmin();   // Render tabel alat dari API MySQL
+            loadKategoriFromDB();           // Load kategori dari API MySQL
+        });
+
+        // Render Tabel Inventaris Alat dari Database MySQL
+        async function renderTabelInventarisAdmin() {
+            const tbody = document.querySelector('#tblInventarisAdmin tbody');
+            if (!tbody) return;
+
+            try {
+                const response = await fetch('api/api_peralatan.php')
+                const items = await response.json();
+                
+                localStorage.setItem('peralatan', JSON.stringify(items));
+                tbody.innerHTML = '';
+
+                if (items.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="py-8 text-center text-slate-400">Belum ada data peralatan di database.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                items.forEach((item) => {
+                    tbody.innerHTML += `
+                        <tr class="hover:bg-slate-50 transition-colors">
+                            <td class="py-4 px-6 font-bold text-slate-900">${item.id_peralatan}</td>
+                            <td class="py-4 px-6 font-bold text-slate-800">${item.nama_peralatan}</td>
+                            <td class="py-4 px-6 text-slate-600">${item.nama_kategori || 'Umum'}</td>
+                            <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}</td>
+                            <td class="py-4 px-6">
+                                <span class="bg-sicamp-100 text-sicamp-800 font-bold px-2.5 py-1 rounded-full text-[10px]">
+                                    ${item.stok} Unit
+                                </span>
+                            </td>
+                            <td class="py-4 px-6 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                    <button onclick="hapusAlatAdmin('${item.id_peralatan}')" class="p-1.5 text-rose-500 hover:text-rose-700 text-xs cursor-pointer">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } catch (err) {
+                console.error("Gagal memuat data peralatan dari MySQL:", err);
+            }
+        }
+
+        async function openModalTambahAlat() {
+            const selectKat = document.getElementById('inputKategoriAlat');
+            try {
+                const response = await fetch('api/api_kategori.php')
+                const kategoris = await response.json();
+                
+                selectKat.innerHTML = '';
+                kategoris.forEach(k => {
+                    selectKat.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
+                });
+            } catch (err) {
+                console.error("Gagal memuat data kategori:", err);
+            }
+
+            document.getElementById('formAlat').reset();
+            document.getElementById('editAlatId').value = '';
+            document.getElementById('modalAlatTitle').innerText = 'Tambah Peralatan Baru';
+            document.getElementById('modalAlat').classList.remove('hidden');
+        }
+
+        function closeModalAlat() {
+            document.getElementById('modalAlat').classList.add('hidden');
+        }
+
+        // Simpan Alat Baru via API MySQL (ID otomatis generate sesuai kategori: 1001, 2001, dst)
+        async function saveAlatHandler(e) {
+            e.preventDefault();
+
+            // Gunakan FormData untuk mengirim data beserta file
+            const formData = new FormData();
+            formData.append('id_kategori', document.getElementById('inputKategoriAlat').value);
+            formData.append('nama_peralatan', document.getElementById('inputNamaAlat').value.trim());
+            formData.append('harga_sewa', document.getElementById('inputHargaAlat').value);
+            formData.append('stok', document.getElementById('inputStokAlat').value);
+            formData.append('deskripsi', document.getElementById('inputDeskripsiAlat').value.trim());
+
+            const fileInput = document.getElementById('inputGambarAlat');
+            if (fileInput.files.length > 0) {
+                formData.append('gambar', fileInput.files[0]);
+            }
+
+            try {
+                const response = await fetch('api/api_peralatan.php', {
+                    method: 'POST',
+                    body: formData // Kirim FormData (jangan set Content-Type header manual)
+                });
+
+                const res = await response.json();
+
+                if (res.status === 'success') {
+                    alert('Peralatan berhasil ditambahkan!\nID Alat: ' + res.id_peralatan);
+                    closeModalAlat();
+                    renderTabelInventarisAdmin();
+                } else {
+                    alert('Gagal menyimpan peralatan: ' + res.message);
+                }
+            } catch (err) {
+                console.error("Error simpan peralatan:", err);
+                alert('Terjadi kesalahan koneksi.');
+            }
+        }
+
+        function hapusAlatAdmin(idAlat) {
+            if (confirm('Yakin ingin menghapus peralatan ID ' + idAlat + '?')) {
+                renderTabelInventarisAdmin();
+            }
+        }
+    </script>
+</body>
+</html>
