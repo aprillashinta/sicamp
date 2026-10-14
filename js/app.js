@@ -6,10 +6,14 @@ function renderUserNavigation() {
     const navPelanggan = document.getElementById('navPelanggan');
     const userIndicator = document.getElementById('userIndicator');
     const sidebarAdmin = document.getElementById('sidebarAdmin');
+    const sidebarMenu = document.getElementById('sidebarMenu');
+    const userInfo = document.getElementById('userInfo');
 
-    const session = JSON.parse(localStorage.getItem('session_user'));
+    // Ambil data user dari localStorage (Support 'session_user' & 'user')
+    const session = JSON.parse(localStorage.getItem('session_user')) || JSON.parse(localStorage.getItem('user'));
     const currentPath = window.location.pathname.split('/').pop() || 'index.html';
 
+    // 1. Render Navigation Bar Atas (Pelanggan / Guest)
     if (userIndicator) {
         if (!session) {
             if (navPelanggan) navPelanggan.innerHTML = '';
@@ -43,9 +47,72 @@ function renderUserNavigation() {
         }
     }
 
+    // HTML Menu Item Admin (Reusable)
+    const adminMenuItemsHtml = `
+        <li>
+            <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'dashboard.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
+                <i class="fa-solid fa-chart-pie text-sm w-4 text-center"></i>
+                <span>Dashboard Utama</span>
+            </a>
+        </li>
+        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">DATA MASTER</li>
+        <li>
+            <a href="kelola-alat.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-alat.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
+                <i class="fa-solid fa-boxes-stacked text-sm w-4 text-center"></i>
+                <span>Kelola Alat</span>
+            </a>
+        </li>
+        <li>
+            <a href="kelola-kategori.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-kategori.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
+                <i class="fa-solid fa-tags text-sm w-4 text-center"></i>
+                <span>Kelola Kategori</span>
+            </a>
+        </li>
+        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">TRANSAKSI</li>
+        <li>
+            <a href="verifikasi-pembayaran.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'verifikasi-pembayaran.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
+                <i class="fa-solid fa-file-invoice-dollar text-sm w-4 text-center"></i>
+                <span>Verifikasi Pembayaran</span>
+            </a>
+        </li>
+        <li>
+            <a href="pengembalian.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'pengembalian.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
+                <i class="fa-solid fa-rotate-left text-sm w-4 text-center"></i>
+                <span>Kelola Pengembalian</span>
+            </a>
+        </li>
+        <li class="pt-4 mt-2 border-t border-slate-800">
+            <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold no-underline">
+                <i class="fa-solid fa-right-from-bracket text-sm w-4 text-center"></i>
+                <span>Logout</span>
+            </a>
+        </li>
+    `;
+
+    // 2. Render Sidebar versi <ul id="sidebarMenu">
+    if (sidebarMenu) {
+        sidebarMenu.innerHTML = adminMenuItemsHtml;
+    }
+
+    // 3. Render User Info versi <div id="userInfo">
+    if (userInfo) {
+        const adminName = session ? session.nama : 'Administrator';
+        userInfo.innerHTML = `
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-300 font-bold">User: <span class="text-white">${adminName}</span></p>
+                    <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Role: ADMIN</p>
+                </div>
+                <button onclick="logout()" class="text-slate-400 hover:text-rose-400 text-sm transition-colors cursor-pointer" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    // 4. Render Sidebar versi <aside id="sidebarAdmin">
     if (sidebarAdmin) {
         const adminName = session ? session.nama : 'Administrator';
-        
         sidebarAdmin.innerHTML = `
             <div>
                 <div class="p-6 border-b border-slate-800 flex items-center gap-3">
@@ -60,44 +127,7 @@ function renderUserNavigation() {
 
                 <nav class="p-4">
                     <ul class="space-y-1">
-                        <li>
-                            <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'dashboard.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                                <i class="fa-solid fa-chart-pie text-sm"></i>
-                                <span>Dashboard Utama</span>
-                            </a>
-                        </li>
-                        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">DATA MASTER</li>
-                        <li>
-                            <a href="kelola-alat.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-alat.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                                <i class="fa-solid fa-boxes-stacked text-sm"></i>
-                                <span>Kelola Alat</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="kelola-kategori.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-kategori.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                                <i class="fa-solid fa-tags text-sm"></i>
-                                <span>Kelola Kategori</span>
-                            </a>
-                        </li>
-                        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">TRANSAKSI</li>
-                        <li>
-                            <a href="verifikasi-pembayaran.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'verifikasi-pembayaran.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                                <i class="fa-solid fa-file-invoice-dollar text-sm"></i>
-                                <span>Verifikasi Pembayaran</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="pengembalian.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'pengembalian.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                                <i class="fa-solid fa-rotate-left text-sm"></i>
-                                <span>Kelola Pengembalian</span>
-                            </a>
-                        </li>
-                        <li class="pt-4 mt-2 border-t border-slate-800">
-                            <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold no-underline">
-                                <i class="fa-solid fa-right-from-bracket text-sm"></i>
-                                <span>Logout</span>
-                            </a>
-                        </li>
+                        ${adminMenuItemsHtml}
                     </ul>
                 </nav>
             </div>
@@ -114,6 +144,7 @@ function renderUserNavigation() {
 
 function logout() {
     localStorage.removeItem('session_user');
+    localStorage.removeItem('user');
     alert('Anda telah logout.');
     window.location.href = 'login.html';
 }

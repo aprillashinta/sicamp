@@ -14,7 +14,7 @@ $host = "localhost";
 $user = "root";
 $pass = "";
 $db   = "db_penyewaan_camping";
-$port = 3307;
+$port = 3306;
 
 // Matikan exception otomatis agar error dapat ditangkap secara bersih oleh script
 mysqli_report(MYSQLI_REPORT_OFF);
