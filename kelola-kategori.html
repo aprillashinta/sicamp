@@ -1,87 +1,880 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kelola Kategori - SiCamp Admin</title>
+
+    <link rel="icon" href="assets/sicamp-logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        sicamp: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                        }
-                    }
-                }
-            }
+
+    <style>
+        :root {
+            --forest: #174c38;
+            --forest-dark: #103b2b;
+            --lime: #b8e36b;
+            --cream: #f7f8ef;
+            --text: #24382b;
+            --muted: #788579;
+            --border: #e5e9df;
         }
-    </script>
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            background: var(--cream);
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .page-content {
+            width: 100%;
+            max-width: 1600px;
+            margin: auto;
+            padding: 32px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            color: #20382a;
+        }
+
+        .muted { color: var(--muted); }
+
+        .panel {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 5px 20px rgba(23, 76, 56, 0.035);
+        }
+
+        .stat-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 21px;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: grid;
+            place-items: center;
+            background: #edf5e5;
+            color: var(--forest);
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .stat-value {
+            margin-top: 5px;
+            font-size: 25px;
+            font-weight: 800;
+            color: var(--forest);
+        }
+
+        .field {
+            width: 100%;
+            min-height: 43px;
+            padding: 10px 13px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: #fff;
+            outline: none;
+            font: inherit;
+            font-size: 12px;
+            color: var(--text);
+        }
+
+        .field:focus {
+            border-color: var(--forest);
+            box-shadow: 0 0 0 3px rgba(23, 76, 56, 0.08);
+        }
+
+        .btn-primary {
+            min-height: 42px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            padding: 0 17px;
+            border: none;
+            border-radius: 10px;
+            background: var(--forest);
+            color: white;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .btn-primary:hover { background: var(--forest-dark); }
+
+        .btn-secondary {
+            min-height: 42px;
+            padding: 0 15px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            background: white;
+            color: #506052;
+            font: inherit;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-secondary:hover { background: #f5f7f1; }
+
+        .action-btn {
+            width: 34px;
+            height: 34px;
+            display: inline-grid;
+            place-items: center;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            cursor: pointer;
+            transition: .2s;
+        }
+
+        .action-btn.edit { color: var(--forest); }
+        .action-btn.edit:hover { background: #edf5e5; }
+        .action-btn.delete { color: #d14343; }
+        .action-btn.delete:hover { background: #fff0f0; }
+
+        .category-icon {
+            width: 42px;
+            height: 42px;
+            display: grid;
+            place-items: center;
+            border-radius: 12px;
+            background: #edf5e5;
+            color: var(--forest);
+            font-size: 17px;
+            flex-shrink: 0;
+        }
+
+        .table-wrap { overflow-x: auto; }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        thead { background: #f6f8f2; }
+
+        th {
+            padding: 15px 20px;
+            color: #738074;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: .7px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eef0e9;
+            font-size: 12px;
+        }
+
+        tbody tr:hover { background: #fbfcf8; }
+        tbody tr:last-child td { border-bottom: none; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 20px;
+            background: #edf5e5;
+            color: var(--forest);
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+            background: rgba(14, 32, 22, .55);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            width: 100%;
+            max-width: 480px;
+            padding: 26px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 25px 80px rgba(0, 0, 0, .18);
+            animation: modalIn .2s ease-out;
+        }
+
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(8px) scale(.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #425346;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .toast {
+            position: fixed;
+            top: 22px;
+            right: 22px;
+            z-index: 2000;
+            max-width: min(380px, calc(100vw - 32px));
+            padding: 14px 18px;
+            border-radius: 12px;
+            background: var(--forest);
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+            opacity: 0;
+            transform: translateY(-8px);
+            pointer-events: none;
+            transition: .25s;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .toast.error { background: #b93636; }
+
+        .empty-state {
+            padding: 55px 20px;
+            text-align: center;
+            color: var(--muted);
+        }
+
+        .empty-state i {
+            display: block;
+            margin-bottom: 14px;
+            font-size: 34px;
+            color: #a9b5a6;
+        }
+
+        .pagination-btn {
+            min-width: 34px;
+            height: 34px;
+            padding: 0 9px;
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            background: white;
+            color: #647265;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .pagination-btn.active {
+            border-color: var(--forest);
+            background: var(--forest);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 900px) {
+            .page-content { padding: 22px; }
+        }
+
+        @media (max-width: 600px) {
+            .page-content { padding: 16px; }
+            .page-title { font-size: 22px; }
+            .stat-card { padding: 16px; }
+            .stat-value { font-size: 22px; }
+            .modal { padding: 21px; }
+        }
+    </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex">
 
-    <!-- Kontainer Sidebar Admin Terpusat -->
-    <aside id="sidebarAdmin" class="w-64 bg-slate-900 text-white h-screen flex flex-col justify-between shrink-0 fixed top-0 bottom-0 left-0 z-20"></aside>
+<body>
+    <!-- Sidebar diintegrasikan melalui app.js -->
+    <div id="sicampSidebar"></div>
 
-    <!-- Content Area -->
-    <main class="flex-grow ml-64 p-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <main class="page-content">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7">
             <div>
-                <h2 class="text-2xl font-black text-slate-900 tracking-tight">Daftar Kategori Peralatan</h2>
-                <p class="text-xs text-slate-500 mt-1">Tambah atau hapus kategori untuk menyaring katalog produk sewa.</p>
+                <div class="text-xs font-bold mb-2" style="color:var(--forest)">
+                    <i class="fa-solid fa-layer-group mr-1"></i> DATA MASTER
+                </div>
+                <h1 class="page-title">Kelola Kategori</h1>
+                <p class="muted text-xs mt-2">
+                    Atur kategori untuk mengelompokkan perlengkapan camping.
+                </p>
             </div>
-            <button onclick="openModalTambahKategori()" class="px-5 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/20 transition-all flex items-center gap-2 shrink-0 cursor-pointer">
-                <i class="fa-solid fa-plus"></i> Tambah Kategori
-            </button>
-        </div>
 
-        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden max-w-4xl">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse" id="tblKategoriAdmin">
+            <button class="btn-primary" type="button" onclick="openCreateModal()">
+                <i class="fa-solid fa-plus"></i>
+                Tambah Kategori
+            </button>
+        </header>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div>
+                    <div class="stat-label">Total Kategori</div>
+                    <div class="stat-value" id="statTotal">0</div>
+                </div>
+            </div>
+
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+                <div>
+                    <div class="stat-label">Kategori dengan Peralatan</div>
+                    <div class="stat-value" id="statTerpakai">—</div>
+                </div>
+            </div>
+
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-list-check"></i></div>
+                <div>
+                    <div class="stat-label">Hasil Pencarian</div>
+                    <div class="stat-value" id="statHasil">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel overflow-hidden">
+            <div class="p-5 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div>
+                    <h2 class="font-extrabold text-sm">Daftar Kategori Peralatan</h2>
+                    <p class="muted text-xs mt-1">Kelola nama kategori yang tersedia di sistem.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <div class="relative">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400"></i>
+                        <input id="searchInput" class="field pl-9 sm:w-64"
+                               type="search" placeholder="Cari kategori...">
+                    </div>
+
+                    <button type="button" class="btn-secondary" onclick="loadKategori()">
+                        <i class="fa-solid fa-rotate-right mr-2"></i>Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
                     <thead>
-                        <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                            <th class="py-4 px-6 w-32">ID Kategori</th>
-                            <th class="py-4 px-6">Nama Kategori</th>
-                            <th class="py-4 px-6 text-center w-40">Aksi</th>
+                        <tr>
+                            <th style="width:90px">No.</th>
+                            <th>Nama Kategori</th>
+                            <th>ID Kategori</th>
+                            <th>Peralatan</th>
+                            <th style="text-align:center">Tindakan</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs text-slate-700 font-medium"></tbody>
+                    <tbody id="kategoriTable">
+                        <tr>
+                            <td colspan="5" class="text-center py-12">
+                                <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                                Memuat kategori...
+                            </td>
+                        </tr>
+                    </tbody>
                 </table>
             </div>
-        </div>
+
+            <div class="p-5 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                 style="border-color:var(--border)">
+                <p class="muted text-xs" id="paginationInfo">Memuat data...</p>
+                <div id="pagination" class="flex items-center gap-2"></div>
+            </div>
+        </section>
     </main>
 
-    <!-- Modal Tambah Kategori -->
-    <div id="modalKategori" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 hidden">
-        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-                <h3 class="text-base font-bold text-slate-900">Tambah Kategori Baru</h3>
-                <button onclick="closeModalKategori()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 text-xs font-bold transition-all flex items-center justify-center">
+    <!-- Modal Tambah/Edit -->
+    <div id="kategoriModal" class="modal-overlay" role="dialog" aria-modal="true"
+         aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="flex items-start justify-between gap-4 mb-6">
+                <div>
+                    <h2 id="modalTitle" class="font-extrabold text-lg">Tambah Kategori</h2>
+                    <p class="muted text-xs mt-2">Masukkan nama kategori peralatan.</p>
+                </div>
+                <button type="button" onclick="closeModal()"
+                        class="text-gray-400 hover:text-gray-700 text-xl"
+                        aria-label="Tutup modal">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <form id="formKategori" onsubmit="saveKategoriHandler(event)" class="space-y-4">
-                <div>
-                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Kategori</label>
-                    <input type="text" id="inputNamaKategori" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-600" placeholder="Contoh: Tenda, Cooking Set">
-                </div>
+            <form id="kategoriForm">
+                <input type="hidden" id="kategoriId">
 
-                <div class="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
-                    <button type="button" onclick="closeModalKategori()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold rounded-xl transition-all">Batal</button>
-                    <button type="submit" class="px-5 py-2.5 bg-sicamp-700 hover:bg-sicamp-800 text-white text-xs font-bold rounded-xl shadow-md transition-all">Simpan Kategori</button>
+                <label for="namaKategori" class="modal-label">Nama Kategori <span class="text-red-500">*</span></label>
+                <input id="namaKategori" class="field" type="text"
+                       maxlength="100" placeholder="Contoh: Tenda Camping" required>
+
+                <p class="muted text-xs mt-2 leading-relaxed">
+                    Gunakan nama yang singkat, jelas, dan tidak duplikat.
+                </p>
+
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 mt-7">
+                    <button type="button" class="btn-secondary" onclick="closeModal()">
+                        Batal
+                    </button>
+                    <button type="submit" id="saveBtn" class="btn-primary">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Simpan Kategori
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
     <script src="js/app.js"></script>
+    <script>
+        const API_KATEGORI = 'api/api_kategori.php';
+        const API_PERALATAN = 'api/api_peralatan.php';
+
+        let kategoriData = [];
+        let peralatanData = [];
+        let currentPage = 1;
+        const pageSize = 8;
+        let toastTimer = null;
+
+        const tableBody = document.getElementById('kategoriTable');
+        const searchInput = document.getElementById('searchInput');
+        const kategoriModal = document.getElementById('kategoriModal');
+        const kategoriForm = document.getElementById('kategoriForm');
+        const namaKategoriInput = document.getElementById('namaKategori');
+        const kategoriIdInput = document.getElementById('kategoriId');
+        const saveBtn = document.getElementById('saveBtn');
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            })[char]);
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+
+        async function fetchJSON(url, options = {}) {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                    ...(options.headers || {})
+                },
+                ...options
+            });
+
+            const raw = await response.text();
+            let result;
+
+            try {
+                result = JSON.parse(raw);
+            } catch {
+                throw new Error('Respons API tidak valid. Periksa file PHP dan koneksi database.');
+            }
+
+            if (!response.ok || result.status === 'error' || result.success === false) {
+                throw new Error(result.message || result.pesan || 'Permintaan tidak berhasil.');
+            }
+
+            return result;
+        }
+
+        function normalizeArray(result) {
+            if (Array.isArray(result)) return result;
+            if (Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result.kategori)) return result.kategori;
+            return [];
+        }
+
+        function getId(item) {
+            return item.id_kategori ?? item.id ?? '';
+        }
+
+        function getNama(item) {
+            return item.nama_kategori ?? item.nama ?? '';
+        }
+
+        async function loadKategori() {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-12">
+                        <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                        Memuat kategori...
+                    </td>
+                </tr>`;
+
+            try {
+                const [kategoriResult, peralatanResult] = await Promise.all([
+                    fetchJSON(API_KATEGORI),
+                    fetchJSON(API_PERALATAN).catch(() => ({ data: [] }))
+                ]);
+
+                kategoriData = normalizeArray(kategoriResult);
+                peralatanData = normalizeArray(peralatanResult);
+
+                currentPage = 1;
+                renderKategori();
+                updateStats();
+            } catch (error) {
+                kategoriData = [];
+                peralatanData = [];
+                updateStats();
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                                <p class="font-bold text-sm text-gray-700">Gagal memuat kategori</p>
+                                <p class="text-xs mt-2">${escapeHTML(error.message)}</p>
+                                <button class="btn-primary mt-4" onclick="loadKategori()">
+                                    <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+
+                document.getElementById('paginationInfo').textContent = 'Data belum tersedia.';
+                document.getElementById('pagination').innerHTML = '';
+            }
+        }
+
+        function getFilteredKategori() {
+            const keyword = searchInput.value.trim().toLowerCase();
+
+            return kategoriData.filter(item =>
+                getNama(item).toLowerCase().includes(keyword) ||
+                String(getId(item)).toLowerCase().includes(keyword)
+            );
+        }
+
+        function countPeralatan(idKategori) {
+            return peralatanData.filter(item =>
+                String(item.id_kategori ?? item.kategori_id ?? '') === String(idKategori)
+            ).length;
+        }
+
+        function updateStats() {
+            document.getElementById('statTotal').textContent = kategoriData.length;
+
+            const terpakai = kategoriData.filter(item =>
+                countPeralatan(getId(item)) > 0
+            ).length;
+
+            document.getElementById('statTerpakai').textContent = terpakai;
+            document.getElementById('statHasil').textContent = getFilteredKategori().length;
+        }
+
+        function renderKategori() {
+            const filtered = getFilteredKategori();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * pageSize;
+            const visible = filtered.slice(start, start + pageSize);
+
+            updateStats();
+
+            if (!visible.length) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <p class="font-bold text-sm text-gray-700">Kategori tidak ditemukan</p>
+                                <p class="text-xs mt-2">Coba gunakan kata kunci lain atau tambahkan kategori baru.</p>
+                            </div>
+                        </td>
+                    </tr>`;
+
+                document.getElementById('paginationInfo').textContent = 'Tidak ada kategori untuk ditampilkan.';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            tableBody.innerHTML = visible.map((item, index) => {
+                const id = getId(item);
+                const nama = getNama(item);
+                const jumlahPeralatan = countPeralatan(id);
+
+                return `
+                    <tr>
+                        <td class="font-bold text-gray-400">${start + index + 1}</td>
+                        <td>
+                            <div class="flex items-center gap-3">
+                                <div class="category-icon">
+                                    <i class="fa-solid fa-mountain-sun"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-gray-800">${escapeHTML(nama)}</div>
+                                    <div class="text-[10px] muted mt-1">Kategori peralatan camping</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td><span class="badge">#${escapeHTML(id)}</span></td>
+                        <td>
+                            <span class="font-bold">${jumlahPeralatan}</span>
+                            <span class="muted text-[10px] ml-1">peralatan</span>
+                        </td>
+                        <td>
+                            <div class="flex justify-center gap-2">
+                                <button class="action-btn edit" title="Edit kategori"
+                                    aria-label="Edit ${escapeHTML(nama)}"
+                                    onclick="openEditModal('${String(id).replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button class="action-btn delete" title="Hapus kategori"
+                                    aria-label="Hapus ${escapeHTML(nama)}"
+                                    onclick="deleteKategori('${String(id).replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+
+            document.getElementById('paginationInfo').textContent =
+                `Menampilkan ${start + 1}–${Math.min(start + pageSize, filtered.length)} dari ${filtered.length} kategori`;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+                <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}
+                    onclick="changePage(${currentPage - 1})" aria-label="Halaman sebelumnya">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>`;
+
+            for (let page = 1; page <= totalPages; page++) {
+                html += `
+                    <button class="pagination-btn ${page === currentPage ? 'active' : ''}"
+                        onclick="changePage(${page})">${page}</button>`;
+            }
+
+            html += `
+                <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}
+                    onclick="changePage(${currentPage + 1})" aria-label="Halaman berikutnya">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>`;
+
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.max(1, Math.ceil(getFilteredKategori().length / pageSize));
+            if (page < 1 || page > totalPages) return;
+
+            currentPage = page;
+            renderKategori();
+        }
+
+        function openCreateModal() {
+            kategoriForm.reset();
+            kategoriIdInput.value = '';
+            document.getElementById('modalTitle').textContent = 'Tambah Kategori';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Kategori';
+            kategoriModal.classList.add('show');
+            setTimeout(() => namaKategoriInput.focus(), 50);
+        }
+
+        function openEditModal(id) {
+            const item = kategoriData.find(category => String(getId(category)) === String(id));
+
+            if (!item) {
+                showToast('Data kategori tidak ditemukan.', 'error');
+                return;
+            }
+
+            kategoriIdInput.value = getId(item);
+            namaKategoriInput.value = getNama(item);
+            document.getElementById('modalTitle').textContent = 'Edit Kategori';
+            saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Perubahan';
+            kategoriModal.classList.add('show');
+            setTimeout(() => namaKategoriInput.focus(), 50);
+        }
+
+        function closeModal() {
+            kategoriModal.classList.remove('show');
+            kategoriForm.reset();
+            kategoriIdInput.value = '';
+        }
+
+        kategoriForm.addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const id = kategoriIdInput.value;
+            const nama = namaKategoriInput.value.trim();
+
+            if (!nama) {
+                showToast('Nama kategori wajib diisi.', 'error');
+                namaKategoriInput.focus();
+                return;
+            }
+
+            const duplicate = kategoriData.some(item =>
+                getNama(item).trim().toLowerCase() === nama.toLowerCase() &&
+                String(getId(item)) !== String(id)
+            );
+
+            if (duplicate) {
+                showToast('Nama kategori tersebut sudah tersedia.', 'error');
+                namaKategoriInput.focus();
+                return;
+            }
+
+            const originalText = saveBtn.innerHTML;
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const payload = {
+                    nama_kategori: nama
+                };
+
+                if (id) {
+                    payload.id_kategori = Number(id);
+                    await fetchJSON(API_KATEGORI, {
+                        method: 'PUT',
+                        body: JSON.stringify(payload)
+                    });
+
+                    showToast('Kategori berhasil diperbarui.');
+                } else {
+                    await fetchJSON(API_KATEGORI, {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    showToast('Kategori berhasil ditambahkan.');
+                }
+
+                closeModal();
+                await loadKategori();
+            } catch (error) {
+                showToast(error.message || 'Kategori gagal disimpan.', 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerHTML = originalText;
+            }
+        });
+
+        async function deleteKategori(id) {
+            const item = kategoriData.find(category => String(getId(category)) === String(id));
+            if (!item) return;
+
+            const jumlah = countPeralatan(id);
+
+            if (jumlah > 0) {
+                showToast(
+                    `Kategori tidak dapat dihapus karena masih digunakan oleh ${jumlah} peralatan.`,
+                    'error'
+                );
+                return;
+            }
+
+            const confirmed = confirm(
+                `Hapus kategori "${getNama(item)}"? Tindakan ini tidak dapat dibatalkan.`
+            );
+
+            if (!confirmed) return;
+
+            try {
+                const url = `${API_KATEGORI}?id=${encodeURIComponent(id)}`;
+
+                await fetchJSON(url, {
+                    method: 'DELETE',
+                    body: JSON.stringify({ id_kategori: Number(id) })
+                });
+
+                showToast('Kategori berhasil dihapus.');
+                await loadKategori();
+            } catch (error) {
+                showToast(error.message || 'Kategori gagal dihapus.', 'error');
+            }
+        }
+
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderKategori();
+        });
+
+        kategoriModal.addEventListener('click', event => {
+            if (event.target === kategoriModal) closeModal();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeModal();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderUserNavigation === 'function') {
+                renderUserNavigation();
+            }
+
+            loadKategori();
+        });
+    </script>
 </body>
 </html>

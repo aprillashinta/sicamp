@@ -1,240 +1,1009 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi Pembayaran - Admin SiCamp</title>
+<link rel="icon" href="assets/sicamp-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        sicamp: {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#0e622f',
-                            900: '#0a4b23',
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
-                    }
-                }
-            }
+<style>
+    :root {
+        --forest: #174c38;
+        --forest-dark: #103b2b;
+        --lime: #b8e36b;
+        --cream: #f7f8ef;
+        --text: #26382e;
+        --muted: #7b887e;
+        --border: #e5e9df;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: var(--cream);
+        color: var(--text);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .page-content {
+        width: 100%;
+        max-width: 1600px;
+        margin: auto;
+        padding: 32px;
+    }
+
+    .page-title {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -.8px;
+        color: #20382a;
+    }
+
+    .muted {
+        color: var(--muted);
+    }
+
+    .panel {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        box-shadow: 0 5px 20px rgba(23, 76, 56, .035);
+    }
+
+    .stat-card {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        padding: 21px;
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: #edf5e5;
+        color: var(--forest);
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: var(--muted);
+        font-weight: 600;
+    }
+
+    .stat-value {
+        margin-top: 5px;
+        font-size: 25px;
+        font-weight: 800;
+        color: var(--forest);
+    }
+
+    .field {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 13px;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--text);
+        outline: none;
+        font: inherit;
+        font-size: 12px;
+    }
+
+    .field:focus {
+        border-color: var(--forest);
+        box-shadow: 0 0 0 3px rgba(23, 76, 56, .08);
+    }
+
+    .btn-primary,
+    .btn-secondary {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 0 15px;
+        border-radius: 10px;
+        font: inherit;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: .2s;
+    }
+
+    .btn-primary {
+        border: 1px solid var(--forest);
+        background: var(--forest);
+        color: #fff;
+    }
+
+    .btn-primary:hover {
+        background: var(--forest-dark);
+    }
+
+    .btn-secondary {
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #526254;
+    }
+
+    .btn-secondary:hover {
+        background: #f5f7f1;
+    }
+
+    button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        white-space: nowrap;
+    }
+
+    thead {
+        background: #f6f8f2;
+    }
+
+    th {
+        padding: 15px 18px;
+        border-bottom: 1px solid var(--border);
+        color: #738074;
+        font-size: 10px;
+        font-weight: 800;
+        text-align: left;
+        text-transform: uppercase;
+        letter-spacing: .6px;
+    }
+
+    td {
+        padding: 15px 18px;
+        border-bottom: 1px solid #eef0e9;
+        font-size: 11px;
+        vertical-align: middle;
+    }
+
+    tbody tr:hover {
+        background: #fbfcf8;
+    }
+
+    tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 30px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .badge.pending {
+        background: #fff5d9;
+        color: #94630a;
+    }
+
+    .badge.approved {
+        background: #e8f6e8;
+        color: #26713d;
+    }
+
+    .badge.rejected {
+        background: #fff0f0;
+        color: #b73636;
+    }
+
+    .action-btn {
+        width: 34px;
+        height: 34px;
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: white;
+        color: var(--forest);
+        cursor: pointer;
+    }
+
+    .action-btn:hover {
+        background: #edf5e5;
+    }
+
+    .empty-state {
+        padding: 45px 20px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .empty-state i {
+        display: block;
+        margin-bottom: 13px;
+        font-size: 32px;
+        color: #aab6a7;
+    }
+
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(14, 32, 22, .58);
+        backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.show {
+        display: flex;
+    }
+
+    .modal {
+        width: 100%;
+        max-width: 720px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 25px;
+        border-radius: 20px;
+        background: white;
+        box-shadow: 0 25px 80px rgba(0, 0, 0, .2);
+    }
+
+    .proof-container {
+        min-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 12px;
+        border: 1px dashed #d9e1d4;
+        border-radius: 13px;
+        background: #f8faf5;
+        overflow: hidden;
+    }
+
+    .proof-container img {
+        display: block;
+        max-width: 100%;
+        max-height: 350px;
+        object-fit: contain;
+        border-radius: 8px;
+    }
+
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        max-width: min(380px, calc(100vw - 40px));
+        padding: 14px 18px;
+        border-radius: 12px;
+        background: var(--forest);
+        color: white;
+        font-size: 12px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+        opacity: 0;
+        transform: translateY(-8px);
+        pointer-events: none;
+        transition: .2s;
+    }
+
+    .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .toast.error {
+        background: #b93636;
+    }
+
+    .pagination-btn {
+        min-width: 33px;
+        height: 33px;
+        padding: 0 8px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: white;
+        color: #627064;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .pagination-btn.active {
+        border-color: var(--forest);
+        background: var(--forest);
+        color: white;
+    }
+
+    @media (max-width: 900px) {
+        .page-content {
+            padding: 22px;
         }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    }
+
+    @media (max-width: 600px) {
+        .page-content {
+            padding: 15px;
+        }
+
+        .page-title {
+            font-size: 22px;
+        }
+
+        .stat-card {
+            padding: 15px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+        .modal {
+            padding: 19px;
+        }
+    }
+</style>
+
 </head>
-<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased h-screen flex flex-col md:flex-row overflow-hidden">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-full md:w-64 bg-slate-900 text-slate-300 flex flex-col justify-between p-5 md:h-screen shrink-0">
-        <div class="space-y-6">
-            <a href="index.html" class="flex items-center gap-2.5 px-2">
-                <div>
-                    <span class="text-lg font-extrabold text-white block leading-none">Si<span class="text-sicamp-500">Camp</span></span>
-                    <span class="text-[9px] text-slate-400 font-semibold tracking-wider uppercase">Admin Control</span>
+<body>
+    <div id="sicampSidebar"></div>
+    <main class="page-content">
+        <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-7">
+            <div>
+                <div class="text-xs font-bold mb-2" style="color:var(--forest)">
+                    <i class="fa-solid fa-money-check-dollar mr-1"></i>
+                    TRANSAKSI
                 </div>
-            </a>
+                <h1 class="page-title">Verifikasi Pembayaran</h1>
+                <p class="muted text-xs mt-2">
+                    Periksa bukti pembayaran sebelum menyetujui transaksi penyewaan.
+                </p>
+            </div>
 
-            <nav>
-                <ul id="sidebarMenu" class="space-y-1 text-xs font-semibold">
-                    <!-- Di-render via app.js -->
-                </ul>
-            </nav>
-        </div>
+            <button class="btn-secondary" id="refreshBtn" type="button">
+                <i class="fa-solid fa-rotate-right"></i>
+                Refresh Data
+            </button>
+        </header>
 
-        <div class="pt-6 border-t border-slate-800 text-[11px] text-slate-400" id="userInfo">
-            <!-- Info Admin -->
-        </div>
-    </aside>
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-regular fa-clock"></i></div>
+                <div>
+                    <div class="stat-label">Menunggu Verifikasi</div>
+                    <div class="stat-value" id="statPending">0</div>
+                </div>
+            </div>
 
-    <!-- Main Content Area -->
-    <main class="flex-1 p-6 md:p-10 overflow-y-auto h-full space-y-6">
-        <div>
-            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">
-                Verifikasi Pembayaran Pelanggan
-            </h1>
-            <p class="text-xs text-slate-500 mt-1">Periksa kelengkapan bukti transfer pembayaran sewa alat dari pelanggan.</p>
-        </div>
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div>
+                    <div class="stat-label">Terverifikasi</div>
+                    <div class="stat-value" id="statApproved">0</div>
+                </div>
+            </div>
 
-        <!-- Tabel Verifikasi -->
-        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="tblVerifikasi" class="w-full text-left border-collapse">
+            <div class="panel stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-circle-xmark"></i></div>
+                <div>
+                    <div class="stat-label">Ditolak</div>
+                    <div class="stat-value" id="statRejected">0</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel overflow-hidden">
+            <div class="p-5 sm:p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                    <h2 class="font-extrabold text-sm">Daftar Pembayaran</h2>
+                    <p class="muted text-xs mt-1">
+                        Buka detail untuk memeriksa bukti dan memperbarui status.
+                    </p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input id="searchInput" type="search" class="field sm:w-64"
+                        placeholder="Cari kode transaksi atau pelanggan..." aria-label="Cari transaksi">
+
+                    <select id="statusFilter" class="field sm:w-48" aria-label="Filter status">
+                        <option value="">Semua status</option>
+                        <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
+                        <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
+                        <option value="Disetujui">Disetujui</option>
+                        <option value="Ditolak">Ditolak</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table>
                     <thead>
-                        <tr class="bg-slate-50 text-slate-700 text-[11px] font-extrabold uppercase tracking-wider border-b border-slate-200">
-                            <th class="py-4 px-6">Kode TRX</th>
-                            <th class="py-4 px-6">Pelanggan</th>
-                            <th class="py-4 px-6">Total Harga</th>
-                            <th class="py-4 px-6">Bukti Transfer</th>
-                            <th class="py-4 px-6">Status</th>
-                            <th class="py-4 px-6 text-center">Tindakan Admin</th>
+                        <tr>
+                            <th>Kode Transaksi</th>
+                            <th>Pelanggan</th>
+                            <th>Tanggal Sewa</th>
+                            <th>Total Pembayaran</th>
+                            <th>Status</th>
+                            <th style="text-align:center">Detail</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100 text-xs font-medium text-slate-700">
-                        <!-- Content di-render via JS -->
+                    <tbody id="paymentTable">
+                        <tr>
+                            <td colspan="6" class="text-center py-12">
+                                <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                                Memuat transaksi...
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
+
+            <div class="p-5 border-t flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"
+                style="border-color:var(--border)">
+                <p id="paginationInfo" class="muted text-xs">Memuat data...</p>
+                <div id="pagination" class="flex items-center gap-2"></div>
+            </div>
+        </section>
     </main>
 
-    <!-- Modal Bukti Transfer -->
-    <div id="modalBukti" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl relative">
-            <button onclick="closeModalBukti()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-lg">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-            <h3 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-file-invoice-dollar text-sicamp-600"></i> Bukti Transfer Pelanggan
-            </h3>
-            <div class="bg-slate-100 rounded-xl overflow-hidden flex items-center justify-center min-h-[250px] border border-slate-200">
-                <img id="imgBukti" src="" alt="Bukti Transfer" class="max-h-[400px] w-auto object-contain">
+    <!-- Modal detail pembayaran -->
+    <div id="detailModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal">
+            <div class="flex items-start justify-between gap-4 mb-5">
+                <div>
+                    <h2 id="modalTitle" class="font-extrabold text-lg">Detail Pembayaran</h2>
+                    <p class="muted text-xs mt-1">Periksa informasi transaksi dan bukti pembayaran.</p>
+                </div>
+
+                <button type="button" id="closeModalBtn" class="text-gray-400 hover:text-gray-700 text-xl"
+                    aria-label="Tutup modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
+
+            <div id="detailContent"></div>
+            <div id="verificationActions" class="flex flex-col sm:flex-row justify-end gap-3 mt-6"></div>
         </div>
     </div>
 
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
     <script src="js/app.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            if (typeof renderUserNavigation === 'function') renderUserNavigation();
-            loadVerifikasiPembayaran();
-        });
+        const API_PENYEWAAN = 'api/api_penyewaan.php';
 
-        // Ambil data dari Backend PHP / API
-        async function loadVerifikasiPembayaran() {
-            const tbody = document.querySelector('#tblVerifikasi tbody');
-            if (!tbody) return;
+        let transactions = [];
+        let currentPage = 1;
+        const pageSize = 8;
+        let selectedTransaction = null;
+        let toastTimer;
 
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="py-12 text-center text-slate-400">
-                        <i class="fa-solid fa-spinner fa-spin text-2xl mb-2 text-sicamp-600"></i>
-                        <p class="text-xs">Memuat data pembayaran...</p>
-                    </td>
-                </tr>
-            `;
+        const paymentTable = document.getElementById('paymentTable');
+        const detailModal = document.getElementById('detailModal');
+        const detailContent = document.getElementById('detailContent');
+        const verificationActions = document.getElementById('verificationActions');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+
+        function escapeHTML(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            })[char]);
+        }
+
+        function rupiah(value) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                maximumFractionDigits: 0
+            }).format(Number(value) || 0);
+        }
+
+        function formatDate(value) {
+            if (!value) return '—';
+
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return escapeHTML(value);
+
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        function getTransactionId(item) {
+            return item.id_penyewaan ?? item.id ?? '';
+        }
+
+        function getTransactionCode(item) {
+            return item.kode_transaksi ?? item.kode_booking ?? item.kode ?? `TRX-${getTransactionId(item)}`;
+        }
+
+        function getCustomerName(item) {
+            return item.nama_pelanggan ??
+                item.pelanggan?.nama_pelanggan ??
+                item.nama ??
+                'Pelanggan';
+        }
+
+        function getDate(item) {
+            return item.tanggal_penyewaan ?? item.tanggal_mulai ?? item.tgl_sewa ?? '';
+        }
+
+        function getTotal(item) {
+            return item.total_harga ?? item.total_pembayaran ?? item.total ?? 0;
+        }
+
+        function getStatus(item) {
+            return item.status_pembayaran ??
+                item.status ??
+                'Menunggu Pembayaran';
+        }
+
+        function getProof(item) {
+            return item.bukti_pembayaran ??
+                item.bukti_transfer ??
+                item.bukti ??
+                '';
+        }
+
+        function getPaymentNote(item) {
+            return item.catatan_pembayaran ?? item.catatan ?? '';
+        }
+
+        function normalizeArray(result) {
+            if (Array.isArray(result)) return result;
+            if (Array.isArray(result.data)) return result.data;
+            if (Array.isArray(result.transaksi)) return result.transaksi;
+            if (Array.isArray(result.penyewaan)) return result.penyewaan;
+            return [];
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast show' + (type === 'error' ? ' error' : '');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        async function requestJSON(url, options = {}) {
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json',
+                    ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+                    ...(options.headers || {})
+                },
+                ...options
+            });
+
+            const raw = await response.text();
+            let result;
 
             try {
-                // Ambil data penyewaan dari API PHP
-                const res = await fetch('api/api_penyewaan.php?action=get_all');
-                const data = await res.json();
+                result = JSON.parse(raw);
+            } catch {
+                throw new Error('Respons API tidak valid. Periksa endpoint PHP.');
+            }
 
-                if (data.status === 'success' && data.data.length > 0) {
-                    // Filter yang butuh verifikasi saja
-                    const pendingList = data.data.filter(p => 
-                        p.status === 'Menunggu Verifikasi' || p.status === 'Menunggu Pembayaran'
-                    );
+            if (!response.ok || result.status === 'error' || result.success === false) {
+                throw new Error(result.message || result.pesan || 'Permintaan gagal diproses.');
+            }
 
-                    if (pendingList.length === 0) {
-                        renderEmptyState(tbody);
-                        return;
-                    }
+            return result;
+        }
 
-                    tbody.innerHTML = '';
-                    pendingList.forEach(p => {
-                        const buktiImg = p.bukti_transfer ? `uploads/${p.bukti_transfer}` : null;
+        async function loadTransactions() {
+            paymentTable.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center py-12">
+                    <i class="fa-solid fa-spinner fa-spin mr-2"></i>
+                    Memuat transaksi...
+                </td>
+            </tr>`;
 
-                        tbody.innerHTML += `
-                            <tr class="hover:bg-slate-50/80 transition-colors">
-                                <td class="py-4 px-6 font-bold text-slate-900">${p.kode_transaksi}</td>
-                                <td class="py-4 px-6">${p.nama_pelanggan || 'Pelanggan'}</td>
-                                <td class="py-4 px-6 font-bold text-sicamp-700">Rp ${parseInt(p.total_harga || 0).toLocaleString('id-ID')}</td>
-                                <td class="py-4 px-6">
-                                    ${buktiImg ? `
-                                        <button onclick="showBukti('${buktiImg}')" class="text-sicamp-600 hover:text-sicamp-800 underline font-semibold text-[11px] flex items-center gap-1">
-                                            <i class="fa-regular fa-image"></i> Lihat Foto
-                                        </button>
-                                    ` : '<span class="text-slate-400 italic">Belum Upload</span>'}
-                                </td>
-                                <td class="py-4 px-6">
-                                    <span class="bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-bold px-2.5 py-1 rounded-full inline-block">
-                                        ${p.status}
-                                    </span>
-                                </td>
-                                <td class="py-4 px-6 text-center">
-                                    <div class="flex items-center justify-center gap-2">
-                                        <button onclick="prosesVerifikasi('${p.id_penyewaan}', 'Disetujui')" class="px-3.5 py-1.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-[11px] rounded-xl shadow-sm transition-all flex items-center gap-1">
-                                            <i class="fa-solid fa-check"></i> Setujui
-                                        </button>
-                                        <button onclick="prosesVerifikasi('${p.id_penyewaan}', 'Ditolak')" class="px-3.5 py-1.5 bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 font-bold text-[11px] rounded-xl border border-rose-200 transition-all flex items-center gap-1">
-                                            <i class="fa-solid fa-xmark"></i> Tolak
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                } else {
-                    renderEmptyState(tbody);
-                }
-            } catch (err) {
-                console.error(err);
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="py-8 text-center text-rose-500 font-semibold text-xs">
-                            Gagal terhubung ke API backend server.
-                        </td>
-                    </tr>
-                `;
+            document.getElementById('refreshBtn').disabled = true;
+
+            try {
+                const result = await requestJSON(
+                    `${API_PENYEWAAN}?action=get_all`
+                );
+
+                transactions = normalizeArray(result);
+                currentPage = 1;
+                renderTransactions();
+                updateStats();
+            } catch (error) {
+                transactions = [];
+                updateStats();
+
+                paymentTable.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <p class="font-bold text-sm text-gray-700">Gagal memuat transaksi</p>
+                            <p class="text-xs mt-2">${escapeHTML(error.message)}</p>
+                            <button class="btn-primary mt-4" onclick="loadTransactions()">
+                                <i class="fa-solid fa-rotate-right"></i> Coba Lagi
+                            </button>
+                        </div>
+                    </td>
+                </tr>`;
+
+                document.getElementById('paginationInfo').textContent = 'Data belum tersedia.';
+                document.getElementById('pagination').innerHTML = '';
+            } finally {
+                document.getElementById('refreshBtn').disabled = false;
             }
         }
 
-        function renderEmptyState(tbody) {
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="py-12 text-center text-slate-400">
-                        <i class="fa-solid fa-circle-check text-4xl mb-2 block text-emerald-500"></i>
-                        Tidak ada pembayaran yang membutuhkan verifikasi saat ini.
-                    </td>
-                </tr>
-            `;
+        function getFilteredTransactions() {
+            const keyword = searchInput.value.trim().toLowerCase();
+            const status = statusFilter.value;
+
+            return transactions.filter(item => {
+                const searchable = [
+                    getTransactionCode(item),
+                    getCustomerName(item),
+                    getTransactionId(item)
+                ].join(' ').toLowerCase();
+
+                const matchesKeyword = searchable.includes(keyword);
+                const matchesStatus = !status || getStatus(item) === status;
+
+                return matchesKeyword && matchesStatus;
+            });
         }
 
-        // Fungsi Update Status ke Backend API
-        async function prosesVerifikasi(idPenyewaan, statusBaru) {
-            if (!confirm(`Apakah Anda yakin ingin mengubah status transaksi ini menjadi '${statusBaru}'?`)) return;
+        function updateStats() {
+            document.getElementById('statPending').textContent =
+                transactions.filter(item =>
+                    ['Menunggu Verifikasi', 'Menunggu Pembayaran'].includes(getStatus(item))
+                ).length;
+
+            document.getElementById('statApproved').textContent =
+                transactions.filter(item => getStatus(item) === 'Disetujui').length;
+
+            document.getElementById('statRejected').textContent =
+                transactions.filter(item => getStatus(item) === 'Ditolak').length;
+        }
+
+        function statusBadge(status) {
+            if (['Disetujui', 'Terverifikasi'].includes(status)) {
+                return `<span class="badge approved"><i class="fa-solid fa-check-circle"></i>${escapeHTML(status)}</span>`;
+            }
+
+            if (status === 'Ditolak') {
+                return `<span class="badge rejected"><i class="fa-solid fa-circle-xmark"></i>Ditolak</span>`;
+            }
+
+            return `<span class="badge pending"><i class="fa-regular fa-clock"></i>${escapeHTML(status)}</span>`;
+        }
+
+        function renderTransactions() {
+            const filtered = getFilteredTransactions();
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const start = (currentPage - 1) * pageSize;
+            const visible = filtered.slice(start, start + pageSize);
+
+            if (!visible.length) {
+                paymentTable.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        <div class="empty-state">
+                            <i class="fa-solid fa-receipt"></i>
+                            <p class="font-bold text-sm text-gray-700">Transaksi tidak ditemukan</p>
+                            <p class="text-xs mt-2">Belum ada data yang sesuai dengan pencarian atau filter.</p>
+                        </div>
+                    </td>
+                </tr>`;
+
+                document.getElementById('paginationInfo').textContent = 'Tidak ada transaksi untuk ditampilkan.';
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            paymentTable.innerHTML = visible.map(item => {
+                const id = getTransactionId(item);
+                const code = getTransactionCode(item);
+                const customer = getCustomerName(item);
+                const status = getStatus(item);
+
+                return `
+                <tr>
+                    <td>
+                        <div class="font-extrabold text-gray-800">${escapeHTML(code)}</div>
+                        <div class="muted text-[10px] mt-1">ID: ${escapeHTML(id)}</div>
+                    </td>
+                    <td>
+                        <div class="font-bold text-gray-700">${escapeHTML(customer)}</div>
+                    </td>
+                    <td>${formatDate(getDate(item))}</td>
+                    <td class="font-extrabold text-gray-800">${rupiah(getTotal(item))}</td>
+                    <td>${statusBadge(status)}</td>
+                    <td style="text-align:center">
+                        <button class="action-btn" title="Lihat detail pembayaran"
+                            aria-label="Lihat detail ${escapeHTML(code)}"
+                            onclick="openDetail('${String(id).replace(/'/g, "\\'")}')">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('paginationInfo').textContent =
+                `Menampilkan ${start + 1}–${Math.min(start + pageSize, filtered.length)} dari ${filtered.length} transaksi`;
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const container = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = `
+            <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''}
+                onclick="changePage(${currentPage - 1})" aria-label="Halaman sebelumnya">
+                <i class="fa-solid fa-chevron-left"></i>
+            </button>`;
+
+            for (let page = 1; page <= totalPages; page++) {
+                html += `
+                <button class="pagination-btn ${page === currentPage ? 'active' : ''}"
+                    onclick="changePage(${page})">${page}</button>`;
+            }
+
+            html += `
+            <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''}
+                onclick="changePage(${currentPage + 1})" aria-label="Halaman berikutnya">
+                <i class="fa-solid fa-chevron-right"></i>
+            </button>`;
+
+            container.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.max(1, Math.ceil(getFilteredTransactions().length / pageSize));
+            if (page < 1 || page > totalPages) return;
+
+            currentPage = page;
+            renderTransactions();
+        }
+
+        function buildProofHTML(proof) {
+            if (!proof) {
+                return `
+                <div class="text-center py-8">
+                    <i class="fa-regular fa-image text-3xl text-gray-300 mb-3"></i>
+                    <p class="text-xs text-gray-500">Bukti pembayaran belum tersedia.</p>
+                </div>`;
+            }
+
+            /*
+             * Path bukti harus berasal dari backend yang tepercaya.
+             * Data URL base64 didukung untuk gambar yang tersimpan di database.
+             */
+            const safeProof = String(proof).trim();
+
+            if (/^data:image\/(png|jpe?g|webp);base64,/i.test(safeProof)) {
+                return `<img src="${safeProof}" alt="Bukti pembayaran pelanggan">`;
+            }
+
+            if (/^https?:\/\//i.test(safeProof)) {
+                let parsed;
+
+                try {
+                    parsed = new URL(safeProof);
+                } catch {
+                    return '<p class="text-xs text-gray-500">Alamat bukti pembayaran tidak valid.</p>';
+                }
+
+                if (!['http:', 'https:'].includes(parsed.protocol)) {
+                    return '<p class="text-xs text-gray-500">Format bukti pembayaran tidak didukung.</p>';
+                }
+
+                return `<img src="${escapeHTML(parsed.href)}" alt="Bukti pembayaran pelanggan">`;
+            }
+
+            if (/^[a-zA-Z0-9/_\-. ]+$/.test(safeProof) && !safeProof.includes('..')) {
+                const path = safeProof.startsWith('uploads/')
+                    ? safeProof
+                    : `uploads/${safeProof.replace(/^\/+/, '')}`;
+
+                return `<img src="${escapeHTML(path)}" alt="Bukti pembayaran pelanggan">`;
+            }
+
+            return '<p class="text-xs text-gray-500">Format bukti pembayaran tidak didukung.</p>';
+        }
+
+        function openDetail(id) {
+            selectedTransaction = transactions.find(item =>
+                String(getTransactionId(item)) === String(id)
+            );
+
+            if (!selectedTransaction) {
+                showToast('Data transaksi tidak ditemukan.', 'error');
+                return;
+            }
+
+            const item = selectedTransaction;
+            const status = getStatus(item);
+            const proof = getProof(item);
+            const isPending = ['Menunggu Pembayaran', 'Menunggu Verifikasi'].includes(status);
+
+            document.getElementById('modalTitle').textContent =
+                `Pembayaran ${getTransactionCode(item)}`;
+
+            detailContent.innerHTML = `
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-5">
+                <div class="rounded-xl p-4" style="background:#f7f8ef">
+                    <div class="muted text-[10px] mb-2">Kode Transaksi</div>
+                    <div class="font-extrabold text-sm">${escapeHTML(getTransactionCode(item))}</div>
+                </div>
+
+                <div class="rounded-xl p-4" style="background:#f7f8ef">
+                    <div class="muted text-[10px] mb-2">Status Transaksi</div>
+                    <div>${statusBadge(status)}</div>
+                </div>
+
+                <div class="rounded-xl p-4" style="background:#f7f8ef">
+                    <div class="muted text-[10px] mb-2">Nama Pelanggan</div>
+                    <div class="font-bold text-sm">${escapeHTML(getCustomerName(item))}</div>
+                </div>
+
+                <div class="rounded-xl p-4" style="background:#f7f8ef">
+                    <div class="muted text-[10px] mb-2">Tanggal Penyewaan</div>
+                    <div class="font-bold text-sm">${formatDate(getDate(item))}</div>
+                </div>
+
+                <div class="rounded-xl p-4 sm:col-span-2" style="background:#f7f8ef">
+                    <div class="muted text-[10px] mb-2">Total Pembayaran</div>
+                    <div class="font-extrabold text-xl" style="color:var(--forest)">${rupiah(getTotal(item))}</div>
+                </div>
+            </div>
+
+            <div class="font-extrabold text-xs mb-3">Bukti Pembayaran</div>
+            <div class="proof-container" id="proofContainer">
+                ${buildProofHTML(proof)}
+            </div>
+
+            ${getPaymentNote(item) ? `
+                <div class="mt-4">
+                    <div class="font-bold text-xs mb-2">Catatan Pembayaran</div>
+                    <p class="muted text-xs leading-relaxed">${escapeHTML(getPaymentNote(item))}</p>
+                </div>` : ''}
+        `;
+
+            verificationActions.innerHTML = isPending ? `
+            <button type="button" class="btn-secondary" onclick="updatePaymentStatus('Ditolak')">
+                <i class="fa-solid fa-xmark"></i> Tolak Pembayaran
+            </button>
+            <button type="button" class="btn-primary" onclick="updatePaymentStatus('Disetujui')">
+                <i class="fa-solid fa-check"></i> Setujui Pembayaran
+            </button>
+        ` : `
+            <button type="button" class="btn-secondary" onclick="closeDetail()">Tutup</button>
+        `;
+
+            const proofImage = detailContent.querySelector('#proofContainer img');
+
+            if (proofImage) {
+                proofImage.addEventListener('error', () => {
+                    proofImage.replaceWith(Object.assign(document.createElement('p'), {
+                        className: 'text-xs text-gray-500 text-center py-8',
+                        textContent: 'Bukti tidak dapat ditampilkan. Periksa lokasi file pada server.'
+                    }));
+                });
+            }
+
+            detailModal.classList.add('show');
+        }
+
+        async function updatePaymentStatus(status) {
+            if (!selectedTransaction) return;
+
+            const id = getTransactionId(selectedTransaction);
+            const code = getTransactionCode(selectedTransaction);
+
+            const actionText = status === 'Disetujui' ? 'menyetujui' : 'menolak';
+
+            if (!confirm(`Yakin ingin ${actionText} pembayaran ${code}?`)) return;
+
+            const buttons = verificationActions.querySelectorAll('button');
+            buttons.forEach(button => button.disabled = true);
 
             try {
-                const res = await fetch('api/api_penyewaan.php?action=update_status', {
+                /*
+                 * Endpoint harus mengubah status di database.
+                 * Sesuaikan nama field dan action dengan api_penyewaan.php
+                 * jika kontrak API backend berbeda.
+                 */
+                await requestJSON(API_PENYEWAAN, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        id_penyewaan: idPenyewaan,
-                        status: statusBaru
+                        action: 'update_status',
+                        id_penyewaan: id,
+                        id: id,
+                        status: status
                     })
                 });
-                const result = await res.json();
 
-                if (result.status === 'success') {
-                    alert(`Status transaksi berhasil diperbarui menjadi: ${statusBaru}`);
-                    loadVerifikasiPembayaran();
-                } else {
-                    alert(`Gagal: ${result.message || 'Terjadi kesalahan'}`);
-                }
-            } catch (err) {
-                alert('Terjadi kesalahan koneksi ke server.');
+                showToast(`Status pembayaran ${code} berhasil diperbarui.`);
+                closeDetail();
+                await loadTransactions();
+            } catch (error) {
+                showToast(error.message || 'Status pembayaran gagal diperbarui.', 'error');
+                buttons.forEach(button => button.disabled = false);
             }
         }
 
-        // Functions Modal Bukti
-        function showBukti(src) {
-            document.getElementById('imgBukti').src = src;
-            document.getElementById('modalBukti').classList.remove('hidden');
+        function closeDetail() {
+            detailModal.classList.remove('show');
+            selectedTransaction = null;
         }
 
-        function closeModalBukti() {
-            document.getElementById('modalBukti').classList.add('hidden');
-        }
+        searchInput.addEventListener('input', () => {
+            currentPage = 1;
+            renderTransactions();
+        });
+
+        statusFilter.addEventListener('change', () => {
+            currentPage = 1;
+            renderTransactions();
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', loadTransactions);
+        document.getElementById('closeModalBtn').addEventListener('click', closeDetail);
+
+        detailModal.addEventListener('click', event => {
+            if (event.target === detailModal) closeDetail();
+        });
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeDetail();
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof renderUserNavigation === 'function') {
+                renderUserNavigation();
+            }
+
+            loadTransactions();
+        });
     </script>
+
 </body>
+
 </html>
+</CodeBlock>

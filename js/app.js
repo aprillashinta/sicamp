@@ -1,479 +1,1642 @@
+/* =========================================================
+   SICAMP ADMIN CONTROL
+   File: js/app.js
+   Shared sidebar, navigation, helpers, and API utilities
+   ========================================================= */
+
+"use strict";
+
+/* =========================================================
+   1. KONFIGURASI DAN STATE
+   ========================================================= */
+
+const SICAMP_CONFIG = {
+    api: {
+        auth: "api/api_auth.php",
+        kategori: "api/api_kategori.php",
+        peralatan: "api/api_peralatan.php",
+        penyewaan: "api/api_penyewaan.php"
+    },
+    logo: "assets/sicamp-logo.png",
+    imageFallback:
+        "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80"
+};
+
 let currentCheckoutStep = 1;
-let currentCategoryFilter = 'all';
-let searchKeyword = '';
+let currentCategoryFilter = "all";
+let searchKeyword = "";
 
-function renderUserNavigation() {
-    const navPelanggan = document.getElementById('navPelanggan');
-    const userIndicator = document.getElementById('userIndicator');
-    const sidebarAdmin = document.getElementById('sidebarAdmin');
-    const sidebarMenu = document.getElementById('sidebarMenu');
-    const userInfo = document.getElementById('userInfo');
+let filterPencarianAlat = "";
+let filterKategoriAlat = "all";
+let filterStokAlat = "all";
+let filterUrutanAlat = "terbaru";
 
-    // Ambil data user dari localStorage (Support 'session_user' & 'user')
-    const session = JSON.parse(localStorage.getItem('session_user')) || JSON.parse(localStorage.getItem('user'));
-    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+let halamanPeralatanAktif = 1;
+let jumlahPeralatanPerHalaman = 5;
 
-    // 1. Render Navigation Bar Atas (Pelanggan / Guest)
-    if (userIndicator) {
-        if (!session) {
-            if (navPelanggan) navPelanggan.innerHTML = '';
-            userIndicator.innerHTML = `
-                <a href="login.html" class="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200 no-underline">Masuk</a>
-                <a href="register.html" class="px-4 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20 no-underline">Daftar</a>
-            `;
-        } else if (session.role === 'pelanggan') {
-            if (navPelanggan) {
-                navPelanggan.innerHTML = `
-                    <a href="riwayat-sewa.html" class="hover:text-sicamp-700 transition-colors flex items-center gap-1.5 no-underline">
-                        <i class="fa-solid fa-clock-rotate-left text-xs text-sicamp-700"></i> Riwayat Penyewaan
-                    </a>
-                `;
-            }
-            userIndicator.innerHTML = `
-                <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-slate-800 hidden sm:inline">Halo, <strong>${session.nama}</strong></span>
-                    <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-600 hover:text-white rounded-full border border-rose-200 transition-all cursor-pointer">Logout</button>
-                </div>
-            `;
-        } else if (session.role === 'admin') {
-            if (navPelanggan) {
-                navPelanggan.innerHTML = `
-                    <a href="dashboard.html" class="text-amber-600 font-bold hover:underline no-underline">Panel Admin</a>
-                `;
-            }
-            userIndicator.innerHTML = `
-                <a href="dashboard.html" class="px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-full transition-all no-underline shadow-md shadow-amber-500/20">Admin Dashboard</a>
-            `;
+let dataKategori = [];
+let dataPeralatan = [];
+
+let sidebarInitialized = false;
+
+/* =========================================================
+   2. HELPER UMUM
+   ========================================================= */
+
+function escapeHTML(value) {
+    return String(value ?? "").replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;"
+    })[char]);
+}
+
+function getStoredArray(key) {
+    try {
+        const value = JSON.parse(localStorage.getItem(key));
+        return Array.isArray(value) ? value : [];
+    } catch (error) {
+        console.warn(`Data localStorage "${key}" tidak valid.`, error);
+        return [];
+    }
+}
+
+function getSessionUser() {
+    try {
+        return (
+            JSON.parse(localStorage.getItem("session_user")) ||
+            JSON.parse(localStorage.getItem("user")) ||
+            null
+        );
+    } catch (error) {
+        return null;
+    }
+}
+
+function getImageFallback() {
+    return SICAMP_CONFIG.imageFallback;
+}
+
+function formatRupiah(value) {
+    const nominal = Number(value) || 0;
+
+    return new Intl.NumberFormat("id-ID", {
+        style: "currency",
+        currency: "IDR",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(nominal);
+}
+
+function formatTanggal(value) {
+    if (!value) return "-";
+
+    const tanggal = new Date(value);
+
+    if (Number.isNaN(tanggal.getTime())) {
+        return escapeHTML(value);
+    }
+
+    return tanggal.toLocaleDateString("id-ID", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric"
+    });
+}
+
+function getCurrentPage() {
+    return window.location.pathname.split("/").pop() || "index.html";
+}
+
+function isAdminPage() {
+    const adminPages = [
+        "dashboard.html",
+        "kelola-alat.html",
+        "kelola-kategori.html",
+        "verifikasi-pembayaran.html",
+        "pengembalian.html"
+    ];
+
+    return adminPages.includes(getCurrentPage());
+}
+
+function showNotification(message, type = "info") {
+    const existing = document.getElementById("sicampToast");
+
+    if (existing) {
+        existing.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.id = "sicampToast";
+    toast.className = `sicamp-toast sicamp-toast-${type}`;
+    toast.setAttribute("role", "status");
+    toast.textContent = message;
+
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => {
+        toast.classList.add("show");
+    });
+
+    window.setTimeout(() => {
+        toast.classList.remove("show");
+
+        window.setTimeout(() => {
+            toast.remove();
+        }, 250);
+    }, 3000);
+}
+
+/* =========================================================
+   3. LOGOUT
+   ========================================================= */
+
+function logout() {
+    const confirmed = window.confirm(
+        "Apakah kamu yakin ingin keluar dari SiCamp Admin?"
+    );
+
+    if (!confirmed) return;
+
+    localStorage.removeItem("session_user");
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+
+    window.location.href = "login.html";
+}
+
+/* =========================================================
+   4. STRUKTUR SIDEBAR TERPUSAT
+   Sidebar dibuat otomatis oleh app.js.
+   HTML halaman cukup berisi konten utama.
+   ========================================================= */
+
+function ensureSidebarMount() {
+    if (!isAdminPage()) return;
+
+    let sidebar = document.getElementById("sidebarAdmin");
+
+    if (!sidebar) {
+        sidebar = document.createElement("aside");
+        sidebar.id = "sidebarAdmin";
+        sidebar.setAttribute("aria-label", "Navigasi administrator");
+
+        const mainContent = document.querySelector("main");
+
+        if (mainContent && mainContent.parentNode) {
+            mainContent.parentNode.insertBefore(
+                sidebar,
+                mainContent
+            );
+        } else {
+            document.body.prepend(sidebar);
         }
     }
 
-    // HTML Menu Item Admin (Reusable)
-    const adminMenuItemsHtml = `
-        <li>
-            <a href="dashboard.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'dashboard.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                <i class="fa-solid fa-chart-pie text-sm w-4 text-center"></i>
-                <span>Dashboard Utama</span>
-            </a>
-        </li>
-        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">DATA MASTER</li>
-        <li>
-            <a href="kelola-alat.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-alat.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                <i class="fa-solid fa-boxes-stacked text-sm w-4 text-center"></i>
-                <span>Kelola Alat</span>
-            </a>
-        </li>
-        <li>
-            <a href="kelola-kategori.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'kelola-kategori.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                <i class="fa-solid fa-tags text-sm w-4 text-center"></i>
-                <span>Kelola Kategori</span>
-            </a>
-        </li>
-        <li class="pt-3 pb-1 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-wider">TRANSAKSI</li>
-        <li>
-            <a href="verifikasi-pembayaran.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'verifikasi-pembayaran.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                <i class="fa-solid fa-file-invoice-dollar text-sm w-4 text-center"></i>
-                <span>Verifikasi Pembayaran</span>
-            </a>
-        </li>
-        <li>
-            <a href="pengembalian.html" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs transition-all no-underline ${currentPath === 'pengembalian.html' ? 'bg-sicamp-700 text-white font-bold shadow-md shadow-sicamp-700/30' : 'text-slate-300 hover:bg-slate-800 hover:text-white font-medium'}">
-                <i class="fa-solid fa-rotate-left text-sm w-4 text-center"></i>
-                <span>Kelola Pengembalian</span>
-            </a>
-        </li>
-        <li class="pt-4 mt-2 border-t border-slate-800">
-            <a href="#" onclick="logout()" class="flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-xs text-rose-400 hover:bg-rose-500/10 hover:text-rose-300 transition-all font-semibold no-underline">
-                <i class="fa-solid fa-right-from-bracket text-sm w-4 text-center"></i>
-                <span>Logout</span>
-            </a>
-        </li>
-    `;
-
-    // 2. Render Sidebar versi <ul id="sidebarMenu">
-    if (sidebarMenu) {
-        sidebarMenu.innerHTML = adminMenuItemsHtml;
+    if (!document.getElementById("sidebarOverlay")) {
+        const overlay = document.createElement("div");
+        overlay.id = "sidebarOverlay";
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.appendChild(overlay);
     }
 
-    // 3. Render User Info versi <div id="userInfo">
-    if (userInfo) {
-        const adminName = session ? session.nama : 'Administrator';
-        userInfo.innerHTML = `
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-slate-300 font-bold">User: <span class="text-white">${adminName}</span></p>
-                    <p class="text-[10px] text-amber-500 font-bold uppercase tracking-wider">Role: ADMIN</p>
-                </div>
-                <button onclick="logout()" class="text-slate-400 hover:text-rose-400 text-sm transition-colors cursor-pointer" title="Logout">
-                    <i class="fa-solid fa-right-from-bracket"></i>
+    if (!document.getElementById("mobileSidebarBackdrop")) {
+        const backdrop = document.createElement("div");
+        backdrop.id = "mobileSidebarBackdrop";
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.appendChild(backdrop);
+    }
+
+    if (!document.getElementById("mobileSidebarToggle")) {
+        const toggle = document.createElement("button");
+
+        toggle.type = "button";
+        toggle.id = "mobileSidebarToggle";
+        toggle.className = "sicamp-mobile-toggle";
+        toggle.setAttribute("aria-label", "Buka menu navigasi");
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+
+        document.body.appendChild(toggle);
+    }
+}
+
+/* =========================================================
+   5. MENU ADMIN
+   ========================================================= */
+
+function renderUserNavigation() {
+    const sidebar = document.getElementById("sidebarAdmin");
+
+    if (!sidebar || !isAdminPage()) return;
+
+    const session = getSessionUser();
+    const currentPage = getCurrentPage();
+
+    const adminName =
+        session?.nama_admin ||
+        session?.nama ||
+        session?.username ||
+        "Administrator";
+
+    const menuItems = [
+        {
+            label: "Dashboard Utama",
+            href: "dashboard.html",
+            icon: "fa-chart-pie",
+            group: "UTAMA"
+        },
+        {
+            label: "Kelola Alat",
+            href: "kelola-alat.html",
+            icon: "fa-boxes-stacked",
+            group: "DATA MASTER"
+        },
+        {
+            label: "Kelola Kategori",
+            href: "kelola-kategori.html",
+            icon: "fa-tags",
+            group: "DATA MASTER"
+        },
+        {
+            label: "Verifikasi Pembayaran",
+            href: "verifikasi-pembayaran.html",
+            icon: "fa-file-invoice-dollar",
+            group: "TRANSAKSI"
+        },
+        {
+            label: "Kelola Pengembalian",
+            href: "pengembalian.html",
+            icon: "fa-rotate-left",
+            group: "TRANSAKSI"
+        }
+    ];
+
+    let lastGroup = "";
+
+    const menuHTML = menuItems.map((item) => {
+        let groupHTML = "";
+
+        if (item.group !== lastGroup) {
+            groupHTML = `
+                <li class="sicamp-menu-group">
+                    ${escapeHTML(item.group)}
+                </li>
+            `;
+
+            lastGroup = item.group;
+        }
+
+        const active = currentPage === item.href;
+
+        return `
+            ${groupHTML}
+            <li class="sicamp-menu-item">
+                <a
+                    href="${item.href}"
+                    class="sicamp-menu-link ${active ? "active" : ""}"
+                    ${active ? 'aria-current="page"' : ""}
+                    title="${escapeHTML(item.label)}"
+                >
+                    <span class="sicamp-menu-icon">
+                        <i class="fa-solid ${item.icon}"></i>
+                    </span>
+
+                    <span class="sicamp-menu-label">
+                        ${escapeHTML(item.label)}
+                    </span>
+                </a>
+            </li>
+        `;
+    }).join("");
+
+    sidebar.innerHTML = `
+        <div class="sicamp-sidebar-inner">
+
+            <div class="sicamp-brand">
+                <a href="dashboard.html" class="sicamp-brand-link">
+                    <img
+                        src="${SICAMP_CONFIG.logo}"
+                        alt="Logo SiCamp"
+                        class="sicamp-brand-logo"
+                        onerror="this.style.display='none'"
+                    >
+
+                    <span class="sicamp-brand-text">
+                        <strong>SiCamp</strong>
+                        <small>ADMIN CONTROL</small>
+                    </span>
+                </a>
+
+                <button
+                    type="button"
+                    id="sidebarCollapseButton"
+                    class="sicamp-collapse-button"
+                    aria-label="Ciutkan sidebar"
+                    title="Ciutkan sidebar"
+                >
+                    <i class="fa-solid fa-angles-left"></i>
                 </button>
             </div>
-        `;
-    }
 
-    // 4. Render Sidebar versi <aside id="sidebarAdmin">
-    if (sidebarAdmin) {
-        const adminName = session ? session.nama : 'Administrator';
-        sidebarAdmin.innerHTML = `
-            <div>
-                <div class="p-6 border-b border-slate-800 flex items-center gap-3">
-                    <div class="w-10 h-10 bg-sicamp-700 rounded-2xl flex items-center justify-center text-white text-xl shadow-lg shadow-sicamp-700/30">
-                        <i class="fa-solid fa-tree"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-extrabold text-lg leading-none">SiCamp</h1>
-                        <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Admin Control</span>
-                    </div>
+            <div class="sicamp-profile">
+                <div class="sicamp-profile-avatar">
+                    <i class="fa-solid fa-user-shield"></i>
                 </div>
 
-                <nav class="p-4">
-                    <ul class="space-y-1">
-                        ${adminMenuItemsHtml}
-                    </ul>
-                </nav>
+                <div class="sicamp-profile-info">
+                    <strong>${escapeHTML(adminName)}</strong>
+                    <span>Administrator</span>
+                </div>
+
+                <span class="sicamp-online-indicator"></span>
             </div>
 
-            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    User: <strong class="text-white">${adminName}</strong><br>
-                    Role: <strong class="text-amber-500 uppercase">ADMIN</strong>
-                </p>
+            <nav class="sicamp-navigation" aria-label="Menu utama">
+                <ul class="sicamp-menu-list">
+                    ${menuHTML}
+                </ul>
+            </nav>
+
+            <div class="sicamp-sidebar-footer">
+                <div class="sicamp-footer-status">
+                    <span class="sicamp-status-dot"></span>
+                    <span class="sicamp-footer-label">Sistem aktif</span>
+                </div>
+
+                <button
+                    type="button"
+                    id="sidebarLogoutButton"
+                    class="sicamp-logout-button"
+                    title="Logout"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    <span class="sicamp-menu-label">Logout</span>
+                </button>
+
+                <div class="sicamp-footer-version">
+                    SiCamp Admin Control
+                </div>
             </div>
-        `;
+
+        </div>
+    `;
+
+    const logoutButton = document.getElementById(
+        "sidebarLogoutButton"
+    );
+
+    logoutButton?.addEventListener("click", logout);
+
+    const collapseButton = document.getElementById(
+        "sidebarCollapseButton"
+    );
+
+    collapseButton?.addEventListener("click", toggleSidebarCollapse);
+}
+
+/* =========================================================
+   6. CSS SIDEBAR DAN TEMA
+   ========================================================= */
+
+function installSharedSidebarStyles() {
+    if (document.getElementById("sicampSharedSidebarStyles")) {
+        return;
+    }
+
+    const style = document.createElement("style");
+    style.id = "sicampSharedSidebarStyles";
+
+    style.textContent = `
+        :root {
+            --sicamp-sidebar-width: 264px;
+            --sicamp-sidebar-collapsed: 82px;
+
+            --sicamp-forest-950: #071713;
+            --sicamp-forest-900: #0a1f18;
+            --sicamp-forest-800: #102b20;
+            --sicamp-forest-700: #183b2a;
+
+            --sicamp-lime: #c3f45b;
+            --sicamp-lime-hover: #d4ff7b;
+            --sicamp-green: #2bd982;
+
+            --sicamp-cream: #f7f7ef;
+            --sicamp-white: #ffffff;
+            --sicamp-text: #17251d;
+            --sicamp-muted: #8b9b91;
+
+            --sicamp-sidebar-radius: 18px;
+            --sicamp-sidebar-transition: 220ms ease;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        #sidebarAdmin {
+            position: fixed;
+            inset: 12px auto 12px 12px;
+            z-index: 1000;
+
+            width: var(--sicamp-sidebar-width);
+            height: auto;
+
+            overflow: hidden;
+            color: #f4f7ef;
+
+            background:
+                radial-gradient(
+                    circle at 10% 0%,
+                    rgba(195, 244, 91, .09),
+                    transparent 32%
+                ),
+                linear-gradient(
+                    160deg,
+                    var(--sicamp-forest-900),
+                    var(--sicamp-forest-950)
+                );
+
+            border: 1px solid rgba(255, 255, 255, .07);
+            border-radius: var(--sicamp-sidebar-radius);
+
+            box-shadow: 0 16px 40px rgba(6, 23, 17, .18);
+
+            transition:
+                width var(--sicamp-sidebar-transition),
+                transform var(--sicamp-sidebar-transition);
+        }
+
+        .sicamp-sidebar-inner {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            min-height: 0;
+        }
+
+        .sicamp-brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+
+            min-height: 88px;
+            padding: 16px 14px;
+
+            border-bottom: 1px solid rgba(255, 255, 255, .07);
+        }
+
+        .sicamp-brand-link {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+
+            min-width: 0;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .sicamp-brand-logo {
+            display: block;
+            flex: 0 0 auto;
+
+            width: 44px;
+            height: 44px;
+
+            object-fit: contain;
+            border-radius: 12px;
+        }
+
+        .sicamp-brand-text {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        .sicamp-brand-text strong {
+            color: #ffffff;
+            font-size: 20px;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -.6px;
+        }
+
+        .sicamp-brand-text small {
+            color: var(--sicamp-lime);
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.6px;
+            white-space: nowrap;
+        }
+
+        .sicamp-collapse-button {
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+
+            width: 30px;
+            height: 30px;
+
+            color: #d9e6d9;
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid rgba(255, 255, 255, .08);
+            border-radius: 9px;
+
+            cursor: pointer;
+            transition: background .2s ease, color .2s ease;
+        }
+
+        .sicamp-collapse-button:hover {
+            color: var(--sicamp-forest-950);
+            background: var(--sicamp-lime);
+        }
+
+        .sicamp-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            margin: 14px 12px 8px;
+            padding: 12px;
+
+            background: rgba(255, 255, 255, .045);
+            border: 1px solid rgba(255, 255, 255, .065);
+            border-radius: 13px;
+        }
+
+        .sicamp-profile-avatar {
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+
+            width: 38px;
+            height: 38px;
+
+            color: var(--sicamp-forest-950);
+            background: var(--sicamp-lime);
+            border-radius: 12px;
+        }
+
+        .sicamp-profile-info {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+
+        .sicamp-profile-info strong {
+            overflow: hidden;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sicamp-profile-info span {
+            color: #9aac9f;
+            font-size: 10px;
+        }
+
+        .sicamp-online-indicator,
+        .sicamp-status-dot {
+            flex: 0 0 auto;
+            width: 7px;
+            height: 7px;
+            background: var(--sicamp-green);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px rgba(43, 217, 130, .10);
+        }
+
+        .sicamp-navigation {
+            flex: 1;
+            min-height: 0;
+            overflow-x: hidden;
+            overflow-y: auto;
+            padding: 8px 12px 16px;
+        }
+
+        .sicamp-navigation::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sicamp-navigation::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, .16);
+            border-radius: 8px;
+        }
+
+        .sicamp-menu-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .sicamp-menu-group {
+            padding: 16px 10px 7px;
+
+            color: #748a7b;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+        }
+
+        .sicamp-menu-link {
+            position: relative;
+
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            min-height: 44px;
+            padding: 10px 12px;
+
+            color: #bdcec1;
+            text-decoration: none;
+
+            font-size: 12px;
+            font-weight: 600;
+
+            border: 1px solid transparent;
+            border-radius: 11px;
+
+            transition:
+                color .18s ease,
+                background .18s ease,
+                border-color .18s ease;
+        }
+
+        .sicamp-menu-link:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, .055);
+        }
+
+        .sicamp-menu-link.active {
+            color: var(--sicamp-lime);
+            background: rgba(195, 244, 91, .105);
+            border-color: rgba(195, 244, 91, .13);
+        }
+
+        .sicamp-menu-link.active::before {
+            position: absolute;
+            top: 9px;
+            bottom: 9px;
+            left: -1px;
+
+            width: 3px;
+            content: "";
+
+            background: var(--sicamp-lime);
+            border-radius: 0 5px 5px 0;
+        }
+
+        .sicamp-menu-icon {
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+
+            width: 20px;
+            font-size: 15px;
+        }
+
+        .sicamp-menu-label {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .sicamp-sidebar-footer {
+            flex: 0 0 auto;
+            padding: 12px;
+
+            border-top: 1px solid rgba(255, 255, 255, .07);
+        }
+
+        .sicamp-footer-status {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+
+            padding: 8px 9px 13px;
+
+            color: #a4b8a9;
+            font-size: 10px;
+        }
+
+        .sicamp-footer-status .sicamp-status-dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        .sicamp-logout-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            width: 100%;
+            min-height: 42px;
+            padding: 10px 12px;
+
+            color: #ffb4ad;
+            background: rgba(255, 105, 95, .07);
+            border: 1px solid rgba(255, 105, 95, .10);
+            border-radius: 11px;
+
+            font-size: 12px;
+            font-weight: 700;
+            text-align: left;
+
+            cursor: pointer;
+            transition: background .2s ease;
+        }
+
+        .sicamp-logout-button:hover {
+            background: rgba(255, 105, 95, .15);
+        }
+
+        .sicamp-logout-button > i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .sicamp-footer-version {
+            padding-top: 13px;
+            color: #607669;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        /* Konten bergeser mengikuti lebar sidebar */
+        body.sicamp-admin-layout {
+            padding-left: calc(var(--sicamp-sidebar-width) + 24px);
+        }
+
+        body.sicamp-admin-layout main {
+            min-width: 0;
+        }
+
+        body.sicamp-sidebar-collapsed #sidebarAdmin {
+            width: var(--sicamp-sidebar-collapsed);
+        }
+
+        body.sicamp-sidebar-collapsed {
+            padding-left: calc(var(--sicamp-sidebar-collapsed) + 24px);
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-brand {
+            justify-content: center;
+            padding: 14px 8px;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-brand-link {
+            justify-content: center;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-brand-logo {
+            width: 42px;
+            height: 42px;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-brand-text,
+        body.sicamp-sidebar-collapsed .sicamp-collapse-button,
+        body.sicamp-sidebar-collapsed .sicamp-profile-info,
+        body.sicamp-sidebar-collapsed .sicamp-profile .sicamp-online-indicator,
+        body.sicamp-sidebar-collapsed .sicamp-menu-label,
+        body.sicamp-sidebar-collapsed .sicamp-menu-group,
+        body.sicamp-sidebar-collapsed .sicamp-footer-status,
+        body.sicamp-sidebar-collapsed .sicamp-footer-version {
+            display: none;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-profile {
+            justify-content: center;
+            margin: 14px 8px;
+            padding: 8px 4px;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-navigation {
+            padding-right: 8px;
+            padding-left: 8px;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-menu-link,
+        body.sicamp-sidebar-collapsed .sicamp-logout-button {
+            justify-content: center;
+            padding-right: 5px;
+            padding-left: 5px;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-menu-icon,
+        body.sicamp-sidebar-collapsed .sicamp-logout-button > i {
+            width: 100%;
+        }
+
+        body.sicamp-sidebar-collapsed .sicamp-menu-link.active::before {
+            left: -8px;
+        }
+
+        #sidebarOverlay {
+            display: none;
+        }
+
+        .sicamp-mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 1100;
+
+            width: 44px;
+            height: 44px;
+
+            color: var(--sicamp-lime);
+            background: var(--sicamp-forest-900);
+            border: 1px solid rgba(195, 244, 91, .25);
+            border-radius: 12px;
+
+            box-shadow: 0 8px 22px rgba(0, 0, 0, .15);
+            cursor: pointer;
+        }
+
+        #mobileSidebarBackdrop {
+            display: none;
+        }
+
+        .sicamp-toast {
+            position: fixed;
+            right: 22px;
+            bottom: 22px;
+            z-index: 9999;
+
+            max-width: min(420px, calc(100vw - 32px));
+            padding: 14px 18px;
+
+            color: #ffffff;
+            background: var(--sicamp-forest-900);
+            border: 1px solid rgba(195, 244, 91, .3);
+            border-radius: 12px;
+
+            box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
+
+            opacity: 0;
+            transform: translateY(8px);
+            transition: opacity .2s ease, transform .2s ease;
+        }
+
+        .sicamp-toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .sicamp-toast-success {
+            border-color: rgba(43, 217, 130, .5);
+        }
+
+        .sicamp-toast-error {
+            border-color: rgba(255, 105, 95, .5);
+        }
+
+        .sicamp-toast-warning {
+            border-color: rgba(255, 193, 7, .5);
+        }
+
+        @media (max-width: 900px) {
+            body.sicamp-admin-layout,
+            body.sicamp-sidebar-collapsed {
+                padding-left: 0;
+            }
+
+            #sidebarAdmin {
+                width: min(290px, calc(100vw - 56px));
+                inset: 0 auto 0 0;
+
+                border-radius: 0 18px 18px 0;
+                transform: translateX(-105%);
+            }
+
+            body.sicamp-mobile-sidebar-open #sidebarAdmin {
+                transform: translateX(0);
+            }
+
+            body.sicamp-sidebar-collapsed #sidebarAdmin {
+                width: min(290px, calc(100vw - 56px));
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-brand {
+                justify-content: space-between;
+                padding: 16px 14px;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-brand-text,
+            body.sicamp-sidebar-collapsed .sicamp-collapse-button,
+            body.sicamp-sidebar-collapsed .sicamp-profile-info,
+            body.sicamp-sidebar-collapsed .sicamp-profile .sicamp-online-indicator,
+            body.sicamp-sidebar-collapsed .sicamp-menu-label,
+            body.sicamp-sidebar-collapsed .sicamp-menu-group,
+            body.sicamp-sidebar-collapsed .sicamp-footer-status,
+            body.sicamp-sidebar-collapsed .sicamp-footer-version {
+                display: initial;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-brand-text,
+            body.sicamp-sidebar-collapsed .sicamp-profile-info {
+                display: flex;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-collapse-button {
+                display: grid;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-menu-group {
+                display: block;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-profile {
+                justify-content: flex-start;
+                margin: 14px 12px 8px;
+                padding: 12px;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-navigation {
+                padding: 8px 12px 16px;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-menu-link,
+            body.sicamp-sidebar-collapsed .sicamp-logout-button {
+                justify-content: flex-start;
+                padding: 10px 12px;
+            }
+
+            body.sicamp-sidebar-collapsed .sicamp-menu-icon,
+            body.sicamp-sidebar-collapsed .sicamp-logout-button > i {
+                width: 20px;
+            }
+
+            .sicamp-mobile-toggle {
+                display: grid;
+                place-items: center;
+            }
+
+            #mobileSidebarBackdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 900;
+
+                background: rgba(4, 16, 11, .55);
+                backdrop-filter: blur(3px);
+            }
+
+            body.sicamp-mobile-sidebar-open #mobileSidebarBackdrop {
+                display: block;
+            }
+
+            body.sicamp-mobile-sidebar-open {
+                overflow: hidden;
+            }
+
+            body.sicamp-mobile-sidebar-open .sicamp-mobile-toggle {
+                left: min(300px, calc(100vw - 50px));
+            }
+
+            body.sicamp-admin-layout main {
+                padding-top: 66px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #sidebarAdmin,
+            .sicamp-menu-link,
+            .sicamp-toast,
+            .sicamp-mobile-toggle {
+                transition: none !important;
+            }
+        }
+    `;
+
+    document.head.appendChild(style);
+}
+
+/* =========================================================
+   7. COLLAPSE DAN RESPONSIVE SIDEBAR
+   ========================================================= */
+
+function toggleSidebarCollapse() {
+    if (window.matchMedia("(max-width: 900px)").matches) {
+        closeMobileSidebar();
+        return;
+    }
+
+    document.body.classList.toggle("sicamp-sidebar-collapsed");
+
+    const collapsed = document.body.classList.contains(
+        "sicamp-sidebar-collapsed"
+    );
+
+    localStorage.setItem(
+        "sicamp_sidebar_collapsed",
+        collapsed ? "true" : "false"
+    );
+
+    const button = document.getElementById("sidebarCollapseButton");
+
+    if (button) {
+        button.setAttribute(
+            "aria-label",
+            collapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"
+        );
+
+        button.title = collapsed
+            ? "Lebarkan sidebar"
+            : "Ciutkan sidebar";
+
+        button.innerHTML = collapsed
+            ? '<i class="fa-solid fa-angles-right"></i>'
+            : '<i class="fa-solid fa-angles-left"></i>';
     }
 }
 
-function logout() {
-    localStorage.removeItem('session_user');
-    localStorage.removeItem('user');
-    alert('Anda telah logout.');
-    window.location.href = 'login.html';
+function openMobileSidebar() {
+    document.body.classList.add("sicamp-mobile-sidebar-open");
+
+    const toggle = document.getElementById("mobileSidebarToggle");
+
+    if (toggle) {
+        toggle.setAttribute("aria-expanded", "true");
+        toggle.setAttribute("aria-label", "Tutup menu navigasi");
+        toggle.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+    }
 }
+
+function closeMobileSidebar() {
+    document.body.classList.remove("sicamp-mobile-sidebar-open");
+
+    const toggle = document.getElementById("mobileSidebarToggle");
+
+    if (toggle) {
+        toggle.setAttribute("aria-expanded", "false");
+        toggle.setAttribute("aria-label", "Buka menu navigasi");
+        toggle.innerHTML = '<i class="fa-solid fa-bars"></i>';
+    }
+}
+
+function initializeSharedSidebarControls() {
+    if (sidebarInitialized) return;
+    sidebarInitialized = true;
+
+    const toggle = document.getElementById("mobileSidebarToggle");
+    const backdrop = document.getElementById("mobileSidebarBackdrop");
+
+    toggle?.addEventListener("click", () => {
+        const isOpen = document.body.classList.contains(
+            "sicamp-mobile-sidebar-open"
+        );
+
+        if (isOpen) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    });
+
+    backdrop?.addEventListener("click", closeMobileSidebar);
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeMobileSidebar();
+        }
+    });
+
+    document.querySelectorAll("#sidebarAdmin a").forEach((link) => {
+        link.addEventListener("click", () => {
+            if (window.matchMedia("(max-width: 900px)").matches) {
+                closeMobileSidebar();
+            }
+        });
+    });
+
+    try {
+        const collapsed =
+            localStorage.getItem("sicamp_sidebar_collapsed") === "true";
+
+        if (
+            collapsed &&
+            !window.matchMedia("(max-width: 900px)").matches
+        ) {
+            document.body.classList.add("sicamp-sidebar-collapsed");
+
+            const button = document.getElementById(
+                "sidebarCollapseButton"
+            );
+
+            if (button) {
+                button.setAttribute("aria-label", "Lebarkan sidebar");
+                button.title = "Lebarkan sidebar";
+                button.innerHTML =
+                    '<i class="fa-solid fa-angles-right"></i>';
+            }
+        }
+    } catch (error) {
+        console.warn("Preferensi sidebar tidak dapat dibaca.", error);
+    }
+
+    window.addEventListener("resize", () => {
+        if (!window.matchMedia("(max-width: 900px)").matches) {
+            closeMobileSidebar();
+        }
+    });
+}
+
+/* =========================================================
+   8. REQUEST API
+   ========================================================= */
+
+async function requestAPI(url, options = {}) {
+    const defaultHeaders = {
+        Accept: "application/json"
+    };
+
+    const config = {
+        method: options.method || "GET",
+        headers: {
+            ...defaultHeaders,
+            ...(options.headers || {})
+        }
+    };
+
+    if (options.body !== undefined) {
+        if (options.body instanceof FormData) {
+            config.body = options.body;
+        } else if (typeof options.body === "string") {
+            config.headers["Content-Type"] =
+                config.headers["Content-Type"] ||
+                "application/json";
+
+            config.body = options.body;
+        } else {
+            config.headers["Content-Type"] =
+                config.headers["Content-Type"] ||
+                "application/json";
+
+            config.body = JSON.stringify(options.body);
+        }
+    }
+
+    const response = await fetch(url, config);
+    const responseText = await response.text();
+
+    let result;
+
+    try {
+        result = responseText ? JSON.parse(responseText) : {};
+    } catch (error) {
+        throw new Error(
+            "Respons server bukan JSON yang valid. Periksa file API PHP."
+        );
+    }
+
+    if (!response.ok) {
+        throw new Error(
+            result.message ||
+            result.pesan ||
+            `Permintaan gagal dengan status ${response.status}.`
+        );
+    }
+
+    if (result && result.success === false) {
+        throw new Error(
+            result.message ||
+            result.pesan ||
+            "Permintaan tidak berhasil."
+        );
+    }
+
+    return result;
+}
+
+/* =========================================================
+   9. DATA KATEGORI
+   ========================================================= */
 
 async function loadKategoriFromDB() {
     try {
-        const res = await fetch('api/api_kategori.php');
-        const kategoris = await res.json();
-        localStorage.setItem('kategori_peralatan', JSON.stringify(kategoris));
-        renderTabelKategoriAdmin();
-        renderCategoryOptionsAndTabs();
-    } catch (err) {
-        console.error("Gagal memuat kategori dari DB:", err);
-    }
-}
+        const result = await requestAPI(
+            SICAMP_CONFIG.api.kategori
+        );
 
-function renderTabelKategoriAdmin() {
-    const tbody = document.querySelector('#tblKategoriAdmin tbody') || document.querySelector('#tblKategori tbody');
-    if (!tbody) return;
+        const kategori = Array.isArray(result)
+            ? result
+            : (
+                result.data ||
+                result.kategori ||
+                result.result ||
+                []
+            );
 
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-    tbody.innerHTML = '';
+        dataKategori = Array.isArray(kategori) ? kategori : [];
 
-    if (kategoris.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="3" class="py-6 text-center text-slate-400 font-medium">Belum ada kategori. Silakan tambah kategori baru.</td></tr>`;
-        return;
-    }
-
-    kategoris.forEach((k) => {
-        tbody.innerHTML += `
-            <tr class="hover:bg-slate-50 transition-colors">
-                <td class="py-3.5 px-6 font-bold text-slate-900">${k.id_kategori}</td>
-                <td class="py-3.5 px-6 font-semibold">${k.nama_kategori}</td>
-                <td class="py-3.5 px-6 text-center">
-                    <button onclick="hapusKategoriAdmin(${k.id_kategori})" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1 mx-auto cursor-pointer">
-                        <i class="fa-solid fa-trash"></i> Hapus
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function openModalTambahKategori() {
-    const input = document.getElementById('inputNamaKategori');
-    if (input) input.value = '';
-    const modal = document.getElementById('modalKategori');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function closeModalKategori() {
-    const modal = document.getElementById('modalKategori');
-    if (modal) modal.classList.add('hidden');
-}
-
-async function saveKategoriHandler(e) {
-    e.preventDefault();
-    const input = document.getElementById('inputNamaKategori');
-    const nama = input ? input.value.trim() : '';
-
-    if (!nama) {
-        alert('Harap isi Nama Kategori!');
-        return;
-    }
-
-    try {
-        const res = await fetch('api/api_kategori.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ nama_kategori: nama })
-        });
-        const result = await res.json();
-        if (result.status === 'success' || result.id) {
-            alert('Kategori berhasil disimpan ke Database!');
-            closeModalKategori();
-            loadKategoriFromDB();
-        } else {
-            alert('Gagal menyimpan kategori!');
-        }
-    } catch (err) {
-        alert('Terjadi kesalahan jaringan.');
-    }
-}
-
-async function hapusKategoriAdmin(idKategori) {
-    if (confirm('Yakin ingin menghapus kategori ini dari Database?')) {
         try {
-            const res = await fetch(`api/api_kategori.php?id=${idKategori}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.status === 'success') {
-                alert('Kategori berhasil dihapus!');
-                loadKategoriFromDB();
-            } else {
-                alert('Gagal menghapus kategori!');
-            }
-        } catch (err) {
-            alert('Terjadi kesalahan jaringan.');
+            localStorage.setItem(
+                "kategori",
+                JSON.stringify(dataKategori)
+            );
+        } catch (error) {
+            console.warn("Kategori tidak dapat disimpan ke cache.", error);
         }
+
+        if (typeof renderKategori === "function") {
+            renderKategori(dataKategori);
+        }
+
+        if (typeof renderKategoriTable === "function") {
+            renderKategoriTable(dataKategori);
+        }
+
+        return dataKategori;
+    } catch (error) {
+        console.error("Gagal memuat kategori:", error);
+
+        dataKategori = getStoredArray("kategori");
+
+        return dataKategori;
     }
 }
+
+/* =========================================================
+   10. DATA PERALATAN
+   ========================================================= */
 
 async function loadPeralatanFromDB() {
     try {
-        const res = await fetch('api/api_peralatan.php');
-        const peralatan = await res.json();
-        localStorage.setItem('peralatan', JSON.stringify(peralatan));
-        if (document.getElementById('tblPeralatanAdmin')) renderTabelPeralatanAdmin();
-        if (document.getElementById('equipmentGrid')) renderKatalog();
-    } catch (err) {
-        console.error("Gagal memuat peralatan dari DB:", err);
-    }
-}
+        const result = await requestAPI(
+            SICAMP_CONFIG.api.peralatan
+        );
 
-function renderTabelPeralatanAdmin() {
-    const tbody = document.querySelector('#tblPeralatanAdmin tbody');
-    if (!tbody) return;
+        const peralatan = Array.isArray(result)
+            ? result
+            : (
+                result.data ||
+                result.peralatan ||
+                result.result ||
+                []
+            );
 
-    const peralatan = JSON.parse(localStorage.getItem('peralatan')) || [];
-    tbody.innerHTML = '';
+        dataPeralatan = Array.isArray(peralatan) ? peralatan : [];
 
-    if (peralatan.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-slate-400 font-medium">Belum ada data peralatan. Silakan tambah peralatan baru.</td></tr>`;
-        return;
-    }
-
-    peralatan.forEach((p) => {
-        const imgUrl = p.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80';
-
-        tbody.innerHTML += `
-            <tr class="hover:bg-slate-50/80 transition-colors">
-                <td class="py-3 px-6">
-                    <img src="${imgUrl}" alt="${p.nama_peralatan}" class="w-12 h-12 object-cover rounded-xl border border-slate-200 shadow-xs">
-                </td>
-                <td class="py-4 px-6 font-bold text-slate-900">${p.id_peralatan}</td>
-                <td class="py-4 px-6 font-bold text-slate-800">${p.nama_peralatan}</td>
-                <td class="py-4 px-6 font-semibold text-slate-500">${p.nama_kategori || 'Umum'}</td>
-                <td class="py-4 px-6 font-extrabold text-sicamp-700">Rp ${parseInt(p.harga_sewa).toLocaleString('id-ID')}</td>
-                <td class="py-4 px-6 font-bold">${p.stok} unit</td>
-                <td class="py-4 px-6 text-center">
-                    <button onclick="hapusPeralatanAdmin('${p.id_peralatan}')" class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded-lg text-xs font-bold transition-all inline-flex items-center gap-1 cursor-pointer">
-                        <i class="fa-solid fa-trash"></i> Hapus
-                    </button>
-                </td>
-            </tr>
-        `;
-    });
-}
-
-function openModalTambahAlat() {
-    const form = document.getElementById('formPeralatan');
-    if (form) form.reset();
-    
-    const idInput = document.getElementById('inputAlatId');
-    if (idInput) idInput.value = '';
-
-    const selectKategori = document.getElementById('inputKategoriAlat');
-    if (selectKategori) {
-        const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-        selectKategori.innerHTML = '<option value="">-- Pilih Kategori --</option>';
-        kategoris.forEach(k => {
-            selectKategori.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
-        });
-    }
-
-    const modal = document.getElementById('modalPeralatan');
-    if (modal) modal.classList.remove('hidden');
-}
-
-function closeModalAlat() {
-    const modal = document.getElementById('modalPeralatan');
-    if (modal) modal.classList.add('hidden');
-}
-
-async function savePeralatanHandler(e) {
-    e.preventDefault();
-
-    const idAlat = document.getElementById('inputAlatId').value;
-    const idKategori = document.getElementById('inputKategoriAlat').value;
-    const namaAlat = document.getElementById('inputNamaAlat').value.trim();
-    const hargaSewa = document.getElementById('inputHargaAlat').value;
-    const stok = document.getElementById('inputStokAlat').value;
-    const gambar = document.getElementById('inputGambarAlat').value.trim();
-    const deskripsi = document.getElementById('inputDeskripsiAlat').value.trim();
-
-    if (!namaAlat || !idKategori) {
-        alert('Harap isi Nama Peralatan dan Pilih Kategori!');
-        return;
-    }
-
-    const payload = {
-        id_peralatan: idAlat,
-        id_kategori: idKategori,
-        nama_peralatan: namaAlat,
-        harga_sewa: parseFloat(hargaSewa) || 0,
-        stok: parseInt(stok) || 0,
-        gambar: gambar,
-        deskripsi: deskripsi
-    };
-
-    try {
-        const res = await fetch('api/api_peralatan.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-
-        if (result.status === 'success') {
-            alert('Peralatan berhasil disimpan ke Database!');
-            closeModalAlat();
-            loadPeralatanFromDB();
-        } else {
-            alert('Gagal menyimpan peralatan: ' + (result.message || 'Error Server'));
-        }
-    } catch (err) {
-        alert('Terjadi kesalahan jaringan.');
-    }
-}
-
-async function hapusPeralatanAdmin(idAlat) {
-    if (confirm('Yakin ingin menghapus peralatan ini dari Database?')) {
         try {
-            const res = await fetch(`api/api_peralatan.php?id=${idAlat}`, { method: 'DELETE' });
-            const result = await res.json();
-            if (result.status === 'success') {
-                alert('Peralatan berhasil dihapus!');
-                loadPeralatanFromDB();
-            } else {
-                alert('Gagal menghapus peralatan!');
-            }
-        } catch (err) {
-            alert('Terjadi kesalahan jaringan.');
+            localStorage.setItem(
+                "peralatan",
+                JSON.stringify(dataPeralatan)
+            );
+        } catch (error) {
+            console.warn("Cache peralatan tidak dapat disimpan.", error);
+        }
+
+        if (typeof renderPeralatan === "function") {
+            renderPeralatan(dataPeralatan);
+        }
+
+        if (typeof renderPeralatanTable === "function") {
+            renderPeralatanTable(dataPeralatan);
+        }
+
+        if (typeof renderDashboard === "function") {
+            renderDashboard();
+        }
+
+        return dataPeralatan;
+    } catch (error) {
+        console.error("Gagal memuat peralatan:", error);
+
+        dataPeralatan = getStoredArray("peralatan");
+
+        return dataPeralatan;
+    }
+}
+
+/* =========================================================
+   11. HELPER IDENTITAS DATA
+   ========================================================= */
+
+function getPeralatanId(item) {
+    return (
+        item?.id_peralatan ??
+        item?.id ??
+        item?.id_alat ??
+        null
+    );
+}
+
+function getKategoriId(item) {
+    return (
+        item?.id_kategori ??
+        item?.kategori_id ??
+        item?.id ??
+        null
+    );
+}
+
+function getPeralatanName(item) {
+    return (
+        item?.nama_peralatan ||
+        item?.nama_alat ||
+        item?.nama ||
+        "Peralatan tanpa nama"
+    );
+}
+
+function getPeralatanStock(item) {
+    return Number(
+        item?.stok ??
+        item?.jumlah_stok ??
+        item?.stock ??
+        0
+    );
+}
+
+function getPeralatanPrice(item) {
+    return Number(
+        item?.harga_sewa ??
+        item?.harga ??
+        item?.harga_per_hari ??
+        0
+    );
+}
+
+function getKategoriName(item) {
+    return (
+        item?.nama_kategori ||
+        item?.kategori ||
+        "Tanpa kategori"
+    );
+}
+
+/* =========================================================
+   12. FILTER DAN PENCARIAN PERALATAN
+   ========================================================= */
+
+function filterDataPeralatan(data = dataPeralatan) {
+    let hasil = [...data];
+
+    const keyword = String(
+        filterPencarianAlat || searchKeyword || ""
+    ).trim().toLowerCase();
+
+    if (keyword) {
+        hasil = hasil.filter((item) => {
+            const nama = getPeralatanName(item).toLowerCase();
+            const kategori = getKategoriName(item).toLowerCase();
+            const deskripsi = String(
+                item?.deskripsi || ""
+            ).toLowerCase();
+
+            return (
+                nama.includes(keyword) ||
+                kategori.includes(keyword) ||
+                deskripsi.includes(keyword)
+            );
+        });
+    }
+
+    if (filterKategoriAlat !== "all") {
+        hasil = hasil.filter((item) => {
+            return String(getKategoriId(item)) ===
+                String(filterKategoriAlat);
+        });
+    }
+
+    if (filterStokAlat === "tersedia") {
+        hasil = hasil.filter(
+            (item) => getPeralatanStock(item) > 0
+        );
+    }
+
+    if (filterStokAlat === "habis") {
+        hasil = hasil.filter(
+            (item) => getPeralatanStock(item) <= 0
+        );
+    }
+
+    if (filterUrutanAlat === "nama_asc") {
+        hasil.sort((a, b) =>
+            getPeralatanName(a).localeCompare(
+                getPeralatanName(b),
+                "id"
+            )
+        );
+    } else if (filterUrutanAlat === "nama_desc") {
+        hasil.sort((a, b) =>
+            getPeralatanName(b).localeCompare(
+                getPeralatanName(a),
+                "id"
+            )
+        );
+    } else if (filterUrutanAlat === "harga_asc") {
+        hasil.sort(
+            (a, b) => getPeralatanPrice(a) - getPeralatanPrice(b)
+        );
+    } else if (filterUrutanAlat === "harga_desc") {
+        hasil.sort(
+            (a, b) => getPeralatanPrice(b) - getPeralatanPrice(a)
+        );
+    } else if (filterUrutanAlat === "stok_asc") {
+        hasil.sort(
+            (a, b) => getPeralatanStock(a) - getPeralatanStock(b)
+        );
+    } else if (filterUrutanAlat === "stok_desc") {
+        hasil.sort(
+            (a, b) => getPeralatanStock(b) - getPeralatanStock(a)
+        );
+    }
+
+    return hasil;
+}
+
+function resetFilterPeralatan() {
+    filterPencarianAlat = "";
+    filterKategoriAlat = "all";
+    filterStokAlat = "all";
+    filterUrutanAlat = "terbaru";
+    halamanPeralatanAktif = 1;
+
+    const searchInput = document.getElementById("searchAlat");
+    const categorySelect = document.getElementById("filterKategori");
+    const stockSelect = document.getElementById("filterStok");
+    const sortSelect = document.getElementById("filterUrutan");
+
+    if (searchInput) searchInput.value = "";
+    if (categorySelect) categorySelect.value = "all";
+    if (stockSelect) stockSelect.value = "all";
+    if (sortSelect) sortSelect.value = "terbaru";
+
+    if (typeof renderPeralatan === "function") {
+        renderPeralatan(filterDataPeralatan());
+    }
+}
+
+/* =========================================================
+   13. INISIALISASI FILTER
+   ========================================================= */
+
+function initializePeralatanFilters() {
+    const searchInput = document.getElementById("searchAlat");
+    const categorySelect = document.getElementById("filterKategori");
+    const stockSelect = document.getElementById("filterStok");
+    const sortSelect = document.getElementById("filterUrutan");
+
+    searchInput?.addEventListener("input", (event) => {
+        filterPencarianAlat = event.target.value;
+        halamanPeralatanAktif = 1;
+
+        if (typeof renderPeralatan === "function") {
+            renderPeralatan(filterDataPeralatan());
+        }
+    });
+
+    categorySelect?.addEventListener("change", (event) => {
+        filterKategoriAlat = event.target.value;
+        halamanPeralatanAktif = 1;
+
+        if (typeof renderPeralatan === "function") {
+            renderPeralatan(filterDataPeralatan());
+        }
+    });
+
+    stockSelect?.addEventListener("change", (event) => {
+        filterStokAlat = event.target.value;
+        halamanPeralatanAktif = 1;
+
+        if (typeof renderPeralatan === "function") {
+            renderPeralatan(filterDataPeralatan());
+        }
+    });
+
+    sortSelect?.addEventListener("change", (event) => {
+        filterUrutanAlat = event.target.value;
+        halamanPeralatanAktif = 1;
+
+        if (typeof renderPeralatan === "function") {
+            renderPeralatan(filterDataPeralatan());
+        }
+    });
+}
+
+/* =========================================================
+   14. NAVIGASI PELANGGAN
+   ========================================================= */
+
+function initializeCustomerNavigation() {
+    const navPelanggan = document.getElementById("navPelanggan");
+    const userIndicator = document.getElementById("userIndicator");
+
+    if (!navPelanggan && !userIndicator) return;
+
+    const session = getSessionUser();
+
+    if (userIndicator) {
+        if (session) {
+            const nama =
+                session.nama_pelanggan ||
+                session.nama ||
+                session.username ||
+                "Pelanggan";
+
+            userIndicator.textContent = nama;
+        } else {
+            userIndicator.textContent = "Pengunjung";
         }
     }
-}
 
-function renderCategoryOptionsAndTabs() {
-    const tabContainer = document.getElementById('filterCategoryContainer');
-    const selectSelect = document.getElementById('searchKategoriSelect');
-    const kategoris = JSON.parse(localStorage.getItem('kategori_peralatan')) || [];
-
-    if (tabContainer) {
-        tabContainer.innerHTML = `
-            <button onclick="setCategoryFilter('all')" 
-                class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${currentCategoryFilter === 'all' ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                Semua Alat
-            </button>
+    if (navPelanggan) {
+        navPelanggan.innerHTML = `
+            <a href="index.html">Beranda</a>
+            <a href="riwayat-sewa.html">Riwayat Sewa</a>
+            ${
+                session
+                    ? `
+                        <button
+                            type="button"
+                            id="customerLogoutButton"
+                            class="sicamp-customer-logout"
+                        >
+                            Keluar
+                        </button>
+                    `
+                    : `
+                        <a href="login.html">Masuk</a>
+                    `
+            }
         `;
 
-        kategoris.forEach(k => {
-            const isSelected = String(currentCategoryFilter) === String(k.id_kategori);
-            tabContainer.innerHTML += `
-                <button onclick="setCategoryFilter('${k.id_kategori}')" 
-                    class="px-4 py-2 text-xs font-bold rounded-full whitespace-nowrap transition-all ${isSelected ? 'bg-sicamp-700 text-white shadow-sm' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
-                    ${k.nama_kategori}
-                </button>
-            `;
-        });
-    }
-
-    if (selectSelect) {
-        selectSelect.innerHTML = '<option value="all">Semua Kategori</option>';
-        kategoris.forEach(k => {
-            selectSelect.innerHTML += `<option value="${k.id_kategori}">${k.nama_kategori}</option>`;
-        });
-        selectSelect.value = currentCategoryFilter;
+        document
+            .getElementById("customerLogoutButton")
+            ?.addEventListener("click", logout);
     }
 }
 
-function setCategoryFilter(catId) {
-    currentCategoryFilter = catId;
-    renderCategoryOptionsAndTabs();
-    renderKatalog();
-}
+/* =========================================================
+   15. INISIALISASI APLIKASI
+   ========================================================= */
 
-function renderKatalog() {
-    const grid = document.getElementById('equipmentGrid');
-    if (!grid) return;
+document.addEventListener("DOMContentLoaded", async () => {
+    initializeCustomerNavigation();
 
-    const items = JSON.parse(localStorage.getItem('peralatan')) || [];
+    if (!isAdminPage()) return;
 
-    grid.innerHTML = '';
-    const filtered = items.filter(item => {
-        const matchCategory = (currentCategoryFilter === 'all') || (String(item.id_kategori) === String(currentCategoryFilter));
-        const matchKeyword = !searchKeyword || item.nama_peralatan.toLowerCase().includes(searchKeyword);
-        return matchCategory && matchKeyword;
-    });
+    document.body.classList.add("sicamp-admin-layout");
 
-    if (filtered.length === 0) {
-        grid.innerHTML = `
-            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-slate-200">
-                <i class="fa-solid fa-box-open text-4xl text-slate-300 mb-3 block"></i>
-                <p class="text-slate-500 text-xs font-medium">Belum ada peralatan yang sesuai dengan pencarian Anda.</p>
-            </div>
-        `;
-        return;
-    }
-
-    filtered.forEach((item) => {
-        const isStokAvailable = item.stok > 0;
-        const stokBadge = isStokAvailable 
-            ? `<span class="bg-sicamp-700 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Stok: ${item.stok}</span>`
-            : `<span class="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-lg shadow-sm">Stok Habis</span>`;
-
-        grid.innerHTML += `
-            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col overflow-hidden group">
-                <div class="relative h-48 overflow-hidden bg-slate-100">
-                    <img src="${item.gambar || 'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=600&q=80'}" alt="${item.nama_peralatan}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-                    <div class="absolute top-3 right-3">${stokBadge}</div>
-                </div>
-                <div class="p-5 flex-grow flex flex-col justify-between space-y-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-900 group-hover:text-sicamp-700 transition-colors line-clamp-1">${item.nama_peralatan}</h3>
-                        <p class="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">${item.deskripsi || 'Peralatan pendakian berkualitas tinggi, terawat, dan siap pakai.'}</p>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-3">
-                        <div>
-                            <span class="block text-[10px] font-semibold text-slate-400 uppercase">Harga Sewa</span>
-                            <span class="text-base font-black text-slate-900">Rp ${parseInt(item.harga_sewa).toLocaleString('id-ID')}<span class="text-xs text-slate-400 font-normal">/hari</span></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    loadKategoriFromDB();
-    loadPeralatanFromDB();
+    ensureSidebarMount();
+    installSharedSidebarStyles();
     renderUserNavigation();
+    initializeSharedSidebarControls();
+    initializePeralatanFilters();
+
+    await Promise.allSettled([
+        loadKategoriFromDB(),
+        loadPeralatanFromDB()
+    ]);
 });
+
+/* =========================================================
+   16. EKSPOR FUNGSI GLOBAL
+   Mendukung pemanggilan dari atribut onclick HTML lama.
+   ========================================================= */
+
+window.escapeHTML = escapeHTML;
+window.getStoredArray = getStoredArray;
+window.getSessionUser = getSessionUser;
+window.getImageFallback = getImageFallback;
+
+window.formatRupiah = formatRupiah;
+window.formatTanggal = formatTanggal;
+window.showNotification = showNotification;
+
+window.logout = logout;
+
+window.ensureSidebarMount = ensureSidebarMount;
+window.renderUserNavigation = renderUserNavigation;
+window.installSharedSidebarStyles = installSharedSidebarStyles;
+window.initializeSharedSidebarControls =
+    initializeSharedSidebarControls;
+
+window.requestAPI = requestAPI;
+window.loadKategoriFromDB = loadKategoriFromDB;
+window.loadPeralatanFromDB = loadPeralatanFromDB;
+
+window.filterDataPeralatan = filterDataPeralatan;
+window.resetFilterPeralatan = resetFilterPeralatan;
+
+window.getPeralatanId = getPeralatanId;
+window.getKategoriId = getKategoriId;
+window.getPeralatanName = getPeralatanName;
+window.getPeralatanStock = getPeralatanStock;
+window.getPeralatanPrice = getPeralatanPrice;
+window.getKategoriName = getKategoriName;

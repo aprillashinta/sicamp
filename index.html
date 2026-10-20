@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SiCamp Surakarta - Jelajah Alam Bebas, Tanpa Beban Beli Alat!</title>
+    <title>SiCamp Surakarta - Rental Peralatan Outdoor</title>
+    <meta name="description" content="Sewa peralatan camping dan pendakian di Surakarta melalui SiCamp.">
 
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -19,519 +19,1849 @@
                             500: '#22c55e',
                             600: '#16a34a',
                             700: '#15803d',
-                            800: '#0e622f',
-                            900: '#0a4b23',
+                            800: '#166534',
+                            900: '#14532d'
                         }
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif']
                     }
                 }
             }
-        }
+        };
     </script>
-    <!-- Google Fonts & FontAwesome Icons -->
+
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-</head>
-<body class="bg-[#f9fbf9] text-slate-800 font-sans antialiased flex flex-col min-h-screen">
 
-    <!-- 1. NAVBAR / HEADER TOP -->
-    <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
-            
-            <!-- Logo SiCamp -->
-            <a href="index.html" class="flex items-center gap-2.5">
-                <div class="w-10 h-10 bg-sicamp-700 rounded-xl flex items-center justify-center text-white text-xl font-black shadow-md shadow-sicamp-700/20">
+    <style>
+        :root {
+            --primary: #15803d;
+            --primary-hover: #166534;
+            --primary-light: #f0fdf4;
+            --text-primary: #172033;
+            --border-color: #e2e8f0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 90px;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+            color: var(--text-primary);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: #f8faf9;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        input,
+        select,
+        textarea,
+        button {
+            font: inherit;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        button:focus-visible,
+        a:focus-visible,
+        input:focus-visible,
+        select:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 3px;
+        }
+
+        .sc-btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 12px 20px;
+            border: 1px solid var(--primary);
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .sc-btn-primary:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .sc-btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 12px 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: #fff;
+            color: #334155 !important;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: center;
+            transition: 0.2s ease;
+        }
+
+        .sc-btn-secondary:hover {
+            background: var(--primary-light);
+            border-color: #bbf7d0;
+            color: var(--primary) !important;
+        }
+
+        .sc-navbar {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.97);
+            border-bottom: 1px solid #f1f5f9;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.035);
+            backdrop-filter: blur(12px);
+        }
+
+        .sc-navbar-inner {
+            width: 100%;
+            max-width: 1280px;
+            min-height: 76px;
+            margin: 0 auto;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+        }
+
+        .sc-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .sc-brand-icon {
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 12px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 19px;
+            box-shadow: 0 4px 10px rgba(21, 128, 61, 0.15);
+        }
+
+        .sc-brand-name {
+            display: block;
+            color: #172033;
+            font-size: 23px;
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.8px;
+        }
+
+        .sc-brand-name span {
+            color: var(--primary);
+        }
+
+        .sc-brand-subtitle {
+            display: block;
+            margin-top: 3px;
+            color: #94a3b8;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+        }
+
+        .sc-nav-search {
+            position: relative;
+            flex: 1;
+            min-width: 120px;
+            max-width: 350px;
+        }
+
+        .sc-nav-search i {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            color: #94a3b8;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .sc-nav-search input {
+            width: 100%;
+            height: 42px;
+            padding: 0 15px 0 42px;
+            border: 1px solid #e2e8f0;
+            border-radius: 24px;
+            background: #f8fafc;
+            color: #334155;
+            font-size: 12px;
+        }
+
+        .sc-nav-search input:focus {
+            border-color: var(--primary);
+            background: #fff;
+            outline: none;
+        }
+
+        .sc-nav-links {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 22px;
+            flex-shrink: 0;
+        }
+
+        .sc-nav-links a {
+            color: #475569;
+            font-size: 12px;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: color 0.2s ease;
+        }
+
+        .sc-nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .sc-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .sc-auth-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 76px;
+            min-height: 40px;
+            padding: 10px 18px;
+            border: 1px solid var(--primary);
+            border-radius: 999px;
+            background: var(--primary);
+            color: #fff !important;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: nowrap;
+            transition: 0.2s ease;
+        }
+
+        .sc-auth-button:hover {
+            background: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+
+        .sc-cart-button {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border: none;
+            border-radius: 50%;
+            background: #f1f5f9;
+            color: var(--primary);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .sc-cart-button:hover {
+            background: #dcfce7;
+        }
+
+        .sc-cart-badge {
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 19px;
+            height: 19px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            background: #f43f5e;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .sc-mobile-menu-button {
+            display: none;
+            width: 42px;
+            height: 42px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #fff;
+            color: #334155;
+            cursor: pointer;
+        }
+
+        .sc-mobile-menu {
+            display: none;
+            padding: 12px 20px 20px;
+            border-top: 1px solid #f1f5f9;
+            background: #fff;
+        }
+
+        .sc-mobile-menu.is-open {
+            display: block;
+        }
+
+        .sc-mobile-menu > a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 13px 4px;
+            color: #475569;
+            font-size: 13px;
+            font-weight: 700;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .sc-mobile-menu > a i {
+            width: 20px;
+            color: var(--primary);
+        }
+
+        .sc-container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding-right: 24px;
+            padding-left: 24px;
+        }
+
+        .sc-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+            align-items: center;
+            gap: 48px;
+            padding-top: 48px;
+            padding-bottom: 38px;
+        }
+
+        .sc-location-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 14px;
+            border: 1px solid #bbf7d0;
+            border-radius: 999px;
+            background: #dcfce7;
+            color: #166534;
+            font-size: 11px;
+            font-weight: 800;
+        }
+
+        .sc-hero-title {
+            margin: 24px 0 16px;
+            color: #111827;
+            font-size: clamp(32px, 4vw, 50px);
+            font-weight: 800;
+            line-height: 1.08;
+            letter-spacing: -1.8px;
+        }
+
+        .sc-hero-title span {
+            color: var(--primary);
+        }
+
+        .sc-hero-description {
+            max-width: 590px;
+            margin: 0;
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.9;
+        }
+
+        .sc-hero-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .sc-hero-benefits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 24px;
+            color: #64748b;
+            font-size: 11px;
+        }
+
+        .sc-hero-benefits span {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .sc-hero-benefits i {
+            color: var(--primary);
+        }
+
+        .sc-hero-image {
+            position: relative;
+            min-height: 300px;
+            overflow: hidden;
+            border-radius: 24px;
+            background: #d1d5db;
+            box-shadow: 0 24px 50px rgba(15, 23, 42, 0.14);
+        }
+
+        .sc-hero-image > img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sc-hero-image::after {
+            position: absolute;
+            inset: 0;
+            content: "";
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.76), rgba(0, 0, 0, 0.05) 65%);
+        }
+
+        .sc-hero-image-caption {
+            position: absolute;
+            z-index: 1;
+            right: 24px;
+            bottom: 24px;
+            left: 24px;
+            color: #fff;
+        }
+
+        .sc-hero-image-caption .badge {
+            display: inline-block;
+            padding: 7px 12px;
+            border-radius: 999px;
+            background: var(--primary);
+            font-size: 9px;
+            font-weight: 800;
+        }
+
+        .sc-hero-image-caption h2 {
+            margin: 12px 0 6px;
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .sc-hero-image-caption p {
+            margin: 0;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .sc-filter-card {
+            display: grid;
+            grid-template-columns: 1.2fr 1.1fr 1.2fr 1fr;
+            align-items: end;
+            gap: 12px;
+            padding: 22px;
+            margin-bottom: 34px;
+            border: 1px solid #f1f5f9;
+            border-radius: 20px;
+            background: #fff;
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.09);
+        }
+
+        .sc-field label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 9px;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .sc-field label i {
+            color: var(--primary);
+        }
+
+        .sc-field select,
+        .sc-field input {
+            width: 100%;
+            min-width: 0;
+            height: 42px;
+            padding: 0 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            color: #334155;
+            font-size: 11px;
+        }
+
+        .sc-date-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .sc-bundle-card {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 24px;
+            padding: 30px;
+            margin-bottom: 48px;
+            border: 1px solid #bbf7d0;
+            border-radius: 24px;
+            background: linear-gradient(115deg, #f0fdf4, #fff);
+        }
+
+        .sc-bundle-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 11px;
+            border-radius: 7px;
+            background: #f59e0b;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .sc-bundle-title {
+            margin: 16px 0 10px;
+            color: #172033;
+            font-size: clamp(20px, 2vw, 26px);
+            font-weight: 800;
+            line-height: 1.3;
+        }
+
+        .sc-bundle-description {
+            max-width: 750px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .sc-bundle-price {
+            min-width: 180px;
+            text-align: right;
+        }
+
+        .sc-bundle-old-price {
+            color: #94a3b8;
+            font-size: 11px;
+            text-decoration: line-through;
+        }
+
+        .sc-bundle-current-price {
+            margin: 5px 0 12px;
+            color: var(--primary);
+            font-size: clamp(25px, 3vw, 32px);
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .sc-bundle-current-price span {
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .sc-section {
+            padding-bottom: 56px;
+        }
+
+        .sc-section-heading {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .sc-section-eyebrow {
+            margin-bottom: 8px;
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .sc-section-title {
+            margin: 0;
+            color: #172033;
+            font-size: clamp(23px, 2.5vw, 30px);
+            font-weight: 800;
+            letter-spacing: -0.8px;
+        }
+
+        .sc-section-description {
+            margin-top: 8px;
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .sc-category-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .sc-category-button {
+            padding: 10px 15px;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            background: #fff;
+            color: #64748b;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .sc-category-button:hover,
+        .sc-category-button.active {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .sc-equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .sc-equipment-card {
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid #e8edf0;
+            border-radius: 18px;
+            background: #fff;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .sc-equipment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        }
+
+        .sc-equipment-image {
+            position: relative;
+            height: 190px;
+            overflow: hidden;
+            background: #f1f5f9;
+        }
+
+        .sc-equipment-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sc-equipment-content {
+            padding: 16px;
+        }
+
+        .sc-equipment-category {
+            color: var(--primary);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .sc-equipment-name {
+            margin: 8px 0;
+            color: #172033;
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.5;
+        }
+
+        .sc-equipment-description {
+            min-height: 36px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+
+        .sc-equipment-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid #f1f5f9;
+        }
+
+        .sc-equipment-price {
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 800;
+        }
+
+        .sc-equipment-price span {
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 500;
+        }
+
+        .sc-equipment-stock {
+            margin-top: 5px;
+            color: #64748b;
+            font-size: 10px;
+        }
+
+        .sc-empty-state {
+            grid-column: 1 / -1;
+            padding: 40px 20px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 18px;
+            color: #64748b;
+            text-align: center;
+        }
+
+        .sc-location-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: center;
+            padding: 28px;
+            margin-bottom: 56px;
+            border: 1px solid #e2e8f0;
+            border-radius: 22px;
+            background: #fff;
+        }
+
+        .sc-location-card h2 {
+            margin: 10px 0;
+            font-size: 22px;
+            font-weight: 800;
+        }
+
+        .sc-location-card p {
+            color: #64748b;
+            font-size: 12px;
+            line-height: 1.8;
+        }
+
+        .sc-location-map {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 16px;
+            background: #f0fdf4;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .sc-footer {
+            background: #fff;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .sc-footer-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 42px 24px 20px;
+        }
+
+        .sc-footer-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr 1fr;
+            gap: 30px;
+        }
+
+        .sc-footer-grid h3 {
+            margin: 0 0 15px;
+            color: #172033;
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        .sc-footer-grid p,
+        .sc-footer-grid li {
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.9;
+        }
+
+        .sc-footer-grid ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .sc-footer-grid a:not(.sc-brand) {
+            color: #64748b;
+        }
+
+        .sc-footer-grid a:hover {
+            color: var(--primary);
+        }
+
+        .sc-footer-bottom {
+            margin-top: 30px;
+            padding-top: 18px;
+            border-top: 1px solid #f1f5f9;
+            color: #94a3b8;
+            font-size: 10px;
+            text-align: center;
+        }
+
+        @media (max-width: 1100px) {
+            .sc-navbar-inner {
+                gap: 14px;
+                padding-right: 18px;
+                padding-left: 18px;
+            }
+
+            .sc-nav-links {
+                gap: 14px;
+            }
+
+            .sc-nav-search {
+                max-width: 260px;
+            }
+
+            .sc-hero {
+                gap: 30px;
+            }
+
+            .sc-equipment-grid {
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 900px) {
+            .sc-navbar-inner {
+                min-height: 70px;
+                gap: 12px;
+            }
+
+            .sc-nav-links {
+                display: none;
+            }
+
+            .sc-nav-search {
+                max-width: none;
+            }
+
+            .sc-mobile-menu-button {
+                display: inline-flex;
+                flex-shrink: 0;
+            }
+
+            .sc-hero {
+                grid-template-columns: 1fr 0.9fr;
+                gap: 24px;
+                padding-top: 36px;
+            }
+
+            .sc-hero-title {
+                font-size: clamp(30px, 4vw, 42px);
+                letter-spacing: -1.2px;
+            }
+
+            .sc-hero-image {
+                min-height: 280px;
+            }
+
+            .sc-filter-card {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .sc-equipment-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .sc-footer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 640px) {
+            .sc-navbar-inner {
+                min-height: 66px;
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .sc-brand {
+                gap: 7px;
+            }
+
+            .sc-brand-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 10px;
+                font-size: 16px;
+            }
+
+            .sc-brand-name {
+                font-size: 19px;
+            }
+
+            .sc-brand-subtitle {
+                font-size: 7px;
+                letter-spacing: 0.3px;
+            }
+
+            .sc-nav-search {
+                display: none;
+            }
+
+            .sc-nav-actions {
+                gap: 7px;
+            }
+
+            .sc-auth-button {
+                min-width: 0;
+                min-height: 36px;
+                padding: 9px 12px;
+                font-size: 11px;
+            }
+
+            .sc-cart-button,
+            .sc-mobile-menu-button {
+                width: 36px;
+                height: 36px;
+            }
+
+            .sc-mobile-menu {
+                padding-right: 16px;
+                padding-left: 16px;
+            }
+
+            .sc-container {
+                padding-right: 16px;
+                padding-left: 16px;
+            }
+
+            .sc-hero {
+                grid-template-columns: 1fr;
+                gap: 26px;
+                padding-top: 28px;
+                padding-bottom: 28px;
+            }
+
+            .sc-hero-title {
+                margin-top: 18px;
+                font-size: clamp(30px, 8vw, 40px);
+                letter-spacing: -1px;
+            }
+
+            .sc-hero-description {
+                font-size: 13px;
+                line-height: 1.8;
+            }
+
+            .sc-hero-buttons {
+                gap: 10px;
+            }
+
+            .sc-hero-buttons .sc-btn-primary,
+            .sc-hero-buttons .sc-btn-secondary {
+                flex: 1;
+                padding-right: 12px;
+                padding-left: 12px;
+                font-size: 11px;
+            }
+
+            .sc-hero-benefits {
+                gap: 12px;
+                font-size: 10px;
+            }
+
+            .sc-hero-image {
+                min-height: 260px;
+                border-radius: 18px;
+            }
+
+            .sc-filter-card {
+                grid-template-columns: 1fr;
+                gap: 16px;
+                padding: 18px;
+                margin-bottom: 28px;
+                border-radius: 18px;
+            }
+
+            .sc-date-fields {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .sc-bundle-card {
+                grid-template-columns: 1fr;
+                gap: 18px;
+                padding: 22px;
+                margin-bottom: 36px;
+                border-radius: 18px;
+            }
+
+            .sc-bundle-price {
+                text-align: left;
+            }
+
+            .sc-section {
+                padding-bottom: 38px;
+            }
+
+            .sc-section-heading {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .sc-section-title {
+                font-size: 23px;
+            }
+
+            .sc-category-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 6px;
+            }
+
+            .sc-category-button {
+                flex-shrink: 0;
+            }
+
+            .sc-equipment-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .sc-equipment-image {
+                height: 145px;
+            }
+
+            .sc-equipment-content {
+                padding: 12px;
+            }
+
+            .sc-equipment-name {
+                font-size: 12px;
+            }
+
+            .sc-equipment-description {
+                font-size: 10px;
+            }
+
+            .sc-equipment-footer {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .sc-equipment-footer .sc-btn-primary {
+                width: 100%;
+                min-height: 38px;
+                padding: 9px;
+                font-size: 11px;
+            }
+
+            .sc-location-card {
+                grid-template-columns: 1fr;
+                padding: 20px;
+                margin-bottom: 38px;
+            }
+
+            .sc-location-card h2 {
+                font-size: 20px;
+            }
+
+            .sc-footer-inner {
+                padding: 32px 16px 18px;
+            }
+
+            .sc-footer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 24px 16px;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .sc-brand-subtitle {
+                display: none;
+            }
+
+            .sc-brand-name {
+                font-size: 17px;
+            }
+
+            .sc-nav-actions {
+                gap: 5px;
+            }
+
+            .sc-auth-button {
+                padding: 8px 9px;
+                font-size: 10px;
+            }
+
+            .sc-cart-button,
+            .sc-mobile-menu-button {
+                width: 33px;
+                height: 33px;
+            }
+
+            .sc-equipment-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sc-equipment-image {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <header class="sc-navbar">
+        <div class="sc-navbar-inner">
+            <a href="index.html" class="sc-brand" aria-label="SiCamp Beranda">
+                <div class="sc-brand-icon">
                     <i class="fa-solid fa-tree"></i>
                 </div>
                 <div>
-                    <span class="text-2xl font-extrabold tracking-tight text-slate-900 block leading-none">Si<span class="text-sicamp-700">Camp</span></span>
-                    <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase">Outdoor Gear Rental</span>
+                    <span class="sc-brand-name">Si<span>Camp</span></span>
+                    <span class="sc-brand-subtitle">Outdoor Gear Rental</span>
                 </div>
             </a>
 
-            <!-- Search Bar Navigation -->
-            <div class="hidden lg:flex flex-1 max-w-md mx-8 relative">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
-                <input type="text" id="searchInput" onkeyup="searchKeywordHandler()" placeholder="Cari tenda, carrier, kompor, SB..." class="w-full pl-11 pr-4 py-2.5 bg-slate-100/80 border border-slate-200/80 rounded-full text-xs focus:outline-none focus:border-sicamp-700 focus:bg-white transition-all">
+            <div class="sc-nav-search">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input
+                    type="text"
+                    id="searchInput"
+                    onkeyup="searchKeywordHandler()"
+                    placeholder="Cari tenda, carrier, kompor, SB..."
+                    aria-label="Cari peralatan camping"
+                >
             </div>
 
-            <!-- Navigation Links -->
-            <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
-                <a href="#katalog" class="hover:text-sicamp-700 transition-colors">Katalog</a>
-                <a href="#bundling" class="hover:text-sicamp-700 transition-colors">Paket Bundling</a>
-                <a href="#basecamp" class="hover:text-sicamp-700 transition-colors">Lokasi</a>
-                <span id="navPelanggan"></span>
+            <nav class="sc-nav-links" aria-label="Navigasi utama">
+                <a href="#katalog">Katalog</a>
+                <a href="#bundling">Paket Bundling</a>
+                <a href="#basecamp">Lokasi</a>
             </nav>
 
-            <!-- Cart & User Auth Indicator -->
-            <div class="flex items-center gap-3">
-                
-                <!-- Button Keranjang -->
-                <button onclick="openModalKeranjang()" class="relative p-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full transition-all flex items-center justify-center">
-                    <i class="fa-solid fa-basket-shopping text-base text-sicamp-700"></i>
-                    <span id="cartBadgeCount" class="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+            <div class="sc-nav-actions">
+                <a href="login.html" class="sc-auth-button">Masuk</a>
+
+                <button
+                    type="button"
+                    onclick="openModalKeranjang()"
+                    class="sc-cart-button"
+                    aria-label="Buka keranjang"
+                >
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span id="cartBadgeCount" class="sc-cart-badge">0</span>
                 </button>
 
-                <div id="userIndicator" class="flex items-center gap-2">
-                    <a href="login.html" class="px-4 py-2 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-full transition-all border border-slate-200">Masuk</a>
-                    <a href="register.html" class="px-4 py-2 text-xs font-bold text-white bg-sicamp-700 hover:bg-sicamp-800 rounded-full transition-all shadow-md shadow-sicamp-700/20">Daftar</a>
-                </div>
+                <a href="register.html" class="sc-auth-button">Daftar</a>
+
+                <button
+                    type="button"
+                    id="scMobileMenuButton"
+                    class="sc-mobile-menu-button"
+                    aria-label="Buka menu navigasi"
+                    aria-expanded="false"
+                    aria-controls="scMobileMenu"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
             </div>
         </div>
+
+        <nav id="scMobileMenu" class="sc-mobile-menu" aria-label="Navigasi mobile">
+            <a href="#katalog"><i class="fa-solid fa-campground"></i>Katalog</a>
+            <a href="#bundling"><i class="fa-solid fa-box-open"></i>Paket Bundling</a>
+            <a href="#basecamp"><i class="fa-solid fa-location-dot"></i>Lokasi Basecamp</a>
+            <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i>Masuk</a>
+            <a href="register.html"><i class="fa-solid fa-user-plus"></i>Daftar</a>
+
+            <div class="relative mt-3">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-slate-400 text-sm"></i>
+                <input
+                    type="text"
+                    id="searchInputMobile"
+                    placeholder="Cari peralatan camping..."
+                    aria-label="Cari peralatan camping"
+                    class="w-full h-11 pl-11 pr-4 border border-slate-200 rounded-xl bg-slate-50 text-xs"
+                >
+            </div>
+        </nav>
     </header>
 
-    <!-- 2. HERO SECTION -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-4">
-        <div class="grid lg:grid-cols-12 gap-8 items-center">
-            <div class="lg:col-span-7 space-y-5">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sicamp-100 text-sicamp-800 text-xs font-bold border border-sicamp-200">
-                    <i class="fa-solid fa-location-dot text-sicamp-700"></i> Basecamp Utama Surakarta (Solo)
-                </div>
-                <h1 class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight leading-tight">
-                    Jelajah Alam Bebas,<br><span class="text-slate-900">Tanpa Beban</span> <span class="text-sicamp-700">Beli Alat!</span>
+    <main>
+        <!-- HERO -->
+        <section class="sc-container sc-hero" id="beranda">
+            <div>
+                <span class="sc-location-pill">
+                    <i class="fa-solid fa-location-dot"></i>
+                    Basecamp Utama Surakarta (Solo)
+                </span>
+
+                <h1 class="sc-hero-title">
+                    Jelajah Alam Bebas,<br>
+                    Tanpa Beban <span>Beli Alat!</span>
                 </h1>
-                <p class="text-sm text-slate-500 max-w-xl leading-relaxed">
-                    Peralatan pendakian & kemping terlengkap di Surakarta. Higienis, steril, dan terawat tanpa ribet deposit jaminan tunai.
+
+                <p class="sc-hero-description">
+                    Peralatan pendakian dan kemping terlengkap di Surakarta.
+                    Higienis, steril, dan terawat tanpa ribet deposit jaminan tunai.
                 </p>
 
-                <div class="flex flex-wrap items-center gap-4 pt-2">
-                    <a href="#katalog" class="px-6 py-3.5 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-lg shadow-sicamp-700/25 transition-all flex items-center gap-2">
-                        <i class="fa-solid fa-compass"></i> Sewa Sekarang
+                <div class="sc-hero-buttons">
+                    <a href="#katalog" class="sc-btn-primary">
+                        <i class="fa-solid fa-compass"></i>
+                        Sewa Sekarang
                     </a>
-                    <a href="#bundling" class="px-6 py-3.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs rounded-xl transition-all">
+
+                    <a href="#bundling" class="sc-btn-secondary">
                         Lihat Paket Hemat
                     </a>
                 </div>
 
-                <div class="pt-2 flex flex-wrap gap-6 text-xs text-slate-500 font-medium">
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-sicamp-700"></i> Sewa Cepat & Bebas Ribet</span>
-                    <span class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-sicamp-700"></i> 100% Alat Steril & Terawat</span>
+                <div class="sc-hero-benefits">
+                    <span><i class="fa-solid fa-circle-check"></i>Sewa Cepat & Bebas Ribet</span>
+                    <span><i class="fa-solid fa-circle-check"></i>100% Alat Steril & Terawat</span>
                 </div>
             </div>
 
-            <div class="lg:col-span-5 relative">
-                <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-100">
-                    <img src="https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=1000&q=80" alt="SiCamp Camping" class="w-full h-[320px] object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
-                        <span class="self-start bg-sicamp-700 text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider mb-1">
-                            Basecamp Solo Active
-                        </span>
-                        <h3 class="text-lg font-bold">Siap Pakai & Lolos QC</h3>
-                        <p class="text-xs text-slate-200 mt-0.5">Semua perlengkapan dijamin steril dan lolos QC sebelum diserahkan.</p>
+            <div class="sc-hero-image">
+                <img
+                    src="https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?auto=format&fit=crop&w=1200&q=85"
+                    alt="Tenda camping di alam terbuka"
+                >
+
+                <div class="sc-hero-image-caption">
+                    <span class="badge">BASECAMP SOLO ACTIVE</span>
+                    <h2>Siap Pakai & Lolos QC</h2>
+                    <p>Semua perlengkapan diperiksa sebelum diserahkan kepada penyewa.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- FILTER PENCARIAN -->
+        <section class="sc-container">
+            <form class="sc-filter-card" id="filterSearchForm">
+                <div class="sc-field">
+                    <label for="lokasiBasecamp">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Lokasi Basecamp
+                    </label>
+
+                    <select id="lokasiBasecamp">
+                        <option value="solo">Basecamp Surakarta (Solo)</option>
+                    </select>
+                </div>
+
+                <div class="sc-field">
+                    <label>
+                        <i class="fa-solid fa-calendar-days"></i>
+                        Tanggal Sewa
+                    </label>
+
+                    <div class="sc-date-fields">
+                        <input type="date" id="tglMulai" aria-label="Tanggal mulai sewa">
+                        <input type="date" id="tglSelesai" aria-label="Tanggal selesai sewa">
                     </div>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- 3. SEARCH & FILTER CARD MELAYANG -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div class="bg-white rounded-2xl shadow-xl border border-slate-100 p-4 sm:p-6 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            
-            <!-- Lokasi Basecamp (Solo Only) -->
-            <div class="space-y-1.5">
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-location-dot text-sicamp-700 mr-1"></i> Lokasi Basecamp</label>
-                <select id="searchBasecamp" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                    <option value="Solo">Basecamp Surakarta (Solo)</option>
-                </select>
-            </div>
+                <div class="sc-field">
+                    <label for="filterKategori">
+                        <i class="fa-solid fa-layer-group"></i>
+                        Kategori Peralatan
+                    </label>
 
-            <!-- Tanggal Sewa Date Picker Interaktif -->
-            <div class="space-y-1.5">
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-calendar-days text-sicamp-700 mr-1"></i> Tanggal Sewa</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <input type="date" id="tglMulai" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-sicamp-700 cursor-pointer">
-                    <input type="date" id="tglSelesai" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-2 text-[11px] font-semibold text-slate-700 focus:outline-none focus:border-sicamp-700 cursor-pointer">
+                    <select id="filterKategori">
+                        <option value="">Semua Kategori</option>
+                    </select>
                 </div>
-            </div>
 
-            <!-- Kategori Peralatan (Static Fallback + Dynamic) -->
-            <div class="space-y-1.5">
-                <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider"><i class="fa-solid fa-layer-group text-sicamp-700 mr-1"></i> Kategori Peralatan</label>
-                <select id="searchKategoriSelect" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                    <option value="all">Semua Kategori</option>
-                    <option value="1">Tenda &amp; Shelter</option>
-                    <option value="2">Carrier &amp; Tas</option>
-                    <option value="3">Alat Masak &amp; Makan</option>
-                    <option value="4">Tidur &amp; Matras</option>
-                    <option value="5">Aksesori &amp; Penerangan</option>
-                </select>
-            </div>
-
-            <!-- Tombol Cari Alat -->
-            <button onclick="cariAlatSubmit()" class="w-full h-[42px] bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md shadow-sicamp-700/20 transition-all flex items-center justify-center gap-2">
-                <i class="fa-solid fa-magnifying-glass"></i> Cari Alat
-            </button>
-        </div>
-    </section>
-
-    <!-- 4. PAKET BUNDLING PROMO BANNER -->
-    <section id="bundling" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div class="bg-gradient-to-r from-sicamp-50 via-emerald-50/50 to-white border border-sicamp-200 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
-            <div class="space-y-3 max-w-2xl">
-                <span class="bg-amber-500 text-white text-[10px] font-extrabold px-3 py-1 rounded-md uppercase tracking-wider">
-                    <i class="fa-solid fa-fire mr-1"></i> Promo Bundling Hemat
-                </span>
-                <h3 class="text-2xl font-extrabold text-slate-900 tracking-tight">Paket Bundling Muncak Starter 4P</h3>
-                <p class="text-xs text-slate-600 leading-relaxed">
-                    Solusi kemping praktis untuk kelompok 4 orang! Sudah termasuk tenda waterproof, carrier ergonomis, cooking set komplit, dan kompor portable mini.
-                </p>
-                <div class="flex flex-wrap gap-2 pt-1">
-                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-campground text-sicamp-700 mr-1"></i> 1x Tenda Dome 4P</span>
-                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-backpack text-sicamp-700 mr-1"></i> 1x Carrier 60L</span>
-                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-kitchen-set text-sicamp-700 mr-1"></i> 1x Cooking Set</span>
-                    <span class="bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold px-3 py-1 rounded-lg"><i class="fa-solid fa-fire-burner text-sicamp-700 mr-1"></i> 1x Kompor Mini</span>
-                </div>
-            </div>
-
-            <div class="text-center md:text-right space-y-3 min-w-[200px]">
-                <div>
-                    <span class="text-xs text-slate-400 line-through">Rp 110.000</span>
-                    <div class="text-3xl font-black text-sicamp-700">Rp 85.000 <span class="text-xs text-slate-500 font-normal">/hari</span></div>
-                </div>
-                <button onclick="sewaItem('Paket Bundling Muncak Starter 4P')" class="w-full px-6 py-3 bg-sicamp-700 hover:bg-sicamp-800 text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-cart-shopping"></i> Sewa Paket Group
+                <button type="submit" class="sc-btn-primary w-full">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    Cari Alat
                 </button>
-            </div>
-        </div>
-    </section>
+            </form>
+        </section>
 
-    <!-- 5. KATALOG PERALATAN RENTAL -->
-    <main id="katalog" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-grow">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <div>
-                <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Katalog Rental Outdoor SiCamp</h2>
-                <p class="text-xs text-slate-500 mt-1">Pilih perlengkapan sesuai kebutuhan ekspedisi kamu.</p>
+        <!-- PAKET BUNDLING -->
+        <section class="sc-container" id="bundling">
+            <div class="sc-bundle-card">
+                <div>
+                    <span class="sc-bundle-badge">
+                        <i class="fa-solid fa-fire"></i>
+                        Promo Bundling Hemat
+                    </span>
+
+                    <h2 class="sc-bundle-title">Paket Bundling Muncak Starter 4P</h2>
+
+                    <p class="sc-bundle-description">
+                        Solusi kemping praktis untuk kelompok 4 orang. Paket berisi
+                        tenda, carrier, cooking set, dan kompor portable untuk membantu
+                        kebutuhan pendakian.
+                    </p>
+                </div>
+
+                <div class="sc-bundle-price">
+                    <div class="sc-bundle-old-price">Rp 110.000</div>
+
+                    <div class="sc-bundle-current-price">
+                        Rp 85.000 <span>/hari</span>
+                    </div>
+
+                    <button
+                        type="button"
+                        onclick="sewaItem('Paket Bundling Muncak Starter 4P')"
+                        class="sc-btn-primary"
+                    >
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        Sewa Paket Group
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- KATALOG -->
+        <section class="sc-container sc-section" id="katalog">
+            <div class="sc-section-heading">
+                <div>
+                    <div class="sc-section-eyebrow">Pilihan Peralatan</div>
+                    <h2 class="sc-section-title">Katalog Rental Outdoor SiCamp</h2>
+                    <p class="sc-section-description">
+                        Pilih perlengkapan sesuai kebutuhan ekspedisi kamu.
+                    </p>
+                </div>
             </div>
 
-            <!-- Filter Tab Buttons (Di-render Dinamis via app.js) -->
-            <div id="filterCategoryContainer" class="flex items-center gap-2 overflow-x-auto pb-2">
-                <!-- Di-render oleh JS -->
+            <div id="filterCategoryContainer" class="sc-category-tabs">
+                <!-- Kategori dirender oleh JavaScript -->
             </div>
-        </div>
 
-        <!-- Dynamic Grid Produk -->
-        <div id="equipmentGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Di-render oleh JS -->
-        </div>
+            <div id="equipmentGrid" class="sc-equipment-grid">
+                <!-- Produk dirender oleh JavaScript -->
+            </div>
+        </section>
+
+        <!-- LOKASI BASECAMP -->
+        <section class="sc-container" id="basecamp">
+            <div class="sc-location-card">
+                <div>
+                    <span class="sc-location-pill">Lokasi Utama</span>
+                    <h2>Basecamp SiCamp Surakarta</h2>
+
+                    <p>
+                        Basecamp SiCamp melayani penyewaan peralatan camping dan
+                        pendakian di wilayah Surakarta.
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-clock"></i>
+                        <strong>Buka setiap hari:</strong> 06.00–22.00 WIB
+                    </p>
+
+                    <p>
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        <strong>Alamat:</strong> Universitas Duta Bangsa,
+                        Kampus 1 Bhayangkara, Surakarta
+                    </p>
+                </div>
+
+                <div class="sc-location-map">
+                    <i class="fa-solid fa-location-dot"></i>
+                    Basecamp SiCamp Surakarta
+                </div>
+            </div>
+        </section>
     </main>
 
-    <!-- 6. KENAPA MEMILIH SICAMP (VALUE PROPOSITION) -->
-    <section class="bg-slate-100/60 border-y border-slate-200/80 py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Kenapa Ribuan Pendaki Memilih SiCamp?</h2>
-            <p class="text-xs text-slate-500 mt-1 max-w-lg mx-auto">Pengalaman rental alat outdoor terbaik dengan standar higienis dan keamanan tertinggi.</p>
+    <!-- MODAL CHECKOUT LAMA: 3 TAHAP -->
+    <div
+        id="modalKeranjang"
+        class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end"
+        aria-hidden="true"
+    >
+        <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
-                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
-                        <i class="fa-solid fa-sparkles"></i>
+            <!-- HEADER MODAL DAN STEPPER -->
+            <div class="border-b border-slate-100 bg-slate-50">
+                <div class="p-4 px-5 flex items-center justify-between border-b border-slate-100">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-8 h-8 bg-sicamp-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md">
+                            <i class="fa-solid fa-cart-flatbed"></i>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-900 leading-tight">
+                                Checkout Penyewaan
+                            </h3>
+                            <p id="stepSubtitle" class="text-[10px] text-slate-400">
+                                Tahap 1 dari 3: Ringkasan Keranjang
+                            </p>
+                        </div>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">Higienis & Smells Fresh</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Tenda dan SB di-laundry khusus anti-bakteri setelah dipakai.</p>
+
+                    <button
+                        type="button"
+                        onclick="closeModalKeranjang()"
+                        class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg"
+                        aria-label="Tutup keranjang"
+                    >
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
                 </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
-                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
-                        <i class="fa-solid fa-clipboard-check"></i>
+                <div class="px-5 py-3 bg-white flex items-center justify-between text-xs font-bold">
+                    <div id="stepIndicator1" class="flex items-center gap-1.5 text-sicamp-700">
+                        <span id="stepBadge1" class="w-5 h-5 rounded-full bg-sicamp-700 text-white text-[10px] flex items-center justify-center">1</span>
+                        <span>Keranjang</span>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">QC Gratis Pre-Check</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Pengujian fungsi tenda, zipper, dan kompor langsung di lokasi pengambilan.</p>
-                </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
-                    <div class="w-10 h-10 bg-sicamp-100 text-sicamp-700 rounded-xl flex items-center justify-center text-lg font-bold">
-                        <i class="fa-solid fa-id-card"></i>
+                    <div id="stepLine1" class="h-0.5 w-8 bg-slate-200"></div>
+
+                    <div id="stepIndicator2" class="flex items-center gap-1.5 text-slate-400">
+                        <span id="stepBadge2" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">2</span>
+                        <span>Data Penyewa</span>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">Tarif Pelajar Tanpa Deposit</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Cukup tunjukkan Kartu Pelajar/KTM aktif tanpa perlu biaya deposit jaminan.</p>
-                </div>
 
-                <div class="bg-white p-6 rounded-2xl border border-slate-200/80 shadow-sm text-left space-y-2">
-                    <div class="w-10 h-10 bg-orange-100 text-orange-600 rounded-xl flex items-center justify-center text-lg font-bold">
-                        <i class="fa-solid fa-qrcode"></i>
+                    <div id="stepLine2" class="h-0.5 w-8 bg-slate-200"></div>
+
+                    <div id="stepIndicator3" class="flex items-center gap-1.5 text-slate-400">
+                        <span id="stepBadge3" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">3</span>
+                        <span>Pembayaran</span>
                     </div>
-                    <h4 class="text-sm font-bold text-slate-900">Ambil 24 Jam via Smart QR</h4>
-                    <p class="text-xs text-slate-500 leading-relaxed">Layanan pengambilan mandiri via locker pintar jika ambil subuh/malam.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 7. CARA SEWA (4 STEPS) -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div class="text-center mb-12">
-            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Cara Sewa di SiCamp</h2>
-            <p class="text-xs text-slate-500 mt-1">4 Langkah praktis menyiapkan peralatan pendakian kamu</p>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">01</span>
-                <h4 class="text-sm font-bold text-slate-900 mt-4">Pilih Alat & Tanggal</h4>
-                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Tentukan peralatan dan durasi tanggal sewa sesuai rencana mendaki.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">02</span>
-                <h4 class="text-sm font-bold text-slate-900 mt-4">Konfirmasi & Bayar</h4>
-                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Upload bukti pembayaran secara online untuk amankan stok barang.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">03</span>
-                <h4 class="text-sm font-bold text-slate-900 mt-4">Ambil di Basecampnya</h4>
-                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Ambil di basecamp terdekat atau gunakan layanan pengantaran instant.</p>
-            </div>
-
-            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
-                <span class="text-4xl font-black text-slate-100 absolute right-4 top-3">04</span>
-                <h4 class="text-sm font-bold text-slate-900 mt-4">Kembalikan Santai</h4>
-                <p class="text-xs text-slate-500 mt-2 leading-relaxed">Kembalikan peralatan dalam kondisi utuh, tidak perlu dicuci sendiri!</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- 8. LOKASI BASECAMP & PETA -->
-    <section id="basecamp" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 grid lg:grid-cols-12 gap-8 items-center shadow-sm">
-            <div class="lg:col-span-6 space-y-4">
-                <span class="bg-sicamp-100 text-sicamp-800 text-[10px] font-extrabold px-3 py-1 rounded-md uppercase tracking-wider">
-                    Lokasi Utama
-                </span>
-                <h3 class="text-2xl font-extrabold text-slate-900">Basecamp SiCamp Surakarta</h3>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                    Terletak strategis di pusat Kota Surakarta. Akses mudah, area parkir luas, dan ruang tes kelayakan alat.
-                </p>
-
-                <div class="space-y-2 pt-2 text-xs text-slate-600">
-                    <p class="flex items-center gap-2"><i class="fa-solid fa-clock text-sicamp-700"></i> <strong>Buka Setiap Hari:</strong> 06.00 - 22.00 WIB</p>
-                    <p class="flex items-center gap-2"><i class="fa-solid fa-map-location-dot text-sicamp-700"></i> <strong>Alamat:</strong> Universitas Duta Bangsa (Kampus 1 Bhayangkara), Surakarta</p>
                 </div>
             </div>
 
-            <!-- Embedded Google Maps -->
-            <div class="lg:col-span-6 h-64 rounded-2xl overflow-hidden border border-slate-200 shadow-inner">
-                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3012.575395232685!2d110.80662507500278!3d-7.5781599924361585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a16783dbd32eb%3A0xe852ba0aa1842158!2sUniversitas%20Duta%20Bangsa%20(Kampus%201%20Bhayangkara)!5e1!3m2!1sid!2sid!4v1791275352590!5m2!1sid!2sid" class="w-full h-full border-0" allowfullscreen="" loading="lazy" referrerpolicy="strict-origin-when-cross-origin"></iframe>
-            </div>
-        </div>
-    </section>
+            <!-- ISI CHECKOUT -->
+            <div class="p-5 flex-grow overflow-y-auto">
 
-    <!-- 9. CTA WHATSAPP BANNER -->
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div class="bg-sicamp-800 text-white rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-            <div class="space-y-1 text-center md:text-left">
-                <h3 class="text-xl font-bold">Mau Konsultasi Kebutuhan Alat Pendakian?</h3>
-                <p class="text-xs text-sicamp-200">Tim profesional kami siap membantu merekomendasikan perlengkapan yang sesuai untuk gunung tujuanmu.</p>
-            </div>
-            <a href="https://wa.me/6285559654080" target="_blank" 
-            style="color: #0f172a !important; background-color: #ffffff !important;" 
-            class="px-6 py-3.5 font-extrabold text-xs sm:text-sm rounded-2xl shadow-md hover:bg-slate-100 transition-all flex items-center gap-2.5 shrink-0 no-underline">
-                <i class="fa-brands fa-whatsapp text-emerald-600 text-lg sm:text-xl"></i>
-                <span style="color: #0f172a !important;">Chat Admin WhatsApp</span>
-            </a>
-        </div>
-    </section>
-
-    <!-- MODAL CHECKOUT MULTI-STEP (3 TAHAP) -->
-<!-- MODAL CHECKOUT MULTI-STEP (3 TAHAP) -->
-<div id="modalKeranjang" class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end">
-    <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
-        
-        <!-- Header Modal & Stepper -->
-        <div class="border-b border-slate-100 bg-slate-50">
-            <div class="p-4 px-5 flex items-center justify-between border-b border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 bg-sicamp-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md">
-                        <i class="fa-solid fa-cart-flatbed"></i>
-                    </div>
+                <!-- TAHAP 1 -->
+                <div id="checkoutStep1" class="space-y-4">
                     <div>
-                        <h3 class="text-sm font-bold text-slate-900 leading-tight">Checkout Penyewaan</h3>
-                        <p id="stepSubtitle" class="text-[10px] text-slate-400">Tahap 1 dari 3: Ringkasan Keranjang</p>
+                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                            <i class="fa-solid fa-boxes-stacked text-sicamp-700"></i>
+                            Peralatan Disewa
+                        </h4>
+
+                        <div id="cartItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                            <!-- Item keranjang dirender oleh JavaScript -->
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fa-solid fa-calendar-days text-sicamp-700"></i>
+                            Tanggal Durasi Sewa
+                        </h4>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                    Mulai Sewa <span class="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    id="checkoutTglSewa"
+                                    oninput="hitungkanTotalCheckout()"
+                                    onchange="hitungkanTotalCheckout()"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
+                                >
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                    Rencana Kembali <span class="text-rose-500">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    id="checkoutTglKembali"
+                                    oninput="hitungkanTotalCheckout()"
+                                    onchange="hitungkanTotalCheckout()"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
+                                >
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <button onclick="closeModalKeranjang()" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg text-lg">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
 
-            <!-- Stepper Indicator (Visual 1 - 2 - 3) -->
-            <div class="px-5 py-3 bg-white flex items-center justify-between text-xs font-bold">
-                <div id="stepIndicator1" class="flex items-center gap-1.5 text-sicamp-700">
-                    <span id="stepBadge1" class="w-5 h-5 rounded-full bg-sicamp-700 text-white text-[10px] flex items-center justify-center">1</span>
-                    <span>Keranjang</span>
-                </div>
-                <div id="stepLine1" class="h-0.5 w-8 bg-slate-200"></div>
-                <div id="stepIndicator2" class="flex items-center gap-1.5 text-slate-400">
-                    <span id="stepBadge2" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">2</span>
-                    <span>Data Penyewa</span>
-                </div>
-                <div id="stepLine2" class="h-0.5 w-8 bg-slate-200"></div>
-                <div id="stepIndicator3" class="flex items-center gap-1.5 text-slate-400">
-                    <span id="stepBadge3" class="w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center">3</span>
-                    <span>Pembayaran</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Scrollable Form Container -->
-        <div class="p-5 flex-grow overflow-y-auto">
-            
-            <!-- TAHAP 1: KERANJANG & TANGGAL SEWA -->
-            <div id="checkoutStep1" class="space-y-4">
-                <div>
-                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                        <i class="fa-solid fa-boxes-stacked text-sicamp-700"></i> Peralatan Disewa
-                    </h4>
-                    <div id="cartItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                        <!-- Di-render via JS -->
-                    </div>
-                </div>
-
-                <div class="pt-3 border-t border-slate-100 space-y-2">
+                <!-- TAHAP 2 -->
+                <div id="checkoutStep2" class="space-y-3 hidden">
                     <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                        <i class="fa-solid fa-calendar-days text-sicamp-700"></i> Tanggal Durasi Sewa
+                        <i class="fa-solid fa-id-card text-sicamp-700"></i>
+                        Data Lengkap &amp; Jaminan Digital
                     </h4>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Nama Lengkap Penyewa <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            id="checkoutNama"
+                            placeholder="Sesuai KTP/KTM"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700"
+                        >
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Mulai Sewa <span class="text-rose-500">*</span></label>
-                            <input type="date" id="checkoutTglSewa" oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                No. WhatsApp <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="tel"
+                                id="checkoutWA"
+                                placeholder="08xxxxxxxxxx"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700"
+                            >
                         </div>
+
                         <div>
-                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Rencana Kembali <span class="text-rose-500">*</span></label>
-                            <input type="date" id="checkoutTglKembali" oninput="hitungkanTotalCheckout()" onchange="hitungkanTotalCheckout()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer">
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                No. HP Darurat <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="tel"
+                                id="checkoutKontakDarurat"
+                                placeholder="08xxx (Ortu/Kakak)"
+                                class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700"
+                            >
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <!-- TAHAP 2: ISI DATA PENYEWA & JAMINAN -->
-            <div id="checkoutStep2" class="space-y-3 hidden">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-id-card text-sicamp-700"></i> Data Lengkap &amp; Jaminan Digital
-                </h4>
-
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Nama Lengkap Penyewa <span class="text-rose-500">*</span></label>
-                    <input type="text" id="checkoutNama" placeholder="Sesuai KTP/KTM" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. WhatsApp <span class="text-rose-500">*</span></label>
-                        <input type="tel" id="checkoutWA" placeholder="08xxxxxxxxxx" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Alamat Lengkap Domisili <span class="text-rose-500">*</span>
+                        </label>
+                        <textarea
+                            id="checkoutAlamat"
+                            rows="2"
+                            placeholder="Jl. Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 resize-none"
+                        ></textarea>
                     </div>
+
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">No. HP Darurat <span class="text-rose-500">*</span></label>
-                        <input type="tel" id="checkoutKontakDarurat" placeholder="08xxx (Ortu/Kakak)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700">
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Upload KTP / KTM (Jaminan Digital) <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="file"
+                            id="checkoutKTP"
+                            accept="image/*"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none"
+                        >
                     </div>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Alamat Lengkap Domisili <span class="text-rose-500">*</span></label>
-                    <textarea id="checkoutAlamat" rows="2" placeholder="Jl. Nama Jalan, No. Rumah, RT/RW, Kecamatan, Kota" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 resize-none"></textarea>
-                </div>
+                <!-- TAHAP 3 -->
+                <div id="checkoutStep3" class="space-y-3 hidden">
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-qrcode text-sicamp-700"></i>
+                        Transfer &amp; Unggah Bukti
+                    </h4>
 
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload KTP / KTM (Jaminan Digital) <span class="text-rose-500">*</span></label>
-                    <input type="file" id="checkoutKTP" accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
+                    <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-4">
+                        <div class="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1 shrink-0 flex items-center justify-center text-center shadow-sm">
+                            <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
+                        </div>
+
+                        <div class="text-xs space-y-0.5">
+                            <span class="font-extrabold text-slate-900 block">QRIS SiCamp Surakarta</span>
+                            <p class="text-[11px] text-slate-500">
+                                BCA: <strong class="text-slate-800">123-456-7890</strong> a.n SiCamp
+                            </p>
+                            <p class="text-[10px] text-slate-400">
+                                Scan via GoPay, OVO, Dana, ShopeePay, atau mobile banking.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                            Upload Bukti Transfer <span class="text-rose-500">*</span>
+                        </label>
+                        <input
+                            type="file"
+                            id="checkoutBukti"
+                            accept="image/*"
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none"
+                        >
+                        <p class="text-[10px] text-slate-400 mt-1">
+                            Wajib unggah bukti pembayaran sebelum mengirim pesanan.
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <!-- TAHAP 3: PEMBAYARAN -->
-            <div id="checkoutStep3" class="space-y-3 hidden">
-                <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                    <i class="fa-solid fa-qrcode text-sicamp-700"></i> Transfer &amp; Unggah Bukti
-                </h4>
-
-                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 flex items-center gap-4">
-                    <div class="w-16 h-16 bg-white border border-slate-200 rounded-xl p-1 shrink-0 flex items-center justify-center text-center shadow-sm">
-                        <i class="fa-solid fa-qrcode text-3xl text-slate-800"></i>
-                    </div>
-                    <div class="text-xs space-y-0.5">
-                        <span class="font-extrabold text-slate-900 block">QRIS SiCamp Surakarta</span>
-                        <p class="text-[11px] text-slate-500">BCA: <strong class="text-slate-800">123-456-7890</strong> a.n SiCamp</p>
-                        <p class="text-[10px] text-slate-400">Scan via GoPay, OVO, Dana, ShopeePay, Mobile Banking.</p>
-                    </div>
+            <!-- TOTAL DAN TOMBOL NAVIGASI -->
+            <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-semibold text-slate-500">Rincian Durasi:</span>
+                    <span id="checkoutRincianDurasi" class="font-bold text-slate-800">1 Hari</span>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Upload Bukti Transfer <span class="text-rose-500">*</span></label>
-                    <input type="file" id="checkoutBukti" accept="image/*" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-sicamp-100 file:text-sicamp-800 hover:file:bg-sicamp-200 cursor-pointer">
-                    <p class="text-[10px] text-slate-400 mt-1">*Wajib unggah resi/bukti pembayaran sebelum mengirim pesanan.</p>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-semibold text-slate-500">Total Pembayaran:</span>
+                    <span id="cartTotalHarga" class="text-lg font-extrabold text-sicamp-700">Rp 0</span>
+                </div>
+
+                <div id="stepButtonsArea" class="flex gap-2">
+                    <!-- Tombol navigasi tahap dirender oleh JavaScript -->
                 </div>
             </div>
-
         </div>
-
-        <!-- Total Summary & Dynamic Navigation Buttons -->
-        <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
-            <div class="flex justify-between items-center text-xs">
-                <span class="font-semibold text-slate-500">Rincian Durasi:</span>
-                <span id="checkoutRincianDurasi" class="font-bold text-slate-800">1 Hari</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-xs font-semibold text-slate-500">Total Pembayaran:</span>
-                <span id="cartTotalHarga" class="text-lg font-extrabold text-sicamp-700">Rp 0</span>
-            </div>
-
-            <!-- Tombol Navigasi Berubah Sesuai Tahap -->
-            <div id="stepButtonsArea" class="flex gap-2">
-                <!-- Di-render via JS -->
-            </div>
-        </div>
-
     </div>
-</div>
 
-    <!-- 11. FOOTER -->
-    <footer class="bg-white border-t border-slate-200 py-12 mt-auto">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-slate-100">
-                <div class="space-y-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 bg-sicamp-700 rounded-lg flex items-center justify-center text-white text-base font-black">
+    <!-- FOOTER -->
+    <footer class="sc-footer">
+        <div class="sc-footer-inner">
+            <div class="sc-footer-grid">
+                <div>
+                    <a href="index.html" class="sc-brand">
+                        <div class="sc-brand-icon">
                             <i class="fa-solid fa-tree"></i>
                         </div>
-                        <span class="text-xl font-black text-slate-900">Si<span class="text-sicamp-700">Camp</span></span>
-                    </div>
-                    <p class="text-xs text-slate-500 leading-relaxed">Penyedia layanan rental peralatan outdoor dan kemping terpercaya dengan standar kebersihan terbaik.</p>
+                        <div>
+                            <span class="sc-brand-name">Si<span>Camp</span></span>
+                            <span class="sc-brand-subtitle">Outdoor Gear Rental</span>
+                        </div>
+                    </a>
+
+                    <p>
+                        Penyedia layanan rental peralatan outdoor dan kemping
+                        untuk membantu kebutuhan pendakian kamu.
+                    </p>
                 </div>
 
-                <div class="space-y-2">
-                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Layanan Rental</h5>
-                    <ul class="space-y-1.5 text-xs text-slate-500">
-                        <li><a href="#katalog" class="hover:text-sicamp-700">Sewa Tenda Dome</a></li>
-                        <li><a href="#katalog" class="hover:text-sicamp-700">Sewa Carrier & Backpack</a></li>
-                        <li><a href="#katalog" class="hover:text-sicamp-700">Cooking Set & Kompor</a></li>
+                <div>
+                    <h3>Layanan Rental</h3>
+                    <ul>
+                        <li><a href="#katalog">Sewa Tenda Dome</a></li>
+                        <li><a href="#katalog">Sewa Carrier &amp; Backpack</a></li>
+                        <li><a href="#katalog">Cooking Set &amp; Kompor</a></li>
                     </ul>
                 </div>
 
-                <div class="space-y-2">
-                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Informasi</h5>
-                    <ul class="space-y-1.5 text-xs text-slate-500">
-                        <li><a href="#basecamp" class="hover:text-sicamp-700">Syarat & Ketentuan Sewa</a></li>
-                        <li><a href="#basecamp" class="hover:text-sicamp-700">Panduan Booking Online</a></li>
-                        <li><a href="#basecamp" class="hover:text-sicamp-700">Lokasi Basecamp Solo</a></li>
+                <div>
+                    <h3>Informasi</h3>
+                    <ul>
+                        <li><a href="#basecamp">Syarat &amp; Ketentuan Sewa</a></li>
+                        <li><a href="#basecamp">Panduan Booking Online</a></li>
+                        <li><a href="#basecamp">Lokasi Basecamp Solo</a></li>
                     </ul>
                 </div>
 
-                <div class="space-y-2">
-                    <h5 class="text-xs font-bold text-slate-900 uppercase tracking-wider">Basecamp Utama</h5>
-                    <p class="text-xs text-slate-500 leading-relaxed">Universitas Duta Bangsa (Kampus 1 Bhayangkara), Surakarta</p>
+                <div>
+                    <h3>Basecamp Utama</h3>
+                    <p>
+                        Universitas Duta Bangsa, Kampus 1 Bhayangkara, Surakarta.
+                    </p>
                 </div>
             </div>
 
-            <div class="pt-6 text-center text-xs text-slate-400">
-                &copy; 2026 SiCamp Surakarta. All rights reserved. Built for Outdoor Enthusiasts.
+            <div class="sc-footer-bottom">
+                &copy; 2026 SiCamp Surakarta. All rights reserved.
             </div>
         </div>
     </footer>
 
-    <!-- App Logic JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuButton = document.getElementById('scMobileMenuButton');
+            const mobileMenu = document.getElementById('scMobileMenu');
+
+            if (menuButton && mobileMenu) {
+                menuButton.addEventListener('click', function () {
+                    const isOpen = mobileMenu.classList.toggle('is-open');
+
+                    menuButton.setAttribute('aria-expanded', String(isOpen));
+                    menuButton.setAttribute(
+                        'aria-label',
+                        isOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'
+                    );
+
+                    menuButton.innerHTML = isOpen
+                        ? '<i class="fa-solid fa-xmark"></i>'
+                        : '<i class="fa-solid fa-bars"></i>';
+                });
+
+                mobileMenu.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        mobileMenu.classList.remove('is-open');
+                        menuButton.setAttribute('aria-expanded', 'false');
+                        menuButton.setAttribute('aria-label', 'Buka menu navigasi');
+                        menuButton.innerHTML = '<i class="fa-solid fa-bars"></i>';
+                    });
+                });
+            }
+
+            const desktopSearch = document.getElementById('searchInput');
+            const mobileSearch = document.getElementById('searchInputMobile');
+
+            if (desktopSearch && mobileSearch) {
+                mobileSearch.addEventListener('input', function () {
+                    desktopSearch.value = mobileSearch.value;
+
+                    if (typeof window.searchKeywordHandler === 'function') {
+                        window.searchKeywordHandler();
+                    }
+                });
+
+                desktopSearch.addEventListener('input', function () {
+                    mobileSearch.value = desktopSearch.value;
+                });
+            }
+
+            const tanggalMulai = document.getElementById('tglMulai');
+            const tanggalSelesai = document.getElementById('tglSelesai');
+
+            function setMinimumTanggalSelesai() {
+                if (!tanggalMulai || !tanggalSelesai) return;
+
+                if (tanggalMulai.value) {
+                    tanggalSelesai.min = tanggalMulai.value;
+
+                    if (
+                        tanggalSelesai.value &&
+                        tanggalSelesai.value < tanggalMulai.value
+                    ) {
+                        tanggalSelesai.value = tanggalMulai.value;
+                    }
+                }
+            }
+
+            if (tanggalMulai && tanggalSelesai) {
+                tanggalMulai.addEventListener('change', setMinimumTanggalSelesai);
+                setMinimumTanggalSelesai();
+            }
+
+            const formPencarian = document.getElementById('filterSearchForm');
+
+            if (formPencarian) {
+                formPencarian.addEventListener('submit', function (event) {
+                    event.preventDefault();
+
+                    const katalog = document.getElementById('katalog');
+
+                    if (katalog) {
+                        katalog.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+
+                    if (typeof window.searchKeywordHandler === 'function') {
+                        window.searchKeywordHandler();
+                    }
+                });
+            }
+
+            const filterKategori = document.getElementById('filterKategori');
+
+            if (filterKategori) {
+                filterKategori.addEventListener('change', function () {
+                    const selected = filterKategori.value;
+
+                    const buttons = document.querySelectorAll(
+                        '#filterCategoryContainer [data-category]'
+                    );
+
+                    buttons.forEach(function (button) {
+                        const category = button.getAttribute('data-category') || '';
+                        button.classList.toggle('active', category === selected);
+                    });
+
+                    if (typeof window.renderPeralatan === 'function') {
+                        window.renderPeralatan();
+                    } else if (typeof window.searchKeywordHandler === 'function') {
+                        window.searchKeywordHandler();
+                    }
+                });
+            }
+        });
+
+        function openModalKeranjang() {
+            const modal = document.getElementById('modalKeranjang');
+
+            if (!modal) return;
+
+            modal.classList.remove('hidden');
+            modal.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+
+            if (typeof window.renderKeranjang === 'function') {
+                window.renderKeranjang();
+            }
+        }
+
+        function closeModalKeranjang() {
+            const modal = document.getElementById('modalKeranjang');
+
+            if (!modal) return;
+
+            modal.classList.add('hidden');
+            modal.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        window.openModalKeranjang = openModalKeranjang;
+        window.closeModalKeranjang = closeModalKeranjang;
+    </script>
+
     <script src="js/app.js"></script>
+    <script src="js/home.js"></script>
 </body>
 </html>
