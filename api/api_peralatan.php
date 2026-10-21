@@ -1,5 +1,7 @@
 <?php
+
 require_once __DIR__ . '/koneksi.php';
+
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
@@ -10,15 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-require_once 'koneksi.php';
-
 mysqli_set_charset($conn, "utf8mb4");
 
 $method = $_SERVER['REQUEST_METHOD'];
 
-/**
- * Mengirim respons JSON dan menghentikan proses.
- */
 function responseJSON($status, $message, $extra = [], $httpCode = 200)
 {
     http_response_code($httpCode);
@@ -34,9 +31,6 @@ function responseJSON($status, $message, $extra = [], $httpCode = 200)
     exit();
 }
 
-/**
- * Membaca input JSON atau form-data.
- */
 function getRequestData()
 {
     $rawInput = file_get_contents("php://input");
@@ -53,9 +47,6 @@ function getRequestData()
     return [];
 }
 
-/**
- * Memastikan nilai numerik berupa bilangan bulat nonnegatif.
- */
 function isNonNegativeInteger($value)
 {
     return filter_var(
@@ -65,10 +56,14 @@ function isNonNegativeInteger($value)
     ) !== false;
 }
 
-/**
- * GET: mengambil seluruh data peralatan.
- */
+/*
+|--------------------------------------------------------------------------
+| GET: Mengambil data peralatan
+|--------------------------------------------------------------------------
+*/
+
 if ($method === 'GET') {
+
     $query = "
         SELECT
             p.*,
@@ -84,7 +79,7 @@ if ($method === 'GET') {
     if (!$result) {
         responseJSON(
             "error",
-            "Gagal mengambil data peralatan: " . mysqli_error($conn),
+            "Gagal mengambil data peralatan.",
             [],
             500
         );
@@ -104,23 +99,124 @@ if ($method === 'GET') {
     exit();
 }
 
-/**
- * POST: tambah atau edit peralatan.
- *
- * Jika id_peralatan kosong:
- *     Tambah data dengan AUTO_INCREMENT.
- *
- * Jika id_peralatan terisi:
- *     Edit data dengan UPDATE berdasarkan ID.
- */
+/*
+|--------------------------------------------------------------------------
+| POST / PUT: Tambah atau edit peralatan
+|--------------------------------------------------------------------------
+*/
+
 elseif ($method === 'POST' || $method === 'PUT') {
+
     $data = getRequestData();
 
+    $uploadDir = dirname(__DIR__)
+        . DIRECTORY_SEPARATOR . 'uploads'
+        . DIRECTORY_SEPARATOR . 'peralatan'
+        . DIRECTORY_SEPARATOR;
+
+    $publicUploadPath = 'uploads/peralatan/';
+
+    $newUploadedImage = null;
+
+    /*
+    |--------------------------------------------------------------------------
+    | Upload dan validasi gambar
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+        isset($_FILES['gambar_file']) &&
+        $_FILES['gambar_file']['error'] !== UPLOAD_ERR_NO_FILE
+    ) {
+
+        $file = $_FILES['gambar_file'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            responseJSON(
+                "error",
+                "Gagal mengunggah gambar.",
+                [],
+                422
+            );
+        }
+
+        if ($file['size'] > 2 * 1024 * 1024) {
+            responseJSON(
+                "error",
+                "Ukuran gambar maksimal 2 MB.",
+                [],
+                422
+            );
+        }
+
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
+        $mime = $finfo->file($file['tmp_name']);
+
+        $allowedMime = [
+            'image/jpeg' => 'jpg',
+            'image/png' => 'png',
+            'image/webp' => 'webp'
+        ];
+
+        if (!isset($allowedMime[$mime])) {
+            responseJSON(
+                "error",
+                "Format gambar harus JPG, PNG, atau WEBP.",
+                [],
+                422
+            );
+        }
+
+        if (
+            !is_dir($uploadDir) &&
+            !mkdir($uploadDir, 0755, true) &&
+            !is_dir($uploadDir)
+        ) {
+            responseJSON(
+                "error",
+                "Folder penyimpanan gambar tidak dapat dibuat.",
+                [],
+                500
+            );
+        }
+
+        $fileName = bin2hex(random_bytes(16))
+            . '.'
+            . $allowedMime[$mime];
+
+        if (
+            !move_uploaded_file(
+                $file['tmp_name'],
+                $uploadDir . $fileName
+            )
+        ) {
+            responseJSON(
+                "error",
+                "Gambar gagal disimpan ke server.",
+                [],
+                500
+            );
+        }
+
+        $newUploadedImage = $publicUploadPath . $fileName;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Mengambil data form
+    |--------------------------------------------------------------------------
+    */
+
     $id_peralatan = trim(
-        (string) ($data['id_peralatan'] ?? $data['id'] ?? '')
+        (string) (
+            $data['id_peralatan']
+            ?? $data['id']
+            ?? ''
+        )
     );
 
     $id_kategori = $data['id_kategori'] ?? '';
+
     $nama_peralatan = trim(
         (string) ($data['nama_peralatan'] ?? '')
     );
@@ -129,9 +225,15 @@ elseif ($method === 'POST' || $method === 'PUT') {
         (string) ($data['deskripsi'] ?? '')
     );
 
-    $gambar = $data['gambar'] ?? null;
+    $gambar = $newUploadedImage
+        ?? ($data['gambar'] ?? null);
+
+    if (($data['hapus_gambar'] ?? '') === '1') {
+        $gambar = '';
+    }
 
     $harga_sewa = $data['harga_sewa'] ?? null;
+
     $stok = $data['stok'] ?? null;
 
     $kondisi = trim(
@@ -142,7 +244,12 @@ elseif ($method === 'POST' || $method === 'PUT') {
         (string) ($data['status'] ?? 'Aktif')
     );
 
-    // Validasi kategori.
+    /*
+    |--------------------------------------------------------------------------
+    | Validasi input
+    |--------------------------------------------------------------------------
+    */
+
     if (
         !is_scalar($id_kategori) ||
         !isNonNegativeInteger($id_kategori) ||
@@ -156,7 +263,6 @@ elseif ($method === 'POST' || $method === 'PUT') {
         );
     }
 
-    // Validasi nama peralatan.
     if ($nama_peralatan === '') {
         responseJSON(
             "error",
@@ -175,7 +281,6 @@ elseif ($method === 'POST' || $method === 'PUT') {
         );
     }
 
-    // Validasi harga.
     if (
         !is_numeric($harga_sewa) ||
         (float) $harga_sewa < 0
@@ -188,10 +293,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
         );
     }
 
-    // Validasi stok.
-    if (
-        !isNonNegativeInteger($stok)
-    ) {
+    if (!isNonNegativeInteger($stok)) {
         responseJSON(
             "error",
             "Stok harus berupa bilangan bulat nol atau lebih.",
@@ -200,7 +302,6 @@ elseif ($method === 'POST' || $method === 'PUT') {
         );
     }
 
-    // Validasi status sesuai ENUM pada database.
     if (!in_array($status, ['Aktif', 'Tidak Aktif'], true)) {
         responseJSON(
             "error",
@@ -210,7 +311,12 @@ elseif ($method === 'POST' || $method === 'PUT') {
         );
     }
 
-    // Pastikan kategori tersedia.
+    /*
+    |--------------------------------------------------------------------------
+    | Memeriksa kategori
+    |--------------------------------------------------------------------------
+    */
+
     $stmtKategori = mysqli_prepare(
         $conn,
         "SELECT id_kategori
@@ -239,6 +345,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
     mysqli_stmt_execute($stmtKategori);
 
     $resultKategori = mysqli_stmt_get_result($stmtKategori);
+
     $kategoriAda = mysqli_fetch_assoc($resultKategori);
 
     mysqli_stmt_close($stmtKategori);
@@ -253,22 +360,24 @@ elseif ($method === 'POST' || $method === 'PUT') {
     }
 
     /*
-     * Tambah peralatan.
-     * ID dibuat otomatis oleh MySQL.
-     */
+    |--------------------------------------------------------------------------
+    | Menambahkan peralatan
+    |--------------------------------------------------------------------------
+    */
+
     if ($id_peralatan === '') {
+
         $query = "
-            INSERT INTO peralatan
-                (
-                    id_kategori,
-                    nama_peralatan,
-                    deskripsi,
-                    gambar,
-                    stok,
-                    harga_sewa,
-                    kondisi,
-                    status
-                )
+            INSERT INTO peralatan (
+                id_kategori,
+                nama_peralatan,
+                deskripsi,
+                gambar,
+                stok,
+                harga_sewa,
+                kondisi,
+                status
+            )
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         ";
 
@@ -277,7 +386,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
         if (!$stmt) {
             responseJSON(
                 "error",
-                "Gagal menyiapkan penyimpanan peralatan: " . mysqli_error($conn),
+                "Gagal menyiapkan penyimpanan peralatan.",
                 [],
                 500
             );
@@ -302,6 +411,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
 
         if (!mysqli_stmt_execute($stmt)) {
             $error = mysqli_stmt_error($stmt);
+
             mysqli_stmt_close($stmt);
 
             responseJSON(
@@ -326,9 +436,13 @@ elseif ($method === 'POST' || $method === 'PUT') {
     }
 
     /*
-     * Edit peralatan.
-     * ID lama dipertahankan.
-     */ else {
+    |--------------------------------------------------------------------------
+    | Mengedit peralatan
+    |--------------------------------------------------------------------------
+    */
+
+    else {
+
         if (
             !ctype_digit($id_peralatan) ||
             (int) $id_peralatan < 1
@@ -347,10 +461,11 @@ elseif ($method === 'POST' || $method === 'PUT') {
         $hargaFloat = (float) $harga_sewa;
 
         /*
-         * Jika gambar tidak dikirim atau null,
-         * gambar lama dipertahankan.
+         * Jika tidak ada gambar baru, gambar lama dipertahankan.
          */
-        if ($gambar === null || $gambar === '') {
+
+        if ($gambar === null) {
+
             $query = "
                 UPDATE peralatan
                 SET
@@ -369,7 +484,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
             if (!$stmt) {
                 responseJSON(
                     "error",
-                    "Gagal menyiapkan perubahan peralatan: " . mysqli_error($conn),
+                    "Gagal menyiapkan perubahan peralatan.",
                     [],
                     500
                 );
@@ -387,7 +502,14 @@ elseif ($method === 'POST' || $method === 'PUT') {
                 $status,
                 $idInt
             );
-        } else {
+        }
+
+        /*
+         * Jika gambar baru tersedia, simpan path gambar baru.
+         */
+
+        else {
+
             $query = "
                 UPDATE peralatan
                 SET
@@ -407,7 +529,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
             if (!$stmt) {
                 responseJSON(
                     "error",
-                    "Gagal menyiapkan perubahan peralatan: " . mysqli_error($conn),
+                    "Gagal menyiapkan perubahan peralatan.",
                     [],
                     500
                 );
@@ -430,6 +552,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
 
         if (!mysqli_stmt_execute($stmt)) {
             $error = mysqli_stmt_error($stmt);
+
             mysqli_stmt_close($stmt);
 
             responseJSON(
@@ -444,11 +567,6 @@ elseif ($method === 'POST' || $method === 'PUT') {
 
         mysqli_stmt_close($stmt);
 
-        /*
-         * affectedRows = 0 bisa berarti data tidak berubah.
-         * Periksa keberadaan ID agar kondisi tersebut
-         * tidak keliru dianggap sebagai data hilang.
-         */
         $stmtCheck = mysqli_prepare(
             $conn,
             "SELECT id_peralatan
@@ -466,6 +584,7 @@ elseif ($method === 'POST' || $method === 'PUT') {
         mysqli_stmt_execute($stmtCheck);
 
         $resultCheck = mysqli_stmt_get_result($stmtCheck);
+
         $dataAda = mysqli_fetch_assoc($resultCheck);
 
         mysqli_stmt_close($stmtCheck);
@@ -490,12 +609,20 @@ elseif ($method === 'POST' || $method === 'PUT') {
     }
 }
 
-/**
- * DELETE: menghapus peralatan berdasarkan ID.
- */
+/*
+|--------------------------------------------------------------------------
+| DELETE: Menghapus peralatan
+|--------------------------------------------------------------------------
+*/
+
 elseif ($method === 'DELETE') {
+
     $id = trim(
-        (string) ($_GET['id'] ?? $_GET['id_peralatan'] ?? '')
+        (string) (
+            $_GET['id']
+            ?? $_GET['id_peralatan']
+            ?? ''
+        )
     );
 
     if (
@@ -536,6 +663,7 @@ elseif ($method === 'DELETE') {
 
     if (!mysqli_stmt_execute($stmt)) {
         $error = mysqli_stmt_error($stmt);
+
         mysqli_stmt_close($stmt);
 
         responseJSON(
@@ -565,10 +693,14 @@ elseif ($method === 'DELETE') {
     );
 }
 
-/**
- * Metode HTTP selain yang didukung.
- */
+/*
+|--------------------------------------------------------------------------
+| Metode HTTP tidak didukung
+|--------------------------------------------------------------------------
+*/
+
 else {
+
     header("Allow: GET, POST, PUT, DELETE, OPTIONS");
 
     responseJSON(
