@@ -13,8 +13,10 @@
         kategori: [],
         peralatan: [],
         kategoriAktif: 'all',
-        kataKunci: ''
+        kataKunci: []
     };
+
+    let currentCheckoutStep = 1;
 
     const FALLBACK_IMAGE =
         'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80';
@@ -409,7 +411,7 @@
             );
         }
 
-        const keyword = state.kataKunci.trim().toLowerCase();
+        const keyword = String(state.kataKunci || '').trim().toLowerCase();
 
         if (keyword) {
             data = data.filter(item =>
@@ -696,6 +698,136 @@
         return total;
     }
 
+    function updateCheckoutStep(step) {
+        currentCheckoutStep = step;
+
+        const step1 = el('checkoutStep1');
+        const step2 = el('checkoutStep2');
+        const step3 = el('checkoutStep3');
+        const dateSection = el('checkoutDateSection');
+        const subtitle = el('stepSubtitle');
+        const buttonsArea = el('stepButtonsArea');
+
+        if (!step1 || !step2 || !step3 || !buttonsArea) return;
+
+        step1.classList.add('hidden');
+        step2.classList.add('hidden');
+        step3.classList.add('hidden');
+
+        [1, 2, 3].forEach(i => {
+            const badge = el(`stepBadge${i}`);
+            const indicator = el(`stepIndicator${i}`);
+            const line = el(`stepLine${i - 1}`);
+
+            if (badge && indicator) {
+                if (i <= step) {
+                    badge.className = 'w-5 h-5 rounded-full bg-sicamp-700 text-white text-[10px] flex items-center justify-center font-bold';
+                    indicator.className = 'flex items-center gap-1.5 text-sicamp-700 font-bold';
+                } else {
+                    badge.className = 'w-5 h-5 rounded-full bg-slate-200 text-slate-600 text-[10px] flex items-center justify-center font-bold';
+                    indicator.className = 'flex items-center gap-1.5 text-slate-400 font-bold';
+                }
+            }
+
+            if (line) {
+                line.className = i <= step ? 'h-0.5 w-8 bg-sicamp-700' : 'h-0.5 w-8 bg-slate-200';
+            }
+        });
+
+        if (step === 1) {
+            step1.classList.remove('hidden');
+            if (dateSection) dateSection.classList.remove('hidden');
+            if (subtitle) subtitle.textContent = 'Tahap 1 dari 3: Ringkasan Keranjang';
+
+            buttonsArea.innerHTML = `
+                <button type="button" onclick="nextCheckoutStep(2)" class="w-full sc-btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <span>Lanjut Ke Data Penyewa</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            `;
+        } else if (step === 2) {
+            step2.classList.remove('hidden');
+            if (dateSection) dateSection.classList.add('hidden');
+            if (subtitle) subtitle.textContent = 'Tahap 2 dari 3: Data Penyewa & Jaminan';
+
+            buttonsArea.innerHTML = `
+                <button type="button" onclick="nextCheckoutStep(1)" class="w-1/3 sc-btn-secondary py-3 rounded-xl font-bold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Kembali</span>
+                </button>
+                <button type="button" onclick="nextCheckoutStep(3)" class="w-2/3 sc-btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
+                    <span>Lanjut Pembayaran</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            `;
+        } else if (step === 3) {
+            step3.classList.remove('hidden');
+            if (dateSection) dateSection.classList.add('hidden');
+            if (subtitle) subtitle.textContent = 'Tahap 3 dari 3: Pembayaran & Bukti Transfer';
+
+            buttonsArea.innerHTML = `
+                <button type="button" onclick="nextCheckoutStep(2)" class="w-1/3 sc-btn-secondary py-3 rounded-xl font-bold flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>Kembali</span>
+                </button>
+                <button type="button" onclick="submitPesanan()" class="w-2/3 sc-btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-emerald-600 border-emerald-600 hover:bg-emerald-700">
+                    <i class="fa-solid fa-paper-plane"></i>
+                    <span>Kirim Pesanan</span>
+                </button>
+            `;
+        }
+    }
+
+    function nextCheckoutStep(targetStep) {
+        if (targetStep === 2) {
+            const keranjang = bacaKeranjang();
+            if (!keranjang.length) {
+                notifikasi('Keranjang Anda masih kosong.', 'error');
+                return;
+            }
+
+            const tglSewa = el('checkoutTglSewa')?.value;
+            const tglKembali = el('checkoutTglKembali')?.value;
+
+            if (!tglSewa || !tglKembali) {
+                notifikasi('Harap isi tanggal mulai dan rencana kembali sewa.', 'error');
+                return;
+            }
+        }
+
+        if (targetStep === 3) {
+            const nama = el('checkoutNama')?.value.trim();
+            const wa = el('checkoutWA')?.value.trim();
+            const darurat = el('checkoutKontakDarurat')?.value.trim();
+            const alamat = el('checkoutAlamat')?.value.trim();
+            const ktp = el('checkoutKTP')?.files.length;
+
+            if (!nama || !wa || !darurat || !alamat || !ktp) {
+                notifikasi('Harap lengkapi semua Data Penyewa dan Upload KTP/KTM.', 'error');
+                return;
+            }
+        }
+
+        updateCheckoutStep(targetStep);
+    }
+
+    function submitPesanan() {
+        const bukti = el('checkoutBukti')?.files.length;
+
+        if (!bukti) {
+            notifikasi('Wajib mengunggah bukti transfer pembayaran.', 'error');
+            return;
+        }
+
+        notifikasi('Pesanan Anda berhasil dikirim!', 'success');
+
+        simpanKeranjang([]);
+
+        if (typeof window.closeModalKeranjang === 'function') {
+            window.closeModalKeranjang();
+        }
+    }
+
     function pasangEventKatalog() {
         const grid = gridKatalog();
 
@@ -818,6 +950,9 @@
     window.renderPeralatan = renderPeralatan;
     window.loadHomeKategori = loadKategori;
     window.loadHomePeralatan = loadPeralatan;
+    window.updateCheckoutStep = updateCheckoutStep;
+    window.nextCheckoutStep = nextCheckoutStep;
+    window.submitPesanan = submitPesanan;
 
     window.searchKeywordHandler = function () {
         const input = el('searchInput');

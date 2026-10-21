@@ -69,15 +69,11 @@
             max-width: 100%;
         }
 
-        input,
-        select,
-        textarea,
-        button {
+        input, select, textarea, button {
             font: inherit;
         }
 
-        button,
-        a {
+        button, a {
             -webkit-tap-highlight-color: transparent;
         }
 
@@ -85,10 +81,7 @@
             text-decoration: none;
         }
 
-        button:focus-visible,
-        a:focus-visible,
-        input:focus-visible,
-        select:focus-visible {
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
             outline: 2px solid var(--primary);
             outline-offset: 3px;
         }
@@ -526,8 +519,7 @@
             color: var(--primary);
         }
 
-        .sc-field select,
-        .sc-field input {
+        .sc-field select, .sc-field input {
             width: 100%;
             min-width: 0;
             height: 42px;
@@ -664,8 +656,7 @@
             transition: 0.2s ease;
         }
 
-        .sc-category-button:hover,
-        .sc-category-button.active {
+        .sc-category-button:hover, .sc-category-button.active {
             border-color: var(--primary);
             background: var(--primary);
             color: #fff;
@@ -829,8 +820,7 @@
             font-weight: 800;
         }
 
-        .sc-footer-grid p,
-        .sc-footer-grid li {
+        .sc-footer-grid p, .sc-footer-grid li {
             color: #64748b;
             font-size: 11px;
             line-height: 1.9;
@@ -972,8 +962,7 @@
                 font-size: 11px;
             }
 
-            .sc-cart-button,
-            .sc-mobile-menu-button {
+            .sc-cart-button, .sc-mobile-menu-button {
                 width: 36px;
                 height: 36px;
             }
@@ -1010,8 +999,7 @@
                 gap: 10px;
             }
 
-            .sc-hero-buttons .sc-btn-primary,
-            .sc-hero-buttons .sc-btn-secondary {
+            .sc-hero-buttons .sc-btn-primary, .sc-hero-buttons .sc-btn-secondary {
                 flex: 1;
                 padding-right: 12px;
                 padding-left: 12px;
@@ -1146,8 +1134,7 @@
                 font-size: 10px;
             }
 
-            .sc-cart-button,
-            .sc-mobile-menu-button {
+            .sc-cart-button, .sc-mobile-menu-button {
                 width: 33px;
                 height: 33px;
             }
@@ -1160,118 +1147,10 @@
                 height: 200px;
             }
         }
-
-        #modalKeranjang {
-    overflow: hidden;
-}
-
-#modalKeranjang > div {
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    height: 100%;
-    max-height: 100dvh;
-    overflow: hidden;
-}
-
-#modalKeranjang > div > div:first-child {
-    flex-shrink: 0;
-}
-
-#modalKeranjang > div > div:nth-child(2) {
-    flex: 1 1 auto;
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-}
-
-#checkoutStep1 {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-#checkoutStep1 > div:first-child {
-    flex: 1 1 auto;
-    min-height: 0;
-}
-
-#cartItemsContainer {
-    max-height: min(32vh, 280px);
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 5px;
-    scrollbar-width: thin;
-    scrollbar-color: #cbd5e1 transparent;
-}
-
-#checkoutStep1 > div:nth-child(2) {
-    position: sticky;
-    bottom: -1px;
-    z-index: 5;
-    flex-shrink: 0;
-    margin-top: 0;
-    padding: 14px 0 12px;
-    background: #ffffff;
-    border-top: 1px solid #e2e8f0;
-}
-
-#checkoutTglSewa,
-#checkoutTglKembali {
-    min-width: 0;
-    width: 100%;
-}
-
-#modalKeranjang > div > div:last-child {
-    position: relative;
-    z-index: 10;
-    flex-shrink: 0;
-    padding-bottom: max(20px, env(safe-area-inset-bottom));
-    background: #f8fafc;
-    border-top: 1px solid #e2e8f0;
-}
-
-#checkoutStep2,
-#checkoutStep3 {
-    padding-bottom: 12px;
-}
-
-@media (max-height: 650px) {
-    #cartItemsContainer {
-        max-height: 24vh;
-    }
-
-    #checkoutStep1 > div:nth-child(2) {
-        padding-top: 10px;
-        padding-bottom: 8px;
-    }
-
-    #modalKeranjang > div > div:last-child {
-        padding-top: 12px;
-        padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-}
-
-@media (max-width: 480px) {
-    #modalKeranjang > div {
-        width: 100%;
-        max-width: 100%;
-    }
-
-    #cartItemsContainer {
-        max-height: 28vh;
-    }
-
-    #checkoutStep1 > div:nth-child(2) {
-        padding-top: 12px;
-        padding-bottom: 12px;
-    }
-}
     </style>
 </head>
 
 <body>
-    <!-- NAVBAR -->
     <header class="sc-navbar">
         <div class="sc-navbar-inner">
             <a href="index.html" class="sc-brand" aria-label="SiCamp Beranda">
@@ -1350,7 +1229,6 @@
     </header>
 
     <main>
-        <!-- HERO -->
         <section class="sc-container sc-hero" id="beranda">
             <div>
                 <span class="sc-location-pill">
@@ -1399,7 +1277,6 @@
             </div>
         </section>
 
-        <!-- FILTER PENCARIAN -->
         <section class="sc-container">
             <form class="sc-filter-card" id="filterSearchForm">
                 <div class="sc-field">
@@ -1443,7 +1320,6 @@
             </form>
         </section>
 
-        <!-- PAKET BUNDLING -->
         <section class="sc-container" id="bundling">
             <div class="sc-bundle-card">
                 <div>
@@ -1480,7 +1356,6 @@
             </div>
         </section>
 
-        <!-- KATALOG -->
         <section class="sc-container sc-section" id="katalog">
             <div class="sc-section-heading">
                 <div>
@@ -1493,15 +1368,12 @@
             </div>
 
             <div id="filterCategoryContainer" class="sc-category-tabs">
-                <!-- Kategori dirender oleh JavaScript -->
             </div>
 
             <div id="equipmentGrid" class="sc-equipment-grid">
-                <!-- Produk dirender oleh JavaScript -->
             </div>
         </section>
 
-        <!-- LOKASI BASECAMP -->
         <section class="sc-container" id="basecamp">
             <div class="sc-location-card">
                 <div>
@@ -1533,7 +1405,6 @@
         </section>
     </main>
 
-    <!-- MODAL CHECKOUT LAMA: 3 TAHAP -->
     <div
         id="modalKeranjang"
         class="fixed inset-0 z-50 hidden bg-slate-900/50 backdrop-blur-sm flex justify-end"
@@ -1541,8 +1412,7 @@
     >
         <div class="w-full max-w-lg bg-white h-full shadow-2xl flex flex-col justify-between overflow-hidden">
 
-            <!-- HEADER MODAL DAN STEPPER -->
-            <div class="border-b border-slate-100 bg-slate-50">
+            <div class="border-b border-slate-100 bg-slate-50 shrink-0">
                 <div class="p-4 px-5 flex items-center justify-between border-b border-slate-100">
                     <div class="flex items-center gap-2.5">
                         <div class="w-8 h-8 bg-sicamp-700 text-white rounded-lg flex items-center justify-center text-sm shadow-md">
@@ -1591,10 +1461,8 @@
                 </div>
             </div>
 
-            <!-- ISI CHECKOUT -->
-            <div class="p-5 flex-grow overflow-y-auto">
+            <div class="p-5 flex-1 overflow-y-auto min-h-0">
 
-                <!-- TAHAP 1 -->
                 <div id="checkoutStep1" class="space-y-4">
                     <div>
                         <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
@@ -1602,48 +1470,11 @@
                             Peralatan Disewa
                         </h4>
 
-                        <div id="cartItemsContainer" class="space-y-2 max-h-48 overflow-y-auto pr-1">
-                            <!-- Item keranjang dirender oleh JavaScript -->
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-100 space-y-2">
-                        <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
-                            <i class="fa-solid fa-calendar-days text-sicamp-700"></i>
-                            Tanggal Durasi Sewa
-                        </h4>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                                    Mulai Sewa <span class="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    id="checkoutTglSewa"
-                                    oninput="hitungkanTotalCheckout()"
-                                    onchange="hitungkanTotalCheckout()"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
-                                >
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
-                                    Rencana Kembali <span class="text-rose-500">*</span>
-                                </label>
-                                <input
-                                    type="date"
-                                    id="checkoutTglKembali"
-                                    oninput="hitungkanTotalCheckout()"
-                                    onchange="hitungkanTotalCheckout()"
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
-                                >
-                            </div>
+                        <div id="cartItemsContainer" class="space-y-2 pr-1">
                         </div>
                     </div>
                 </div>
 
-                <!-- TAHAP 2 -->
                 <div id="checkoutStep2" class="space-y-3 hidden">
                     <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-id-card text-sicamp-700"></i>
@@ -1713,7 +1544,6 @@
                     </div>
                 </div>
 
-                <!-- TAHAP 3 -->
                 <div id="checkoutStep3" class="space-y-3 hidden">
                     <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fa-solid fa-qrcode text-sicamp-700"></i>
@@ -1753,8 +1583,43 @@
                 </div>
             </div>
 
-            <!-- TOTAL DAN TOMBOL NAVIGASI -->
-            <div class="p-5 border-t border-slate-100 bg-slate-50 space-y-3 shrink-0">
+            <div class="p-5 border-t border-slate-200 bg-slate-50 space-y-3 shrink-0 shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+                
+                <div id="checkoutDateSection" class="pb-2 border-b border-slate-200 space-y-2">
+                    <h4 class="text-[11px] font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-calendar-days text-sicamp-700"></i>
+                        Tanggal Durasi Sewa
+                    </h4>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                Mulai Sewa <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                id="checkoutTglSewa"
+                                oninput="hitungkanTotalCheckout()"
+                                onchange="hitungkanTotalCheckout()"
+                                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
+                            >
+                        </div>
+
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                Rencana Kembali <span class="text-rose-500">*</span>
+                            </label>
+                            <input
+                                type="date"
+                                id="checkoutTglKembali"
+                                oninput="hitungkanTotalCheckout()"
+                                onchange="hitungkanTotalCheckout()"
+                                class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sicamp-700 cursor-pointer"
+                            >
+                        </div>
+                    </div>
+                </div>
+
                 <div class="flex justify-between items-center text-xs">
                     <span class="font-semibold text-slate-500">Rincian Durasi:</span>
                     <span id="checkoutRincianDurasi" class="font-bold text-slate-800">1 Hari</span>
@@ -1765,14 +1630,12 @@
                     <span id="cartTotalHarga" class="text-lg font-extrabold text-sicamp-700">Rp 0</span>
                 </div>
 
-                <div id="stepButtonsArea" class="flex gap-2">
-                    <!-- Tombol navigasi tahap dirender oleh JavaScript -->
+                <div id="stepButtonsArea" class="flex gap-2 pt-1">
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- FOOTER -->
     <footer class="sc-footer">
         <div class="sc-footer-inner">
             <div class="sc-footer-grid">
@@ -1948,6 +1811,10 @@
             modal.classList.remove('hidden');
             modal.setAttribute('aria-hidden', 'false');
             document.body.style.overflow = 'hidden';
+
+            if (typeof window.updateCheckoutStep === 'function') {
+                window.updateCheckoutStep(1);
+            }
 
             if (typeof window.renderKeranjang === 'function') {
                 window.renderKeranjang();
