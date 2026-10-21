@@ -1,9 +1,3 @@
-/* =========================================================
-   SICAMP - BERANDA PELANGGAN
-   Memuat kategori dan peralatan dari database melalui API
-   Tidak mengubah fungsi sidebar maupun halaman admin
-   ========================================================= */
-
 (() => {
     'use strict';
 
@@ -12,20 +6,22 @@
         peralatan: 'api/api_peralatan.php'
     };
 
+    const CART_KEY = 'keranjang';
+    const CART_KEY_ALT = 'sicamp_keranjang';
+
     const state = {
         kategori: [],
         peralatan: [],
         kategoriAktif: 'all',
-        kataKunci: '',
-        sedangMemuat: false
+        kataKunci: ''
     };
 
     const FALLBACK_IMAGE =
         'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80';
 
-    /* =====================================================
-       UTILITAS
-       ===================================================== */
+    function el(id) {
+        return document.getElementById(id);
+    }
 
     function escapeHTML(value) {
         return String(value ?? '').replace(/[&<>"']/g, char => ({
@@ -37,17 +33,11 @@
         })[char]);
     }
 
-    function formatRupiah(value) {
-        const harga = Number(value) || 0;
-
-        return 'Rp' + harga.toLocaleString('id-ID');
+    function rupiah(value) {
+        return 'Rp' + (Number(value) || 0).toLocaleString('id-ID');
     }
 
-    function getElement(id) {
-        return document.getElementById(id);
-    }
-
-    function getFirstValue(object, keys, fallback = '') {
+    function firstValue(object, keys, fallback = '') {
         for (const key of keys) {
             if (
                 object &&
@@ -63,25 +53,27 @@
     }
 
     function normalizeResponse(response) {
-        if (Array.isArray(response)) {
-            return response;
-        }
+        if (Array.isArray(response)) return response;
+        if (!response || typeof response !== 'object') return [];
 
-        if (!response || typeof response !== 'object') {
-            return [];
-        }
-
-        const possibleKeys = [
+        for (const key of [
             'data',
             'result',
             'kategori',
             'peralatan',
-            'items'
-        ];
-
-        for (const key of possibleKeys) {
+            'items',
+            'results',
+            'records'
+        ]) {
             if (Array.isArray(response[key])) {
                 return response[key];
+            }
+        }
+
+        for (const key of ['data', 'result']) {
+            if (response[key] && typeof response[key] === 'object') {
+                const nested = normalizeResponse(response[key]);
+                if (nested.length) return nested;
             }
         }
 
@@ -98,690 +90,159 @@
         });
 
         const text = await response.text();
-
         let result;
 
         try {
             result = JSON.parse(text);
         } catch {
-            throw new Error(
-                'Respons API bukan JSON yang valid. Periksa file ' + url
-            );
-        }
-
-        if (!response.ok) {
-            throw new Error(
-                result.message ||
-                'Gagal mengambil data dari ' + url
-            );
+            throw new Error('Respons API bukan JSON yang valid.');
         }
 
         if (
-            result &&
-            result.success === false
+            !response.ok ||
+            result.success === false ||
+            result.status === 'error'
         ) {
-            throw new Error(
-                result.message ||
-                'API tidak berhasil mengambil data.'
-            );
+            throw new Error(result.message || 'Gagal mengambil data API.');
         }
 
         return normalizeResponse(result);
     }
 
-    /* =====================================================
-       NORMALISASI DATA DATABASE
-       ===================================================== */
-
-    function getKategoriId(item) {
-        return String(
-            getFirstValue(item, [
-                'id_kategori',
-                'kategori_id',
-                'idKategori'
-            ], '')
-        );
+    function idKategori(item) {
+        return String(firstValue(item, [
+            'id_kategori',
+            'kategori_id',
+            'idKategori'
+        ], ''));
     }
 
-    function getKategoriNama(item) {
-        return String(
-            getFirstValue(item, [
-                'nama_kategori',
-                'kategori',
-                'namaKategori'
-            ], 'Kategori lainnya')
-        );
+    function namaKategori(item) {
+        return String(firstValue(item, [
+            'nama_kategori',
+            'kategori',
+            'namaKategori'
+        ], 'Peralatan Outdoor'));
     }
 
-    function getPeralatanId(item) {
-        return String(
-            getFirstValue(item, [
-                'id_peralatan',
-                'id_alat',
-                'peralatan_id',
-                'id'
-            ], '')
-        );
+    function idPeralatan(item) {
+        return String(firstValue(item, [
+            'id_peralatan',
+            'id_alat',
+            'peralatan_id',
+            'id'
+        ], ''));
     }
 
-    function getPeralatanNama(item) {
-        return String(
-            getFirstValue(item, [
-                'nama_peralatan',
-                'nama_alat',
-                'nama',
-                'nama_barang'
-            ], 'Peralatan tanpa nama')
-        );
+    function namaPeralatan(item) {
+        return String(firstValue(item, [
+            'nama_peralatan',
+            'nama_alat',
+            'nama',
+            'nama_barang'
+        ], 'Peralatan Camping'));
     }
 
-    function getPeralatanDeskripsi(item) {
-        return String(
-            getFirstValue(item, [
-                'deskripsi',
-                'keterangan',
-                'detail'
-            ], 'Peralatan outdoor untuk menemani kegiatan camping.')
-        );
+    function deskripsiPeralatan(item) {
+        return String(firstValue(item, [
+            'deskripsi',
+            'keterangan',
+            'detail'
+        ], 'Peralatan outdoor untuk kegiatan camping.'));
     }
 
-    function getPeralatanHarga(item) {
-        return Number(
-            getFirstValue(item, [
-                'harga_sewa',
-                'harga',
-                'harga_per_hari'
-            ], 0)
-        ) || 0;
+    function hargaPeralatan(item) {
+        return Number(firstValue(item, [
+            'harga_sewa',
+            'harga',
+            'harga_per_hari'
+        ], 0)) || 0;
     }
 
-    function getPeralatanStok(item) {
-        return Number(
-            getFirstValue(item, [
-                'stok',
-                'jumlah_stok',
-                'stock'
-            ], 0)
-        ) || 0;
+    function stokPeralatan(item) {
+        return Math.max(0, Number(firstValue(item, [
+            'stok',
+            'jumlah_stok',
+            'stock'
+        ], 0)) || 0);
     }
 
-    function getPeralatanStatus(item) {
-        return String(
-            getFirstValue(item, [
-                'status'
-            ], 'Aktif')
-        ).toLowerCase();
+    function statusAktif(item) {
+        const status = String(firstValue(item, ['status'], 'Aktif'))
+            .trim()
+            .toLowerCase();
+
+        return ![
+            'tidak aktif',
+            'nonaktif',
+            'non-aktif',
+            'inactive',
+            '0',
+            'false',
+            'deleted'
+        ].includes(status);
     }
 
-    function getPeralatanGambar(item) {
-        const gambar = getFirstValue(item, [
+    function gambarPeralatan(item) {
+        return String(firstValue(item, [
             'gambar',
             'foto',
             'image',
             'foto_peralatan',
             'gambar_peralatan'
-        ], '');
-
-        if (!gambar) {
-            return FALLBACK_IMAGE;
-        }
-
-        const value = String(gambar).trim();
-
-        if (
-            value.startsWith('data:image/') ||
-            value.startsWith('https://') ||
-            value.startsWith('http://')
-        ) {
-            return value;
-        }
-
-        /*
-         * Jika database menyimpan path gambar lokal,
-         * path tersebut digunakan sebagai sumber gambar.
-         *
-         * Contoh:
-         * assets/peralatan/tenda.jpg
-         * uploads/tenda.jpg
-         */
-
-        return value;
+        ], '')).trim() || FALLBACK_IMAGE;
     }
 
-    function getNamaKategoriPeralatan(item) {
-        const kategoriDariData = getFirstValue(item, [
+    function kategoriPeralatan(item) {
+        const nama = firstValue(item, [
             'nama_kategori',
             'kategori',
             'kategori_peralatan'
         ], '');
 
-        if (kategoriDariData) {
-            if (typeof kategoriDariData === 'object') {
-                return getKategoriNama(kategoriDariData);
-            }
-
-            return String(kategoriDariData);
+        if (nama) {
+            return typeof nama === 'object'
+                ? namaKategori(nama)
+                : String(nama);
         }
 
-        const idKategori = String(
-            getFirstValue(item, [
-                'id_kategori',
-                'kategori_id'
-            ], '')
-        );
-
+        const id = idKategori(item);
         const kategori = state.kategori.find(
-            itemKategori => getKategoriId(itemKategori) === idKategori
+            itemKategori => idKategori(itemKategori) === id
         );
 
-        return kategori
-            ? getKategoriNama(kategori)
-            : 'Peralatan Outdoor';
+        return kategori ? namaKategori(kategori) : 'Peralatan Outdoor';
     }
 
-    function isPeralatanAktif(item) {
-        const status = getPeralatanStatus(item);
-
-        return [
-            'aktif',
-            'active',
-            'tersedia',
-            '1'
-        ].includes(status);
+    function gridKatalog() {
+        return el('equipmentGrid') ||
+            el('katalogPeralatan') ||
+            el('productGrid');
     }
 
-    /* =====================================================
-       ELEMEN BERANDA
-       ===================================================== */
-
-    function getGridKatalog() {
-        return (
-            getElement('equipmentGrid') ||
-            getElement('katalogPeralatan') ||
-            getElement('productGrid')
-        );
+    function containerKategori() {
+        return el('filterCategoryContainer') ||
+            el('categoryContainer') ||
+            el('kategoriContainer');
     }
 
-    function getContainerKategori() {
-        return (
-            getElement('filterCategoryContainer') ||
-            getElement('categoryContainer') ||
-            getElement('kategoriContainer')
-        );
-    }
-
-    function tampilkanPesanKatalog(pesan, jenis = 'info') {
-        const grid = getGridKatalog();
-
-        if (!grid) {
-            console.warn(
-                'Elemen katalog tidak ditemukan. ' +
-                'Periksa ID equipmentGrid di index.html.'
-            );
-
-            return;
-        }
-
-        const warna = jenis === 'error'
-            ? 'text-rose-600'
-            : 'text-slate-500';
-
-        grid.innerHTML = `
-            <div class="col-span-full py-12 text-center">
-                <div class="mx-auto mb-4 flex h-14 w-14
-                            items-center justify-center rounded-2xl
-                            bg-slate-100 text-slate-400">
-                    <i class="fa-solid ${
-                        jenis === 'error'
-                            ? 'fa-circle-exclamation'
-                            : 'fa-box-open'
-                    } text-xl"></i>
-                </div>
-
-                <p class="${warna} text-sm font-semibold">
-                    ${escapeHTML(pesan)}
-                </p>
-            </div>
-        `;
-    }
-
-    /* =====================================================
-       RENDER KATEGORI
-       ===================================================== */
-
-    function renderKategori() {
-        const container = getContainerKategori();
-
-        if (!container) {
-            console.warn(
-                'Elemen kategori tidak ditemukan. ' +
-                'Periksa ID filterCategoryContainer di index.html.'
-            );
-
-            return;
-        }
-
-        const semuaKategori = [
-            {
-                id: 'all',
-                nama: 'Semua Peralatan'
-            },
-            ...state.kategori.map(item => ({
-                id: getKategoriId(item),
-                nama: getKategoriNama(item)
-            }))
-        ];
-
-        container.innerHTML = semuaKategori.map(kategori => {
-            const aktif =
-                String(state.kategoriAktif) === String(kategori.id);
-
-            return `
-                <button
-                    type="button"
-                    class="home-category-button ${
-                        aktif
-                            ? 'bg-sicamp-700 text-white border-sicamp-700'
-                            : 'bg-white text-slate-600 border-slate-200 hover:border-sicamp-500 hover:text-sicamp-700'
-                    } inline-flex items-center gap-2 rounded-full
-                       border px-4 py-2.5 text-xs font-bold
-                       transition-all"
-                    data-home-category="${escapeHTML(kategori.id)}"
-                    aria-pressed="${aktif ? 'true' : 'false'}"
-                >
-                    ${escapeHTML(kategori.nama)}
-                </button>
-            `;
-        }).join('');
-
-        container.querySelectorAll('[data-home-category]').forEach(button => {
-            button.addEventListener('click', () => {
-                state.kategoriAktif = button.dataset.homeCategory;
-
-                renderKategori();
-                renderPeralatan();
-            });
-        });
-    }
-
-    /* =====================================================
-       FILTER DAN PENCARIAN
-       ===================================================== */
-
-    function getPeralatanTersaring() {
-        let data = state.peralatan.filter(isPeralatanAktif);
-
-        if (state.kategoriAktif !== 'all') {
-            data = data.filter(item => {
-                const idKategori = String(
-                    getFirstValue(item, [
-                        'id_kategori',
-                        'kategori_id'
-                    ], '')
-                );
-
-                return idKategori === String(state.kategoriAktif);
-            });
-        }
-
-        const keyword = state.kataKunci
-            .trim()
-            .toLowerCase();
-
-        if (keyword) {
-            data = data.filter(item => {
-                const nama = getPeralatanNama(item).toLowerCase();
-                const deskripsi = getPeralatanDeskripsi(item).toLowerCase();
-                const kategori = getNamaKategoriPeralatan(item).toLowerCase();
-
-                return (
-                    nama.includes(keyword) ||
-                    deskripsi.includes(keyword) ||
-                    kategori.includes(keyword)
-                );
-            });
-        }
-
-        return data;
-    }
-
-    function pasangPencarian() {
-        const searchInput = getElement('searchInput');
-
-        if (!searchInput || searchInput.dataset.homeInitialized === 'true') {
-            return;
-        }
-
-        searchInput.dataset.homeInitialized = 'true';
-
-        searchInput.addEventListener('input', event => {
-            state.kataKunci = event.target.value || '';
-
-            renderPeralatan();
-        });
-
-        /*
-         * Tetap mendukung atribut HTML lama:
-         * onkeyup="searchKeywordHandler()"
-         */
-    }
-
-    /* =====================================================
-       RENDER KARTU PERALATAN
-       ===================================================== */
-
-    function renderPeralatan() {
-        const grid = getGridKatalog();
-
-        if (!grid) {
-            return;
-        }
-
-        const data = getPeralatanTersaring();
-
-        if (data.length === 0) {
-            tampilkanPesanKatalog(
-                state.kataKunci
-                    ? 'Peralatan tidak ditemukan. Coba kata kunci lain.'
-                    : 'Belum ada peralatan yang tersedia untuk ditampilkan.'
-            );
-
-            return;
-        }
-
-        grid.innerHTML = data.map(item => {
-            const id = getPeralatanId(item);
-            const nama = getPeralatanNama(item);
-            const deskripsi = getPeralatanDeskripsi(item);
-            const harga = getPeralatanHarga(item);
-            const stok = getPeralatanStok(item);
-            const gambar = getPeralatanGambar(item);
-            const kategori = getNamaKategoriPeralatan(item);
-
-            const stokTersedia = stok > 0;
-
-            return `
-                <article
-                    class="home-equipment-card group overflow-hidden
-                           rounded-2xl border border-slate-200/80
-                           bg-white shadow-sm transition-all
-                           hover:-translate-y-1 hover:shadow-lg"
-                    data-equipment-id="${escapeHTML(id)}"
-                >
-                    <div class="relative h-52 overflow-hidden bg-slate-100">
-                        <img
-                            src="${escapeHTML(gambar)}"
-                            alt="${escapeHTML(nama)}"
-                            loading="lazy"
-                            class="h-full w-full object-cover transition-transform
-                                   duration-500 group-hover:scale-105"
-                            onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'"
-                        >
-
-                        <span class="absolute left-3 top-3 rounded-full
-                                     bg-white/95 px-3 py-1.5 text-[10px]
-                                     font-bold text-sicamp-800 shadow-sm">
-                            ${escapeHTML(kategori)}
-                        </span>
-
-                        <span class="absolute right-3 top-3 rounded-full
-                                     px-3 py-1.5 text-[10px] font-bold
-                                     ${
-                                         stokTersedia
-                                             ? 'bg-emerald-100 text-emerald-700'
-                                             : 'bg-rose-100 text-rose-700'
-                                     }">
-                            ${
-                                stokTersedia
-                                    ? 'Stok ' + stok
-                                    : 'Stok Habis'
-                            }
-                        </span>
-                    </div>
-
-                    <div class="space-y-3 p-4">
-                        <div>
-                            <h3 class="line-clamp-1 text-base
-                                       font-extrabold text-slate-900">
-                                ${escapeHTML(nama)}
-                            </h3>
-
-                            <p class="mt-1 line-clamp-2 min-h-[2.5rem]
-                                      text-xs leading-relaxed text-slate-500">
-                                ${escapeHTML(deskripsi)}
-                            </p>
-                        </div>
-
-                        <div class="flex items-end justify-between gap-3
-                                    border-t border-slate-100 pt-3">
-                            <div>
-                                <p class="text-[10px] font-semibold
-                                          text-slate-400">
-                                    Harga sewa
-                                </p>
-
-                                <p class="mt-0.5 text-base font-black
-                                          text-sicamp-700">
-                                    ${formatRupiah(harga)}
-                                    <span class="text-[10px] font-medium
-                                                 text-slate-400">
-                                        /hari
-                                    </span>
-                                </p>
-                            </div>
-
-                            <button
-                                type="button"
-                                class="home-rent-button rounded-xl
-                                       px-3.5 py-2.5 text-xs font-bold
-                                       transition-all
-                                       ${
-                                           stokTersedia
-                                               ? 'bg-sicamp-700 text-white hover:bg-sicamp-800'
-                                               : 'cursor-not-allowed bg-slate-100 text-slate-400'
-                                       }"
-                                data-rent-id="${escapeHTML(id)}"
-                                ${stokTersedia ? '' : 'disabled'}
-                            >
-                                <i class="fa-solid fa-basket-shopping mr-1"></i>
-                                ${stokTersedia ? 'Tambah' : 'Habis'}
-                            </button>
-                        </div>
-                    </div>
-                </article>
-            `;
-        }).join('');
-
-        pasangTombolKeranjang();
-    }
-
-    /* =====================================================
-       KERANJANG
-       ===================================================== */
-
-    function pasangTombolKeranjang() {
-        const grid = getGridKatalog();
-
-        if (!grid) {
-            return;
-        }
-
-        grid.querySelectorAll('[data-rent-id]').forEach(button => {
-            button.addEventListener('click', () => {
-                const id = button.dataset.rentId;
-
-                const peralatan = state.peralatan.find(
-                    item => getPeralatanId(item) === String(id)
-                );
-
-                if (!peralatan) {
-                    tampilkanNotifikasi(
-                        'Data peralatan tidak ditemukan.',
-                        'error'
-                    );
-
-                    return;
-                }
-
-                if (
-                    !isPeralatanAktif(peralatan) ||
-                    getPeralatanStok(peralatan) <= 0
-                ) {
-                    tampilkanNotifikasi(
-                        'Peralatan sedang tidak tersedia.',
-                        'error'
-                    );
-
-                    return;
-                }
-
-                /*
-                 * Jika app.js atau script beranda lama menyediakan
-                 * fungsi tambah keranjang, gunakan fungsi tersebut.
-                 * Nama fungsi yang tidak tersedia tidak akan dipanggil.
-                 */
-
-                const fungsiKeranjang = [
-                    'tambahKeKeranjang',
-                    'addToCart',
-                    'tambahKeranjang',
-                    'sewaItem'
-                ];
-
-                for (const namaFungsi of fungsiKeranjang) {
-                    if (typeof window[namaFungsi] === 'function') {
-                        try {
-                            window[namaFungsi](id);
-                            return;
-                        } catch (error) {
-                            console.error(
-                                'Gagal menggunakan fungsi keranjang:',
-                                error
-                            );
-
-                            break;
-                        }
-                    }
-                }
-
-                /*
-                 * Jika fungsi keranjang lama tidak tersedia,
-                 * simpan item ke keranjang lokal sebagai fallback.
-                 *
-                 * Ini bukan transaksi database. Checkout tetap harus
-                 * menggunakan API penyewaan yang benar.
-                 */
-
-                tambahKeranjangLokal(peralatan);
-            });
-        });
-    }
-
-    function tambahKeranjangLokal(peralatan) {
-        let keranjang = [];
-
-        try {
-            keranjang = JSON.parse(
-                localStorage.getItem('sicamp_keranjang') || '[]'
-            );
-
-            if (!Array.isArray(keranjang)) {
-                keranjang = [];
-            }
-        } catch {
-            keranjang = [];
-        }
-
-        const id = getPeralatanId(peralatan);
-
-        const itemLama = keranjang.find(item =>
-            String(
-                getFirstValue(item, [
-                    'id_peralatan',
-                    'id_alat',
-                    'id'
-                ], '')
-            ) === String(id)
-        );
-
-        if (itemLama) {
-            const jumlah = Number(
-                getFirstValue(itemLama, [
-                    'jumlah',
-                    'qty',
-                    'quantity'
-                ], 1)
-            );
-
-            if (jumlah >= getPeralatanStok(peralatan)) {
-                tampilkanNotifikasi(
-                    'Jumlah barang sudah mencapai batas stok.',
-                    'error'
-                );
-
-                return;
-            }
-
-            if ('jumlah' in itemLama) {
-                itemLama.jumlah = jumlah + 1;
-            } else if ('qty' in itemLama) {
-                itemLama.qty = jumlah + 1;
-            } else {
-                itemLama.jumlah = jumlah + 1;
-            }
-        } else {
-            keranjang.push({
-                id_peralatan: id,
-                nama_peralatan: getPeralatanNama(peralatan),
-                harga_sewa: getPeralatanHarga(peralatan),
-                gambar: getPeralatanGambar(peralatan),
-                jumlah: 1
-            });
-        }
-
-        localStorage.setItem(
-            'sicamp_keranjang',
-            JSON.stringify(keranjang)
-        );
-
-        perbaruiBadgeKeranjang(keranjang.length);
-
-        tampilkanNotifikasi(
-            getPeralatanNama(peralatan) + ' ditambahkan ke keranjang.',
-            'success'
-        );
-    }
-
-    function perbaruiBadgeKeranjang(jumlah) {
-        const badge = getElement('cartBadgeCount');
-
-        if (badge) {
-            badge.textContent = String(jumlah);
-        }
-    }
-
-    function tampilkanNotifikasi(pesan, jenis = 'info') {
+    function notifikasi(pesan, jenis = 'info') {
         if (typeof window.showNotification === 'function') {
             window.showNotification(pesan, jenis);
             return;
         }
 
-        let toast = getElement('homeToast');
+        let toast = el('homeToast');
 
         if (!toast) {
             toast = document.createElement('div');
             toast.id = 'homeToast';
-
             toast.className =
-                'fixed bottom-5 right-5 z-[100] max-w-sm ' +
-                'rounded-xl px-4 py-3 text-sm font-semibold ' +
-                'text-white shadow-xl transition-all';
-
+                'fixed bottom-5 right-5 z-[100] max-w-sm rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-xl';
             document.body.appendChild(toast);
         }
 
         toast.textContent = pesan;
-
         toast.style.backgroundColor =
             jenis === 'error' ? '#e11d48' :
             jenis === 'success' ? '#15803d' :
@@ -796,131 +257,599 @@
         }, 3000);
     }
 
-    /* =====================================================
-       MUAT DATA DARI API
-       ===================================================== */
+    function tampilkanPesanKatalog(pesan, error = false) {
+        const grid = gridKatalog();
+        if (!grid) return;
+
+        grid.innerHTML = `
+            <div class="col-span-full py-12 text-center">
+                <p class="${error ? 'text-rose-600' : 'text-slate-500'} text-sm font-semibold">
+                    ${escapeHTML(pesan)}
+                </p>
+            </div>
+        `;
+    }
+
+    function bacaKeranjang() {
+        try {
+            const utama = JSON.parse(
+                localStorage.getItem(CART_KEY) || 'null'
+            );
+
+            const alternatif = JSON.parse(
+                localStorage.getItem(CART_KEY_ALT) || 'null'
+            );
+
+            const data = Array.isArray(utama)
+                ? utama
+                : Array.isArray(alternatif)
+                    ? alternatif
+                    : [];
+
+            return data.map(item => {
+                const jumlah = Math.max(1, Number(firstValue(item, [
+                    'qty',
+                    'jumlah',
+                    'quantity'
+                ], 1)) || 1);
+
+                return {
+                    ...item,
+                    id_peralatan: String(firstValue(item, [
+                        'id_peralatan',
+                        'id_alat',
+                        'peralatan_id',
+                        'id'
+                    ], '')),
+                    nama_peralatan: String(firstValue(item, [
+                        'nama_peralatan',
+                        'nama_alat',
+                        'nama',
+                        'nama_barang'
+                    ], 'Peralatan Camping')),
+                    harga_sewa: Number(firstValue(item, [
+                        'harga_sewa',
+                        'harga',
+                        'harga_per_hari'
+                    ], 0)) || 0,
+                    gambar: gambarPeralatan(item),
+                    stok: Number(firstValue(item, [
+                        'stok',
+                        'jumlah_stok',
+                        'stock'
+                    ], 999)) || 999,
+                    qty: jumlah,
+                    jumlah: jumlah
+                };
+            });
+        } catch (error) {
+            console.error('Gagal membaca keranjang:', error);
+            return [];
+        }
+    }
+
+    function simpanKeranjang(data) {
+        const keranjang = data.map(item => {
+            const jumlah = Math.max(
+                1,
+                Number(item.qty ?? item.jumlah ?? 1) || 1
+            );
+
+            return {
+                ...item,
+                qty: jumlah,
+                jumlah: jumlah
+            };
+        });
+
+        localStorage.setItem(CART_KEY, JSON.stringify(keranjang));
+        localStorage.setItem(CART_KEY_ALT, JSON.stringify(keranjang));
+
+        updateCartBadge();
+        renderKeranjang();
+    }
+
+    function jumlahItemKeranjang() {
+        return bacaKeranjang().reduce((total, item) => {
+            return total + Number(item.qty || 1);
+        }, 0);
+    }
+
+    function updateCartBadge() {
+        const badge = el('cartBadgeCount');
+        if (!badge) return;
+
+        const jumlah = jumlahItemKeranjang();
+
+        badge.textContent = String(jumlah);
+        badge.style.display = 'flex';
+    }
+
+    function renderKategori() {
+        const container = containerKategori();
+        if (!container) return;
+
+        const daftar = [
+            {
+                id: 'all',
+                nama: 'Semua Peralatan'
+            },
+            ...state.kategori.map(item => ({
+                id: idKategori(item),
+                nama: namaKategori(item)
+            }))
+        ];
+
+        container.innerHTML = daftar.map(item => {
+            const aktif =
+                String(state.kategoriAktif) === String(item.id);
+
+            return `
+                <button
+                    type="button"
+                    class="home-category-button ${
+                        aktif
+                            ? 'bg-sicamp-700 text-white border-sicamp-700'
+                            : 'bg-white text-slate-600 border-slate-200 hover:border-sicamp-500 hover:text-sicamp-700'
+                    } inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-xs font-bold transition-all"
+                    data-home-category="${escapeHTML(item.id)}"
+                    aria-pressed="${aktif}">
+                    ${escapeHTML(item.nama)}
+                </button>
+            `;
+        }).join('');
+    }
+
+    function dataPeralatanTersaring() {
+        let data = state.peralatan.filter(statusAktif);
+
+        if (state.kategoriAktif !== 'all') {
+            data = data.filter(item =>
+                idKategori(item) === String(state.kategoriAktif)
+            );
+        }
+
+        const keyword = state.kataKunci.trim().toLowerCase();
+
+        if (keyword) {
+            data = data.filter(item =>
+                namaPeralatan(item).toLowerCase().includes(keyword) ||
+                deskripsiPeralatan(item).toLowerCase().includes(keyword) ||
+                kategoriPeralatan(item).toLowerCase().includes(keyword)
+            );
+        }
+
+        return data;
+    }
+
+    function renderPeralatan() {
+        const grid = gridKatalog();
+        if (!grid) return;
+
+        const data = dataPeralatanTersaring();
+
+        if (!data.length) {
+            tampilkanPesanKatalog(
+                state.peralatan.length
+                    ? 'Peralatan tidak ditemukan. Coba kata kunci lain.'
+                    : 'Belum ada data peralatan yang tersedia.'
+            );
+            return;
+        }
+
+        grid.innerHTML = data.map(item => {
+            const id = idPeralatan(item);
+            const nama = namaPeralatan(item);
+            const harga = hargaPeralatan(item);
+            const stok = stokPeralatan(item);
+            const tersedia = stok > 0;
+
+            return `
+                <article
+                    class="home-equipment-card group overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-lg"
+                    data-equipment-id="${escapeHTML(id)}">
+
+                    <div class="relative h-52 overflow-hidden bg-slate-100">
+                        <img
+                            src="${escapeHTML(gambarPeralatan(item))}"
+                            alt="${escapeHTML(nama)}"
+                            loading="lazy"
+                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                            onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
+
+                        <span class="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1.5 text-[10px] font-bold text-sicamp-800 shadow-sm">
+                            ${escapeHTML(kategoriPeralatan(item))}
+                        </span>
+
+                        <span class="absolute right-3 top-3 rounded-full px-3 py-1.5 text-[10px] font-bold ${
+                            tersedia
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-rose-100 text-rose-700'
+                        }">
+                            ${tersedia ? 'Stok ' + stok : 'Stok Habis'}
+                        </span>
+                    </div>
+
+                    <div class="space-y-3 p-4">
+                        <div>
+                            <h3 class="line-clamp-1 text-base font-extrabold text-slate-900">
+                                ${escapeHTML(nama)}
+                            </h3>
+
+                            <p class="mt-1 line-clamp-2 min-h-[2.5rem] text-xs leading-relaxed text-slate-500">
+                                ${escapeHTML(deskripsiPeralatan(item))}
+                            </p>
+                        </div>
+
+                        <div class="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
+                            <div>
+                                <p class="text-[10px] font-semibold text-slate-400">
+                                    Harga sewa
+                                </p>
+
+                                <p class="mt-0.5 text-base font-black text-sicamp-700">
+                                    ${rupiah(harga)}
+                                    <span class="text-[10px] font-medium text-slate-400">/hari</span>
+                                </p>
+                            </div>
+
+                            <button
+                                type="button"
+                                class="home-rent-button rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all ${
+                                    tersedia
+                                        ? 'bg-sicamp-700 text-white hover:bg-sicamp-800'
+                                        : 'cursor-not-allowed bg-slate-100 text-slate-400'
+                                }"
+                                data-rent-id="${escapeHTML(id)}"
+                                ${tersedia ? '' : 'disabled'}>
+                                <i class="fa-solid fa-basket-shopping mr-1"></i>
+                                ${tersedia ? 'Tambah' : 'Habis'}
+                            </button>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    function tambahKeKeranjang(id) {
+        const peralatan = state.peralatan.find(
+            item => idPeralatan(item) === String(id)
+        );
+
+        if (!peralatan) {
+            notifikasi('Data peralatan tidak ditemukan.', 'error');
+            return;
+        }
+
+        if (!statusAktif(peralatan) || stokPeralatan(peralatan) <= 0) {
+            notifikasi('Peralatan sedang tidak tersedia.', 'error');
+            return;
+        }
+
+        const keranjang = bacaKeranjang();
+        const idBarang = idPeralatan(peralatan);
+
+        const itemLama = keranjang.find(
+            item => String(item.id_peralatan) === idBarang
+        );
+
+        if (itemLama) {
+            if (itemLama.qty >= stokPeralatan(peralatan)) {
+                notifikasi('Jumlah barang sudah mencapai batas stok.', 'error');
+                return;
+            }
+
+            itemLama.qty += 1;
+            itemLama.jumlah = itemLama.qty;
+        } else {
+            keranjang.push({
+                id_peralatan: idBarang,
+                nama_peralatan: namaPeralatan(peralatan),
+                harga_sewa: hargaPeralatan(peralatan),
+                gambar: gambarPeralatan(peralatan),
+                stok: stokPeralatan(peralatan),
+                qty: 1,
+                jumlah: 1
+            });
+        }
+
+        simpanKeranjang(keranjang);
+
+        notifikasi(
+            namaPeralatan(peralatan) + ' berhasil ditambahkan ke keranjang.',
+            'success'
+        );
+    }
+
+    function renderKeranjang() {
+        const container = el('cartItemsContainer');
+
+        if (!container) return;
+
+        const keranjang = bacaKeranjang();
+
+        if (!keranjang.length) {
+            container.innerHTML = `
+                <div class="rounded-xl border border-dashed border-slate-200 p-5 text-center">
+                    <i class="fa-solid fa-basket-shopping text-2xl text-slate-300"></i>
+                    <p class="mt-2 text-xs font-bold text-slate-600">
+                        Keranjang masih kosong
+                    </p>
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        Klik tombol Tambah pada peralatan yang ingin disewa.
+                    </p>
+                </div>
+            `;
+
+            updateCartBadge();
+            hitungkanTotalCheckout();
+            return;
+        }
+
+        container.innerHTML = keranjang.map((item, index) => `
+            <div
+                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"
+                data-cart-index="${index}">
+
+                <img
+                    src="${escapeHTML(item.gambar || FALLBACK_IMAGE)}"
+                    alt="${escapeHTML(item.nama_peralatan)}"
+                    class="h-16 w-16 shrink-0 rounded-lg bg-slate-100 object-cover"
+                    onerror="this.onerror=null;this.src='${FALLBACK_IMAGE}'">
+
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-800">
+                        ${escapeHTML(item.nama_peralatan)}
+                    </p>
+
+                    <p class="mt-1 text-xs font-bold text-sicamp-700">
+                        ${rupiah(item.harga_sewa)}
+                        <span class="font-normal text-slate-400">/hari</span>
+                    </p>
+
+                    <div class="mt-2 flex items-center gap-2">
+                        <button
+                            type="button"
+                            class="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
+                            data-cart-action="minus"
+                            data-cart-index="${index}"
+                            aria-label="Kurangi jumlah">
+                            −
+                        </button>
+
+                        <span class="min-w-4 text-center text-xs font-bold">
+                            ${item.qty}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
+                            data-cart-action="plus"
+                            data-cart-index="${index}"
+                            aria-label="Tambah jumlah">
+                            +
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-end gap-2">
+                    <p class="text-xs font-bold text-slate-800">
+                        ${rupiah(item.harga_sewa * item.qty)}
+                    </p>
+
+                    <button
+                        type="button"
+                        class="rounded-lg p-2 text-rose-500 hover:bg-rose-50"
+                        data-cart-action="remove"
+                        data-cart-index="${index}"
+                        aria-label="Hapus barang">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+
+        updateCartBadge();
+        hitungkanTotalCheckout();
+    }
+
+    function hitungkanTotalCheckout() {
+        const keranjang = bacaKeranjang();
+
+        const tanggalMulai = el('checkoutTglSewa')?.value || '';
+        const tanggalKembali = el('checkoutTglKembali')?.value || '';
+
+        let durasi = 1;
+
+        if (tanggalMulai && tanggalKembali) {
+            const mulai = new Date(tanggalMulai + 'T00:00:00');
+            const kembali = new Date(tanggalKembali + 'T00:00:00');
+
+            const selisih = Math.round(
+                (kembali.getTime() - mulai.getTime()) /
+                (1000 * 60 * 60 * 24)
+            );
+
+            durasi = selisih > 0 ? selisih : 1;
+        }
+
+        const total = keranjang.reduce((jumlah, item) => {
+            return jumlah +
+                (Number(item.harga_sewa) || 0) *
+                (Number(item.qty) || 1) *
+                durasi;
+        }, 0);
+
+        const totalElement = el('cartTotalHarga');
+
+        if (totalElement) {
+            totalElement.textContent = rupiah(total);
+        }
+
+        const durasiElement = el('checkoutRincianDurasi');
+
+        if (durasiElement) {
+            durasiElement.textContent = durasi + ' Hari';
+        }
+
+        return total;
+    }
+
+    function pasangEventKatalog() {
+        const grid = gridKatalog();
+
+        if (grid && grid.dataset.homeCartBound !== 'true') {
+            grid.dataset.homeCartBound = 'true';
+
+            grid.addEventListener('click', event => {
+                const button = event.target.closest('[data-rent-id]');
+
+                if (!button || button.disabled) return;
+
+                event.preventDefault();
+                tambahKeKeranjang(button.dataset.rentId);
+            });
+        }
+
+        const kategori = containerKategori();
+
+        if (kategori && kategori.dataset.homeCategoryBound !== 'true') {
+            kategori.dataset.homeCategoryBound = 'true';
+
+            kategori.addEventListener('click', event => {
+                const button = event.target.closest('[data-home-category]');
+
+                if (!button) return;
+
+                state.kategoriAktif = button.dataset.homeCategory;
+
+                renderKategori();
+                renderPeralatan();
+            });
+        }
+
+        const input = el('searchInput');
+
+        if (input && input.dataset.homeSearchBound !== 'true') {
+            input.dataset.homeSearchBound = 'true';
+
+            input.addEventListener('input', () => {
+                state.kataKunci = input.value || '';
+                renderPeralatan();
+            });
+        }
+
+        document.addEventListener('click', event => {
+            const button = event.target.closest('[data-cart-action]');
+
+            if (!button) return;
+
+            const index = Number(button.dataset.cartIndex);
+            const action = button.dataset.cartAction;
+            const keranjang = bacaKeranjang();
+
+            if (!Number.isInteger(index) || !keranjang[index]) return;
+
+            const item = keranjang[index];
+
+            if (action === 'plus') {
+                if (item.qty >= item.stok) {
+                    notifikasi('Jumlah barang sudah mencapai batas stok.', 'error');
+                    return;
+                }
+
+                item.qty += 1;
+                item.jumlah = item.qty;
+            } else if (action === 'minus') {
+                if (item.qty <= 1) {
+                    keranjang.splice(index, 1);
+                } else {
+                    item.qty -= 1;
+                    item.jumlah = item.qty;
+                }
+            } else if (action === 'remove') {
+                keranjang.splice(index, 1);
+            } else {
+                return;
+            }
+
+            simpanKeranjang(keranjang);
+        });
+
+        document.addEventListener('input', event => {
+            if (
+                event.target.id === 'checkoutTglSewa' ||
+                event.target.id === 'checkoutTglKembali'
+            ) {
+                hitungkanTotalCheckout();
+            }
+        });
+    }
 
     async function loadKategori() {
         try {
-            const data = await requestAPI(API.kategori);
-
-            state.kategori = data;
-
-            try {
-                localStorage.setItem(
-                    'kategori',
-                    JSON.stringify(data)
-                );
-            } catch (error) {
-                console.warn('Kategori tidak dapat disimpan ke cache.', error);
-            }
-
+            state.kategori = await requestAPI(API.kategori);
             renderKategori();
         } catch (error) {
             console.error('Gagal memuat kategori:', error);
-
-            const container = getContainerKategori();
-
-            if (container) {
-                container.innerHTML = `
-                    <p class="py-2 text-xs text-rose-600">
-                        Kategori gagal dimuat. Periksa koneksi server.
-                    </p>
-                `;
-            }
         }
     }
 
     async function loadPeralatan() {
         try {
-            const data = await requestAPI(API.peralatan);
-
-            state.peralatan = data;
-
-            try {
-                localStorage.setItem(
-                    'peralatan',
-                    JSON.stringify(data)
-                );
-            } catch (error) {
-                console.warn('Peralatan tidak dapat disimpan ke cache.', error);
-            }
-
+            state.peralatan = await requestAPI(API.peralatan);
             renderPeralatan();
         } catch (error) {
             console.error('Gagal memuat peralatan:', error);
 
             tampilkanPesanKatalog(
-                'Data peralatan gagal dimuat. Pastikan server PHP berjalan dan API peralatan dapat diakses.',
-                'error'
+                'Data peralatan gagal dimuat. Periksa API peralatan.',
+                true
             );
         }
     }
 
-    /* =====================================================
-       KOMPATIBILITAS DENGAN HTML LAMA
-       ===================================================== */
-
-    window.searchKeywordHandler = function () {
-        const searchInput = getElement('searchInput');
-
-        state.kataKunci = searchInput
-            ? searchInput.value
-            : '';
-
-        renderPeralatan();
-    };
-
-    window.renderHomeKategori = renderKategori;
-    window.renderHomePeralatan = renderPeralatan;
-
+    window.renderKeranjang = renderKeranjang;
+    window.hitungkanTotalCheckout = hitungkanTotalCheckout;
+    window.updateCartBadge = updateCartBadge;
+    window.tambahKeKeranjang = tambahKeKeranjang;
+    window.addToCart = tambahKeKeranjang;
+    window.renderPeralatan = renderPeralatan;
     window.loadHomeKategori = loadKategori;
     window.loadHomePeralatan = loadPeralatan;
 
-    /* =====================================================
-       INISIALISASI
-       ===================================================== */
+    window.searchKeywordHandler = function () {
+        const input = el('searchInput');
+        state.kataKunci = input ? input.value : '';
+        renderPeralatan();
+    };
+
+    window.addEventListener('storage', event => {
+        if (event.key === CART_KEY || event.key === CART_KEY_ALT) {
+            renderKeranjang();
+        }
+    });
 
     async function init() {
-        /*
-         * Jangan menjalankan loader beranda di halaman admin.
-         */
         const halaman = window.location.pathname
             .split('/')
             .pop()
             .toLowerCase();
 
-        if (
-            halaman &&
-            halaman !== 'index.html' &&
-            halaman !== ''
-        ) {
-            return;
-        }
+        if (halaman && halaman !== 'index.html') return;
 
-        pasangPencarian();
-
-        tampilkanPesanKatalog('Memuat peralatan dari database...');
+        pasangEventKatalog();
+        renderKeranjang();
+        tampilkanPesanKatalog('Memuat peralatan...');
 
         await Promise.allSettled([
             loadKategori(),
             loadPeralatan()
         ]);
 
-        /*
-         * Badge awal keranjang.
-         */
-        try {
-            const keranjang = JSON.parse(
-                localStorage.getItem('sicamp_keranjang') || '[]'
-            );
-
-            perbaruiBadgeKeranjang(
-                Array.isArray(keranjang) ? keranjang.length : 0
-            );
-        } catch {
-            perbaruiBadgeKeranjang(0);
-        }
+        renderKeranjang();
+        updateCartBadge();
     }
 
     if (document.readyState === 'loading') {

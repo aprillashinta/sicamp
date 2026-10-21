@@ -1160,6 +1160,113 @@
                 height: 200px;
             }
         }
+
+        #modalKeranjang {
+    overflow: hidden;
+}
+
+#modalKeranjang > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
+    max-height: 100dvh;
+    overflow: hidden;
+}
+
+#modalKeranjang > div > div:first-child {
+    flex-shrink: 0;
+}
+
+#modalKeranjang > div > div:nth-child(2) {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#checkoutStep1 {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+#checkoutStep1 > div:first-child {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+#cartItemsContainer {
+    max-height: min(32vh, 280px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 5px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+#checkoutStep1 > div:nth-child(2) {
+    position: sticky;
+    bottom: -1px;
+    z-index: 5;
+    flex-shrink: 0;
+    margin-top: 0;
+    padding: 14px 0 12px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
+}
+
+#checkoutTglSewa,
+#checkoutTglKembali {
+    min-width: 0;
+    width: 100%;
+}
+
+#modalKeranjang > div > div:last-child {
+    position: relative;
+    z-index: 10;
+    flex-shrink: 0;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+#checkoutStep2,
+#checkoutStep3 {
+    padding-bottom: 12px;
+}
+
+@media (max-height: 650px) {
+    #cartItemsContainer {
+        max-height: 24vh;
+    }
+
+    #checkoutStep1 > div:nth-child(2) {
+        padding-top: 10px;
+        padding-bottom: 8px;
+    }
+
+    #modalKeranjang > div > div:last-child {
+        padding-top: 12px;
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 480px) {
+    #modalKeranjang > div {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    #cartItemsContainer {
+        max-height: 28vh;
+    }
+
+    #checkoutStep1 > div:nth-child(2) {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+}
     </style>
 </head>
 
