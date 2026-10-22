@@ -26,6 +26,7 @@ let jumlahPeralatanPerHalaman = 5;
 
 let dataKategori = [];
 let dataPeralatan = [];
+let dataPenyewaan = [];
 
 let sidebarInitialized = false;
 
@@ -350,16 +351,10 @@ function renderUserNavigation() {
         </div>
     `;
 
-    const logoutButton = document.getElementById(
-        "sidebarLogoutButton"
-    );
-
+    const logoutButton = document.getElementById("sidebarLogoutButton");
     logoutButton?.addEventListener("click", logout);
 
-    const collapseButton = document.getElementById(
-        "sidebarCollapseButton"
-    );
-
+    const collapseButton = document.getElementById("sidebarCollapseButton");
     collapseButton?.addEventListener("click", toggleSidebarCollapse);
 }
 
@@ -371,27 +366,15 @@ function toggleSidebarCollapse() {
 
     document.body.classList.toggle("sicamp-sidebar-collapsed");
 
-    const collapsed = document.body.classList.contains(
-        "sicamp-sidebar-collapsed"
-    );
+    const collapsed = document.body.classList.contains("sicamp-sidebar-collapsed");
 
-    localStorage.setItem(
-        "sicamp_sidebar_collapsed",
-        collapsed ? "true" : "false"
-    );
+    localStorage.setItem("sicamp_sidebar_collapsed", collapsed ? "true" : "false");
 
     const button = document.getElementById("sidebarCollapseButton");
 
     if (button) {
-        button.setAttribute(
-            "aria-label",
-            collapsed ? "Lebarkan sidebar" : "Ciutkan sidebar"
-        );
-
-        button.title = collapsed
-            ? "Lebarkan sidebar"
-            : "Ciutkan sidebar";
-
+        button.setAttribute("aria-label", collapsed ? "Lebarkan sidebar" : "Ciutkan sidebar");
+        button.title = collapsed ? "Lebarkan sidebar" : "Ciutkan sidebar";
         button.innerHTML = collapsed
             ? '<i class="fa-solid fa-angles-right"></i>'
             : '<i class="fa-solid fa-angles-left"></i>';
@@ -430,10 +413,7 @@ function initializeSharedSidebarControls() {
     const backdrop = document.getElementById("mobileSidebarBackdrop");
 
     toggle?.addEventListener("click", () => {
-        const isOpen = document.body.classList.contains(
-            "sicamp-mobile-sidebar-open"
-        );
-
+        const isOpen = document.body.classList.contains("sicamp-mobile-sidebar-open");
         if (isOpen) {
             closeMobileSidebar();
         } else {
@@ -458,24 +438,17 @@ function initializeSharedSidebarControls() {
     });
 
     try {
-        const collapsed =
-            localStorage.getItem("sicamp_sidebar_collapsed") === "true";
+        const collapsed = localStorage.getItem("sicamp_sidebar_collapsed") === "true";
 
-        if (
-            collapsed &&
-            !window.matchMedia("(max-width: 900px)").matches
-        ) {
+        if (collapsed && !window.matchMedia("(max-width: 900px)").matches) {
             document.body.classList.add("sicamp-sidebar-collapsed");
 
-            const button = document.getElementById(
-                "sidebarCollapseButton"
-            );
+            const button = document.getElementById("sidebarCollapseButton");
 
             if (button) {
                 button.setAttribute("aria-label", "Lebarkan sidebar");
                 button.title = "Lebarkan sidebar";
-                button.innerHTML =
-                    '<i class="fa-solid fa-angles-right"></i>';
+                button.innerHTML = '<i class="fa-solid fa-angles-right"></i>';
             }
         }
     } catch (error) {
@@ -490,9 +463,7 @@ function initializeSharedSidebarControls() {
 }
 
 async function requestAPI(url, options = {}) {
-    const defaultHeaders = {
-        Accept: "application/json"
-    };
+    const defaultHeaders = { Accept: "application/json" };
 
     const config = {
         method: options.method || "GET",
@@ -506,16 +477,10 @@ async function requestAPI(url, options = {}) {
         if (options.body instanceof FormData) {
             config.body = options.body;
         } else if (typeof options.body === "string") {
-            config.headers["Content-Type"] =
-                config.headers["Content-Type"] ||
-                "application/json";
-
+            config.headers["Content-Type"] = config.headers["Content-Type"] || "application/json";
             config.body = options.body;
         } else {
-            config.headers["Content-Type"] =
-                config.headers["Content-Type"] ||
-                "application/json";
-
+            config.headers["Content-Type"] = config.headers["Content-Type"] || "application/json";
             config.body = JSON.stringify(options.body);
         }
     }
@@ -528,25 +493,17 @@ async function requestAPI(url, options = {}) {
     try {
         result = responseText ? JSON.parse(responseText) : {};
     } catch (error) {
-        throw new Error(
-            "Respons server bukan JSON yang valid. Periksa file API PHP."
-        );
+        throw new Error("Respons server bukan JSON yang valid. Periksa file API PHP.");
     }
 
     if (!response.ok) {
         throw new Error(
-            result.message ||
-            result.pesan ||
-            `Permintaan gagal dengan status ${response.status}.`
+            result.message || result.pesan || `Permintaan gagal dengan status ${response.status}.`
         );
     }
 
     if (result && result.success === false) {
-        throw new Error(
-            result.message ||
-            result.pesan ||
-            "Permintaan tidak berhasil."
-        );
+        throw new Error(result.message || result.pesan || "Permintaan tidak berhasil.");
     }
 
     return result;
@@ -554,163 +511,205 @@ async function requestAPI(url, options = {}) {
 
 async function loadKategoriFromDB() {
     try {
-        const result = await requestAPI(
-            SICAMP_CONFIG.api.kategori
-        );
-
-        const kategori = Array.isArray(result)
-            ? result
-            : (
-                result.data ||
-                result.kategori ||
-                result.result ||
-                []
-            );
-
+        const result = await requestAPI(SICAMP_CONFIG.api.kategori);
+        const kategori = Array.isArray(result) ? result : (result.data || result.kategori || result.result || []);
         dataKategori = Array.isArray(kategori) ? kategori : [];
 
         try {
-            localStorage.setItem(
-                "kategori",
-                JSON.stringify(dataKategori)
-            );
+            localStorage.setItem("kategori", JSON.stringify(dataKategori));
         } catch (error) {
             console.warn("Kategori tidak dapat disimpan ke cache.", error);
         }
 
-        if (typeof renderKategori === "function") {
-            renderKategori(dataKategori);
-        }
-
-        if (typeof renderKategoriTable === "function") {
-            renderKategoriTable(dataKategori);
-        }
+        if (typeof renderKategori === "function") renderKategori(dataKategori);
+        if (typeof renderKategoriTable === "function") renderKategoriTable(dataKategori);
 
         return dataKategori;
     } catch (error) {
         console.error("Gagal memuat kategori:", error);
-
         dataKategori = getStoredArray("kategori");
-
         return dataKategori;
     }
 }
 
 async function loadPeralatanFromDB() {
     try {
-        const result = await requestAPI(
-            SICAMP_CONFIG.api.peralatan
-        );
-
-        const peralatan = Array.isArray(result)
-            ? result
-            : (
-                result.data ||
-                result.peralatan ||
-                result.result ||
-                []
-            );
-
+        const result = await requestAPI(SICAMP_CONFIG.api.peralatan);
+        const peralatan = Array.isArray(result) ? result : (result.data || result.peralatan || result.result || []);
         dataPeralatan = Array.isArray(peralatan) ? peralatan : [];
 
         try {
-            localStorage.setItem(
-                "peralatan",
-                JSON.stringify(dataPeralatan)
-            );
+            localStorage.setItem("peralatan", JSON.stringify(dataPeralatan));
         } catch (error) {
             console.warn("Cache peralatan tidak dapat disimpan.", error);
         }
 
-        if (typeof renderPeralatan === "function") {
-            renderPeralatan(dataPeralatan);
-        }
-
-        if (typeof renderPeralatanTable === "function") {
-            renderPeralatanTable(dataPeralatan);
-        }
-
-        if (typeof renderDashboard === "function") {
-            renderDashboard();
-        }
+        if (typeof renderPeralatan === "function") renderPeralatan(dataPeralatan);
+        if (typeof renderPeralatanTable === "function") renderPeralatanTable(dataPeralatan);
+        if (typeof renderDashboard === "function") renderDashboard();
 
         return dataPeralatan;
     } catch (error) {
         console.error("Gagal memuat peralatan:", error);
-
         dataPeralatan = getStoredArray("peralatan");
-
         return dataPeralatan;
     }
 }
 
+async function loadVerifikasiPembayaran() {
+    try {
+        const result = await requestAPI(SICAMP_CONFIG.api.penyewaan);
+        const penyewaan = Array.isArray(result) ? result : (result.data || result.penyewaan || result.result || []);
+        dataPenyewaan = Array.isArray(penyewaan) ? penyewaan : [];
+
+        renderVerifikasiTable(dataPenyewaan);
+        return dataPenyewaan;
+    } catch (error) {
+        console.error("Gagal memuat data verifikasi pembayaran:", error);
+        dataPenyewaan = getStoredArray("penyewaan");
+        renderVerifikasiTable(dataPenyewaan);
+        return dataPenyewaan;
+    }
+}
+
+function renderVerifikasiTable(data) {
+    const tbody = document.getElementById("tbodyVerifikasi") || document.querySelector("table tbody");
+    if (!tbody || getCurrentPage() !== "verifikasi-pembayaran.html") return;
+
+    if (!data || data.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 24px;">
+                    Belum ada data pembayaran yang perlu diverifikasi.
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
+    tbody.innerHTML = data.map((item) => {
+        const statusClean = String(item.status || "").toLowerCase().trim();
+        const isMenunggu = statusClean === "menunggu verifikasi" || statusClean === "menunggu";
+
+        return `
+            <tr>
+                <td>
+                    <strong>${escapeHTML(item.kode_transaksi || item.kode || '-')}</strong>
+                    <br><small style="color: #94a3b8;">ID: ${item.id || item.id_penyewaan}</small>
+                </td>
+                <td>${escapeHTML(item.nama_pelanggan || item.pelanggan || "Pelanggan")}</td>
+                <td>${formatTanggal(item.tanggal_sewa || item.created_at)}</td>
+                <td><strong>${formatRupiah(item.total_pembayaran || item.total)}</strong></td>
+                <td>
+                    <span class="badge ${isMenunggu ? 'badge-stok-habis' : 'badge-stok-tersedia'}">
+                        ${escapeHTML(item.status || 'Proses')}
+                    </span>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <button 
+                            type="button" 
+                            class="action-btn detail" 
+                            onclick="lihatDetailPembayaran('${item.id || item.id_penyewaan}')" 
+                            title="Lihat Detail & Bukti"
+                        >
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+
+                        ${isMenunggu ? `
+                            <button 
+                                type="button" 
+                                class="action-btn approve" 
+                                onclick="setujuiPembayaran('${item.id || item.id_penyewaan}')" 
+                                title="Setujui Pembayaran"
+                            >
+                                <i class="fa-solid fa-check"></i>
+                            </button>
+                            <button 
+                                type="button" 
+                                class="action-btn reject" 
+                                onclick="tolakPembayaran('${item.id || item.id_penyewaan}')" 
+                                title="Tolak Pembayaran"
+                            >
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join("");
+}
+
+async function setujuiPembayaran(id) {
+    if (!confirm("Apakah Anda yakin ingin menyetujui pembayaran ini?")) return;
+
+    try {
+        await requestAPI(SICAMP_CONFIG.api.penyewaan, {
+            method: "POST",
+            body: { action: "verify", id: id, status: "Terverifikasi" }
+        });
+        showNotification("Pembayaran berhasil disetujui!", "success");
+        loadVerifikasiPembayaran();
+    } catch (error) {
+        showNotification(error.message || "Gagal menyetujui pembayaran", "error");
+    }
+}
+
+async function tolakPembayaran(id) {
+    const alasan = prompt("Masukkan alasan penolakan pembayaran:");
+    if (alasan === null) return;
+
+    try {
+        await requestAPI(SICAMP_CONFIG.api.penyewaan, {
+            method: "POST",
+            body: { action: "reject", id: id, catatan: alasan, status: "Ditolak" }
+        });
+        showNotification("Pembayaran telah ditolak", "warning");
+        loadVerifikasiPembayaran();
+    } catch (error) {
+        showNotification(error.message || "Gagal menolak pembayaran", "error");
+    }
+}
+
+function lihatDetailPembayaran(id) {
+    showNotification(`Membuka detail transaksi #${id}...`, "info");
+}
+
 function getPeralatanId(item) {
-    return (
-        item?.id_peralatan ??
-        item?.id ??
-        item?.id_alat ??
-        null
-    );
+    return item?.id_peralatan ?? item?.id ?? item?.id_alat ?? null;
 }
 
 function getKategoriId(item) {
-    return (
-        item?.id_kategori ??
-        item?.kategori_id ??
-        item?.id ??
-        null
-    );
+    return item?.id_kategori ?? item?.kategori_id ?? item?.id ?? null;
 }
 
 function getPeralatanName(item) {
-    return (
-        item?.nama_peralatan ||
-        item?.nama_alat ||
-        item?.nama ||
-        "Peralatan tanpa nama"
-    );
+    return item?.nama_peralatan || item?.nama_alat || item?.nama || "Peralatan tanpa nama";
 }
 
 function getPeralatanStock(item) {
-    return Number(
-        item?.stok ??
-        item?.jumlah_stok ??
-        item?.stock ??
-        0
-    );
+    return Number(item?.stok ?? item?.jumlah_stok ?? item?.stock ?? 0);
 }
 
 function getPeralatanPrice(item) {
-    return Number(
-        item?.harga_sewa ??
-        item?.harga ??
-        item?.harga_per_hari ??
-        0
-    );
+    return Number(item?.harga_sewa ?? item?.harga ?? item?.harga_per_hari ?? 0);
 }
 
 function getKategoriName(item) {
-    return (
-        item?.nama_kategori ||
-        item?.kategori ||
-        "Tanpa kategori"
-    );
+    return item?.nama_kategori || item?.kategori || "Tanpa kategori";
 }
 
 function filterDataPeralatan(data = dataPeralatan) {
     let hasil = [...data];
 
-    const keyword = String(
-        filterPencarianAlat || searchKeyword || ""
-    ).trim().toLowerCase();
+    const keyword = String(filterPencarianAlat || searchKeyword || "").trim().toLowerCase();
 
     if (keyword) {
         hasil = hasil.filter((item) => {
             const nama = getPeralatanName(item).toLowerCase();
             const kategori = getKategoriName(item).toLowerCase();
-            const deskripsi = String(
-                item?.deskripsi || ""
-            ).toLowerCase();
+            const deskripsi = String(item?.deskripsi || "").toLowerCase();
 
             return (
                 nama.includes(keyword) ||
@@ -722,53 +721,30 @@ function filterDataPeralatan(data = dataPeralatan) {
 
     if (filterKategoriAlat !== "all") {
         hasil = hasil.filter((item) => {
-            return String(getKategoriId(item)) ===
-                String(filterKategoriAlat);
+            return String(getKategoriId(item)) === String(filterKategoriAlat);
         });
     }
 
     if (filterStokAlat === "tersedia") {
-        hasil = hasil.filter(
-            (item) => getPeralatanStock(item) > 0
-        );
+        hasil = hasil.filter((item) => getPeralatanStock(item) > 0);
     }
 
     if (filterStokAlat === "habis") {
-        hasil = hasil.filter(
-            (item) => getPeralatanStock(item) <= 0
-        );
+        hasil = hasil.filter((item) => getPeralatanStock(item) <= 0);
     }
 
     if (filterUrutanAlat === "nama_asc") {
-        hasil.sort((a, b) =>
-            getPeralatanName(a).localeCompare(
-                getPeralatanName(b),
-                "id"
-            )
-        );
+        hasil.sort((a, b) => getPeralatanName(a).localeCompare(getPeralatanName(b), "id"));
     } else if (filterUrutanAlat === "nama_desc") {
-        hasil.sort((a, b) =>
-            getPeralatanName(b).localeCompare(
-                getPeralatanName(a),
-                "id"
-            )
-        );
+        hasil.sort((a, b) => getPeralatanName(b).localeCompare(getPeralatanName(a), "id"));
     } else if (filterUrutanAlat === "harga_asc") {
-        hasil.sort(
-            (a, b) => getPeralatanPrice(a) - getPeralatanPrice(b)
-        );
+        hasil.sort((a, b) => getPeralatanPrice(a) - getPeralatanPrice(b));
     } else if (filterUrutanAlat === "harga_desc") {
-        hasil.sort(
-            (a, b) => getPeralatanPrice(b) - getPeralatanPrice(a)
-        );
+        hasil.sort((a, b) => getPeralatanPrice(b) - getPeralatanPrice(a));
     } else if (filterUrutanAlat === "stok_asc") {
-        hasil.sort(
-            (a, b) => getPeralatanStock(a) - getPeralatanStock(b)
-        );
+        hasil.sort((a, b) => getPeralatanStock(a) - getPeralatanStock(b));
     } else if (filterUrutanAlat === "stok_desc") {
-        hasil.sort(
-            (a, b) => getPeralatanStock(b) - getPeralatanStock(a)
-        );
+        hasil.sort((a, b) => getPeralatanStock(b) - getPeralatanStock(a));
     }
 
     return hasil;
@@ -805,7 +781,6 @@ function initializePeralatanFilters() {
     searchInput?.addEventListener("input", (event) => {
         filterPencarianAlat = event.target.value;
         halamanPeralatanAktif = 1;
-
         if (typeof renderPeralatan === "function") {
             renderPeralatan(filterDataPeralatan());
         }
@@ -814,7 +789,6 @@ function initializePeralatanFilters() {
     categorySelect?.addEventListener("change", (event) => {
         filterKategoriAlat = event.target.value;
         halamanPeralatanAktif = 1;
-
         if (typeof renderPeralatan === "function") {
             renderPeralatan(filterDataPeralatan());
         }
@@ -823,7 +797,6 @@ function initializePeralatanFilters() {
     stockSelect?.addEventListener("change", (event) => {
         filterStokAlat = event.target.value;
         halamanPeralatanAktif = 1;
-
         if (typeof renderPeralatan === "function") {
             renderPeralatan(filterDataPeralatan());
         }
@@ -832,7 +805,6 @@ function initializePeralatanFilters() {
     sortSelect?.addEventListener("change", (event) => {
         filterUrutanAlat = event.target.value;
         halamanPeralatanAktif = 1;
-
         if (typeof renderPeralatan === "function") {
             renderPeralatan(filterDataPeralatan());
         }
@@ -849,12 +821,7 @@ function initializeCustomerNavigation() {
 
     if (userIndicator) {
         if (session) {
-            const nama =
-                session.nama_pelanggan ||
-                session.nama ||
-                session.username ||
-                "Pelanggan";
-
+            const nama = session.nama_pelanggan || session.nama || session.username || "Pelanggan";
             userIndicator.textContent = nama;
         } else {
             userIndicator.textContent = "Pengunjung";
@@ -867,24 +834,12 @@ function initializeCustomerNavigation() {
             <a href="riwayat-sewa.html">Riwayat Sewa</a>
             ${
                 session
-                    ? `
-                        <button
-                            type="button"
-                            id="customerLogoutButton"
-                            class="sicamp-customer-logout"
-                        >
-                            Keluar
-                        </button>
-                    `
-                    : `
-                        <a href="login.html">Masuk</a>
-                    `
+                    ? `<button type="button" id="customerLogoutButton" class="sicamp-customer-logout">Keluar</button>`
+                    : `<a href="login.html">Masuk</a>`
             }
         `;
 
-        document
-            .getElementById("customerLogoutButton")
-            ?.addEventListener("click", logout);
+        document.getElementById("customerLogoutButton")?.addEventListener("click", logout);
     }
 }
 
@@ -898,10 +853,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     initializeSharedSidebarControls();
     initializePeralatanFilters();
 
-    await Promise.allSettled([
-        loadKategoriFromDB(),
-        loadPeralatanFromDB()
-    ]);
+    const tasks = [loadKategoriFromDB(), loadPeralatanFromDB()];
+    if (getCurrentPage() === "verifikasi-pembayaran.html") {
+        tasks.push(loadVerifikasiPembayaran());
+    }
+
+    await Promise.allSettled(tasks);
 });
 
 window.escapeHTML = escapeHTML;
@@ -922,6 +879,11 @@ window.initializeSharedSidebarControls = initializeSharedSidebarControls;
 window.requestAPI = requestAPI;
 window.loadKategoriFromDB = loadKategoriFromDB;
 window.loadPeralatanFromDB = loadPeralatanFromDB;
+window.loadVerifikasiPembayaran = loadVerifikasiPembayaran;
+window.renderVerifikasiTable = renderVerifikasiTable;
+window.setujuiPembayaran = setujuiPembayaran;
+window.tolakPembayaran = tolakPembayaran;
+window.lihatDetailPembayaran = lihatDetailPembayaran;
 
 window.filterDataPeralatan = filterDataPeralatan;
 window.resetFilterPeralatan = resetFilterPeralatan;

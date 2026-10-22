@@ -13,8 +13,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Stylesheet utama SiCamp -->
-    <link rel="stylesheet" href="css/style.css?v=1.1">
+    <link rel="stylesheet" href="css/style.css?v=1.4">
 
     <style>
         :root {
@@ -229,10 +228,35 @@
             background: white;
             color: var(--forest);
             cursor: pointer;
+            transition: all .18s ease;
         }
 
         .action-btn:hover {
             background: #edf5e5;
+        }
+
+        .action-btn.approve {
+            color: #16a34a;
+            border-color: #bbf7d0;
+            background: #f0fdf4;
+        }
+
+        .action-btn.approve:hover {
+            background: #16a34a;
+            color: #ffffff;
+            border-color: #16a34a;
+        }
+
+        .action-btn.reject {
+            color: #dc2626;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .action-btn.reject:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #dc2626;
         }
 
         .empty-state {
@@ -372,7 +396,6 @@
 </head>
 
 <body class="sicamp-admin-layout">
-    <!-- Sidebar Admin Static -->
     <aside id="sidebarAdmin" aria-label="Navigasi administrator"></aside>
 
     <main class="page-content">
@@ -436,8 +459,7 @@
                     <select id="statusFilter" class="field sm:w-48" aria-label="Filter status">
                         <option value="">Semua status</option>
                         <option value="Menunggu Verifikasi">Menunggu Verifikasi</option>
-                        <option value="Menunggu Pembayaran">Menunggu Pembayaran</option>
-                        <option value="Disetujui">Disetujui</option>
+                        <option value="Terverifikasi">Terverifikasi / Disetujui</option>
                         <option value="Ditolak">Ditolak</option>
                     </select>
                 </div>
@@ -452,7 +474,7 @@
                             <th>Tanggal Sewa</th>
                             <th>Total Pembayaran</th>
                             <th>Status</th>
-                            <th style="text-align:center">Detail</th>
+                            <th style="text-align:center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="paymentTable">
@@ -474,7 +496,6 @@
         </section>
     </main>
 
-    <!-- Modal detail pembayaran -->
     <div id="detailModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal">
             <div class="flex items-start justify-between gap-4 mb-5">
@@ -496,7 +517,7 @@
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-    <script src="js/app.js?v=1.1"></script>
+    <script src="js/app.js?v=1.4"></script>
     <script>
         const API_PENYEWAAN = 'api/api_penyewaan.php';
 
@@ -568,9 +589,8 @@
         }
 
         function getStatus(item) {
-            return item.status_pembayaran ??
-                item.status ??
-                'Menunggu Pembayaran';
+            const rawStatus = item.status_pembayaran ?? item.status ?? item.status_transaksi ?? '';
+            return String(rawStatus).trim();
         }
 
         function getProof(item) {
@@ -581,7 +601,7 @@
         }
 
         function getPaymentNote(item) {
-            return item.catatan_pembayaran ?? item.catatan ?? '';
+            return item.catatan_pembayaran ?? item.catatan ?? item.alasan_penolakan ?? '';
         }
 
         function normalizeArray(result) {
@@ -615,9 +635,11 @@
             let result;
 
             try {
-                result = JSON.parse(raw);
-            } catch {
-                throw new Error('Respons API tidak valid. Periksa endpoint PHP.');
+                const cleanedRaw = raw.trim().replace(/^\uFEFF/, '');
+                result = JSON.parse(cleanedRaw);
+            } catch (e) {
+                const cleanError = raw.replace(/<[^>]*>?/gm, '').trim();
+                throw new Error(cleanError || 'Respons API tidak valid. Periksa endpoint PHP.');
             }
 
             if (!response.ok || result.status === 'error' || result.success === false) {
@@ -674,7 +696,7 @@
 
         function getFilteredTransactions() {
             const keyword = searchInput.value.trim().toLowerCase();
-            const status = statusFilter.value;
+            const statusFilterValue = statusFilter.value.trim().toLowerCase();
 
             return transactions.filter(item => {
                 const searchable = [
@@ -683,8 +705,19 @@
                     getTransactionId(item)
                 ].join(' ').toLowerCase();
 
+                const currentStatus = getStatus(item).toLowerCase();
                 const matchesKeyword = searchable.includes(keyword);
-                const matchesStatus = !status || getStatus(item) === status;
+
+                let matchesStatus = true;
+                if (statusFilterValue) {
+                    if (statusFilterValue === 'ditolak') {
+                        matchesStatus = ['ditolak', 'batal', 'gagal'].includes(currentStatus);
+                    } else if (statusFilterValue === 'terverifikasi' || statusFilterValue === 'disetujui') {
+                        matchesStatus = ['disetujui', 'terverifikasi'].includes(currentStatus);
+                    } else {
+                        matchesStatus = currentStatus.includes(statusFilterValue);
+                    }
+                }
 
                 return matchesKeyword && matchesStatus;
             });
@@ -692,27 +725,37 @@
 
         function updateStats() {
             document.getElementById('statPending').textContent =
-                transactions.filter(item =>
-                    ['Menunggu Verifikasi', 'Menunggu Pembayaran'].includes(getStatus(item))
-                ).length;
+                transactions.filter(item => {
+                    const s = getStatus(item).toLowerCase();
+                    return ['menunggu verifikasi', 'menunggu pembayaran', 'menunggu', 'sedang disewa', 'proses', ''].includes(s);
+                }).length;
 
             document.getElementById('statApproved').textContent =
-                transactions.filter(item => getStatus(item) === 'Disetujui').length;
+                transactions.filter(item => {
+                    const s = getStatus(item).toLowerCase();
+                    return ['disetujui', 'terverifikasi'].includes(s);
+                }).length;
 
             document.getElementById('statRejected').textContent =
-                transactions.filter(item => getStatus(item) === 'Ditolak').length;
+                transactions.filter(item => {
+                    const s = getStatus(item).toLowerCase();
+                    return ['ditolak', 'batal', 'gagal'].includes(s);
+                }).length;
         }
 
         function statusBadge(status) {
-            if (['Disetujui', 'Terverifikasi'].includes(status)) {
-                return `<span class="badge approved"><i class="fa-solid fa-check-circle"></i>${escapeHTML(status)}</span>`;
+            const s = String(status || '').toLowerCase().trim();
+
+            if (['disetujui', 'terverifikasi'].includes(s)) {
+                return `<span class="badge approved"><i class="fa-solid fa-check-circle"></i>Terverifikasi</span>`;
             }
 
-            if (status === 'Ditolak') {
+            if (['ditolak', 'batal', 'gagal'].includes(s)) {
                 return `<span class="badge rejected"><i class="fa-solid fa-circle-xmark"></i>Ditolak</span>`;
             }
 
-            return `<span class="badge pending"><i class="fa-regular fa-clock"></i>${escapeHTML(status)}</span>`;
+            const label = status && status.trim() !== '' ? escapeHTML(status) : 'Menunggu Verifikasi';
+            return `<span class="badge pending"><i class="fa-regular fa-clock"></i>${label}</span>`;
         }
 
         function renderTransactions() {
@@ -746,6 +789,8 @@
                 const code = getTransactionCode(item);
                 const customer = getCustomerName(item);
                 const status = getStatus(item);
+                const sClean = status.toLowerCase();
+                const isPending = ['menunggu pembayaran', 'menunggu verifikasi', 'menunggu', 'sedang disewa', 'proses', ''].includes(sClean);
 
                 return `
                 <tr>
@@ -760,11 +805,25 @@
                     <td class="font-extrabold text-gray-800">${rupiah(getTotal(item))}</td>
                     <td>${statusBadge(status)}</td>
                     <td style="text-align:center">
-                        <button class="action-btn" title="Lihat detail pembayaran"
-                            aria-label="Lihat detail ${escapeHTML(code)}"
-                            onclick="openDetail('${String(id).replace(/'/g, "\\'")}')">
-                            <i class="fa-solid fa-eye"></i>
-                        </button>
+                        <div class="flex items-center justify-center gap-2">
+                            <button class="action-btn" title="Lihat detail pembayaran"
+                                aria-label="Lihat detail ${escapeHTML(code)}"
+                                onclick="openDetail('${String(id).replace(/'/g, "\\'")}')">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            ${isPending ? `
+                                <button class="action-btn approve" title="Setujui Pembayaran"
+                                    aria-label="Setujui ${escapeHTML(code)}"
+                                    onclick="quickApprove('${String(id).replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-check"></i>
+                                </button>
+                                <button class="action-btn reject" title="Tolak Pembayaran"
+                                    aria-label="Tolak ${escapeHTML(code)}"
+                                    onclick="quickReject('${String(id).replace(/'/g, "\\'")}')">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            ` : ''}
+                        </div>
                     </td>
                 </tr>`;
             }).join('');
@@ -866,8 +925,9 @@
 
             const item = selectedTransaction;
             const status = getStatus(item);
+            const sClean = status.toLowerCase();
             const proof = getProof(item);
-            const isPending = ['Menunggu Pembayaran', 'Menunggu Verifikasi'].includes(status);
+            const isPending = ['menunggu pembayaran', 'menunggu verifikasi', 'menunggu', 'sedang disewa', 'proses', ''].includes(sClean);
 
             document.getElementById('modalTitle').textContent =
                 `Pembayaran ${getTransactionCode(item)}`;
@@ -906,17 +966,17 @@
             </div>
 
             ${getPaymentNote(item) ? `
-                <div class="mt-4">
-                    <div class="font-bold text-xs mb-2">Catatan Pembayaran</div>
-                    <p class="muted text-xs leading-relaxed">${escapeHTML(getPaymentNote(item))}</p>
+                <div class="mt-4 p-4 rounded-xl" style="background:#fff0f0; border:1px solid #fecaca;">
+                    <div class="font-bold text-xs mb-1 text-red-700">Catatan / Alasan Penolakan</div>
+                    <p class="text-xs text-red-600 leading-relaxed">${escapeHTML(getPaymentNote(item))}</p>
                 </div>` : ''}
         `;
 
             verificationActions.innerHTML = isPending ? `
-            <button type="button" class="btn-secondary" onclick="updatePaymentStatus('Ditolak')">
+            <button type="button" class="btn-secondary text-red-600 hover:bg-red-50" onclick="updatePaymentStatus('Ditolak')">
                 <i class="fa-solid fa-xmark"></i> Tolak Pembayaran
             </button>
-            <button type="button" class="btn-primary" onclick="updatePaymentStatus('Disetujui')">
+            <button type="button" class="btn-primary" onclick="updatePaymentStatus('Terverifikasi')">
                 <i class="fa-solid fa-check"></i> Setujui Pembayaran
             </button>
         ` : `
@@ -937,15 +997,71 @@
             detailModal.classList.add('show');
         }
 
+        async function quickApprove(id) {
+            const item = transactions.find(t => String(getTransactionId(t)) === String(id));
+            const code = item ? getTransactionCode(item) : id;
+
+            if (!confirm(`Yakin ingin menyetujui pembayaran ${code}?`)) return;
+
+            try {
+                await requestJSON(API_PENYEWAAN, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_status',
+                        id_penyewaan: id,
+                        id: id,
+                        status: 'Terverifikasi'
+                    })
+                });
+
+                showToast(`Status pembayaran ${code} berhasil disetujui.`);
+                await loadTransactions();
+            } catch (error) {
+                showToast(error.message || 'Status pembayaran gagal diperbarui.', 'error');
+            }
+        }
+
+        async function quickReject(id) {
+            const item = transactions.find(t => String(getTransactionId(t)) === String(id));
+            const code = item ? getTransactionCode(item) : id;
+
+            const alasan = prompt(`Masukkan alasan penolakan untuk transaksi ${code}:`);
+            if (alasan === null) return;
+
+            try {
+                await requestJSON(API_PENYEWAAN, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_status',
+                        id_penyewaan: id,
+                        id: id,
+                        status: 'Ditolak',
+                        catatan: alasan,
+                        catatan_pembayaran: alasan,
+                        alasan_penolakan: alasan
+                    })
+                });
+
+                showToast(`Status pembayaran ${code} telah ditolak.`, 'error');
+                await loadTransactions();
+            } catch (error) {
+                showToast(error.message || 'Status pembayaran gagal diperbarui.', 'error');
+            }
+        }
+
         async function updatePaymentStatus(status) {
             if (!selectedTransaction) return;
 
             const id = getTransactionId(selectedTransaction);
             const code = getTransactionCode(selectedTransaction);
 
-            const actionText = status === 'Disetujui' ? 'menyetujui' : 'menolak';
-
-            if (!confirm(`Yakin ingin ${actionText} pembayaran ${code}?`)) return;
+            let alasan = '';
+            if (status === 'Ditolak') {
+                alasan = prompt(`Masukkan alasan penolakan untuk transaksi ${code}:`);
+                if (alasan === null) return;
+            } else {
+                if (!confirm(`Yakin ingin menyetujui pembayaran ${code}?`)) return;
+            }
 
             const buttons = verificationActions.querySelectorAll('button');
             buttons.forEach(button => button.disabled = true);
@@ -957,7 +1073,10 @@
                         action: 'update_status',
                         id_penyewaan: id,
                         id: id,
-                        status: status
+                        status: status,
+                        catatan: alasan,
+                        catatan_pembayaran: alasan,
+                        alasan_penolakan: alasan
                     })
                 });
 
@@ -999,6 +1118,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             loadTransactions();
         });
+
+        window.quickApprove = quickApprove;
+        window.quickReject = quickReject;
+        window.openDetail = openDetail;
     </script>
 </body>
 </html>
