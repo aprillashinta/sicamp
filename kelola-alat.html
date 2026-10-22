@@ -1,1096 +1,551 @@
-
-
 <!DOCTYPE html>
-
 <html lang="id">
-
 <head>
-
     <meta charset="UTF-8">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <meta name="theme-color" content="#071713">
-
     <title>Kelola Alat | SiCamp Admin</title>
 
-
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
-
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght\@400;500;600;700;800&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
-
+    <!-- Memuat file CSS gabungan utama SiCamp -->
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 
     <style>
-
         :root {
-
             --forest: #0a1f18;
-
             --forest-light: #143a29;
-
             --lime: #c3f45b;
-
             --cream: #f7f7ef;
-
             --white: #fff;
-
             --text: #1c2b22;
-
             --muted: #7d8b81;
-
             --border: #e8ebe3;
-
             --danger: #d94e4e;
-
         }
-
-
 
         * { box-sizing: border-box; }
 
-
-
         body {
-
             margin: 0;
-
             min-height: 100vh;
-
             background: var(--cream);
-
             color: var(--text);
-
             font-family: "Inter", sans-serif;
-
         }
-
-
 
         button, input, select, textarea { font: inherit; }
-
         button { cursor: pointer; }
 
-
-
         .page {
-
             max-width: 1600px;
-
             margin: auto;
-
             padding: 28px 32px 40px;
-
         }
-
-
 
         .page-header {
-
             display: flex;
-
             align-items: flex-start;
-
             justify-content: space-between;
-
             gap: 18px;
-
             margin-bottom: 26px;
-
         }
-
-
 
         .page-title h1 {
-
             margin: 0;
-
             font-size: clamp(24px, 3vw, 32px);
-
             font-weight: 800;
-
             letter-spacing: -1px;
-
         }
-
-
 
         .page-title p {
-
             margin: 8px 0 0;
-
             color: var(--muted);
-
             font-size: 13px;
-
             line-height: 1.7;
-
         }
-
-
 
         .btn {
-
             display: inline-flex;
-
             align-items: center;
-
             justify-content: center;
-
             gap: 9px;
-
             min-height: 42px;
-
             padding: 11px 15px;
-
             border: 1px solid transparent;
-
             border-radius: 11px;
-
             font-size: 12px;
-
             font-weight: 700;
-
             transition: .2s ease;
-
         }
-
-
 
         .btn-primary {
-
             color: var(--forest);
-
             background: var(--lime);
-
         }
-
-
 
         .btn-primary:hover { background: #d4ff7b; }
 
-
-
         .btn-secondary {
-
             color: #526056;
-
             background: white;
-
             border-color: var(--border);
-
         }
-
-
 
         .btn-secondary:hover { background: #f6f8f1; }
 
-
-
         .btn-danger {
-
             color: white;
-
             background: var(--danger);
-
         }
-
-
 
         .btn-danger:hover { background: #bf3e3e; }
 
-
-
         .stats {
-
             display: grid;
-
             grid-template-columns: repeat(3, minmax(0, 1fr));
-
             gap: 16px;
-
             margin-bottom: 22px;
-
         }
-
-
 
         .stat-card {
-
             display: flex;
-
             align-items: center;
-
             gap: 15px;
-
             min-width: 0;
-
             padding: 21px;
-
             background: white;
-
             border: 1px solid var(--border);
-
             border-radius: 17px;
-
         }
-
-
 
         .stat-icon {
-
             display: grid;
-
             place-items: center;
-
             flex: 0 0 auto;
-
             width: 46px;
-
             height: 46px;
-
             color: #365c32;
-
             background: #eef6e4;
-
             border-radius: 13px;
-
             font-size: 17px;
-
         }
-
-
 
         .stat-card:nth-child(2) .stat-icon {
-
             color: #9a6a19;
-
             background: #fff4dc;
-
         }
-
-
 
         .stat-card:nth-child(3) .stat-icon {
-
             color: #b34747;
-
             background: #ffebeb;
-
         }
-
-
 
         .stat-label {
-
             color: var(--muted);
-
             font-size: 11px;
-
             font-weight: 600;
-
         }
-
-
 
         .stat-value {
-
             margin-top: 7px;
-
             font-size: 27px;
-
             font-weight: 800;
-
             letter-spacing: -.8px;
-
         }
-
-
 
         .panel {
-
             overflow: hidden;
-
             background: white;
-
             border: 1px solid var(--border);
-
             border-radius: 18px;
-
         }
-
-
 
         .panel-header {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 16px;
-
             padding: 22px 23px;
-
             border-bottom: 1px solid var(--border);
-
         }
-
-
 
         .panel-header h2 {
-
             margin: 0;
-
             font-size: 16px;
-
             font-weight: 800;
-
         }
-
-
 
         .panel-header p {
-
             margin: 6px 0 0;
-
             color: var(--muted);
-
             font-size: 11px;
-
         }
-
-
 
         .filter-area {
-
             display: grid;
-
             grid-template-columns: minmax(200px, 1.6fr) repeat(3, minmax(130px, 1fr)) auto;
-
             gap: 10px;
-
             padding: 18px 23px;
-
             border-bottom: 1px solid var(--border);
-
         }
-
-
 
         .field {
-
             display: flex;
-
             flex-direction: column;
-
             gap: 7px;
-
             min-width: 0;
-
         }
-
-
 
         .field label {
-
             color: #657267;
-
             font-size: 11px;
-
             font-weight: 700;
-
         }
-
-
 
         .control {
-
             width: 100%;
-
             min-height: 42px;
-
             padding: 10px 12px;
-
             color: var(--text);
-
             background: white;
-
             border: 1px solid #dfe5db;
-
             border-radius: 10px;
-
             outline: none;
-
             font-size: 12px;
-
         }
-
-
 
         .control:focus {
-
             border-color: #91b85b;
-
             box-shadow: 0 0 0 3px rgba(195,244,91,.18);
-
         }
-
-
 
         .search-wrap { position: relative; }
 
-
-
         .search-wrap > i {
-
             position: absolute;
-
             top: 50%;
-
             left: 13px;
-
             color: #849184;
-
             transform: translateY(-50%);
-
         }
-
-
 
         .search-wrap input { padding-left: 36px; }
 
-
-
         .filter-reset {
-
             align-self: end;
-
             min-height: 42px;
-
             padding: 0 12px;
-
             color: #536356;
-
             background: #f6f8f2;
-
             border: 1px solid var(--border);
-
             border-radius: 10px;
-
             font-size: 11px;
-
             font-weight: 700;
-
         }
-
-
 
         .filter-reset:hover { background: #edf3e5; }
 
-
-
         .table-wrap { overflow-x: auto; }
 
-
-
         table {
-
             width: 100%;
-
             border-collapse: collapse;
-
             text-align: left;
-
         }
-
-
 
         thead { background: #f8f9f5; }
 
-
-
         th {
-
             padding: 14px 16px;
-
             color: #849084;
-
             font-size: 10px;
-
             font-weight: 800;
-
             letter-spacing: .6px;
-
             text-transform: uppercase;
-
             white-space: nowrap;
-
         }
-
-
 
         td {
-
             padding: 15px 16px;
-
             border-bottom: 1px solid #edf0e9;
-
             font-size: 12px;
-
             vertical-align: middle;
-
         }
-
-
 
         tbody tr:last-child td { border-bottom: 0; }
-
         tbody tr:hover { background: #fcfdf9; }
 
-
-
         .equipment {
-
             display: flex;
-
             align-items: center;
-
             gap: 12px;
-
             min-width: 190px;
-
         }
-
-
 
         .equipment-image {
-
             display: grid;
-
             place-items: center;
-
             flex: 0 0 auto;
-
             width: 52px;
-
             height: 52px;
-
             overflow: hidden;
-
             color: #69865c;
-
             background: #f0f4e9;
-
             border-radius: 12px;
-
         }
-
-
 
         .equipment-image img {
-
             width: 100%;
-
             height: 100%;
-
             object-fit: cover;
-
         }
-
-
 
         .equipment-name {
-
             color: #26372b;
-
             font-size: 12px;
-
             font-weight: 800;
-
             line-height: 1.5;
-
         }
-
-
 
         .equipment-description {
-
             max-width: 240px;
-
             margin-top: 4px;
-
             overflow: hidden;
-
             color: var(--muted);
-
             font-size: 10px;
-
             text-overflow: ellipsis;
-
             white-space: nowrap;
-
         }
-
-
 
         .category-badge {
-
             display: inline-flex;
-
             padding: 6px 9px;
-
             color: #41633a;
-
             background: #eff5e8;
-
             border-radius: 8px;
-
             font-size: 10px;
-
             font-weight: 700;
-
             white-space: nowrap;
-
         }
-
-
 
         .stock-badge, .status-badge {
-
             display: inline-flex;
-
             align-items: center;
-
             gap: 6px;
-
             padding: 6px 9px;
-
             border-radius: 20px;
-
             font-size: 10px;
-
             font-weight: 700;
-
             white-space: nowrap;
-
         }
-
-
 
         .stock-ok, .status-active {
-
             color: #24744d;
-
             background: #e7f6ed;
-
         }
-
-
 
         .stock-low {
-
             color: #9a6a19;
-
             background: #fff4dc;
-
         }
-
-
 
         .stock-empty, .status-inactive {
-
             color: #b34747;
-
             background: #ffebeb;
-
         }
-
-
 
         .price {
-
             color: #243b2b;
-
             font-weight: 800;
-
             white-space: nowrap;
-
         }
-
-
 
         .price small {
-
             display: block;
-
             margin-top: 4px;
-
             color: var(--muted);
-
             font-size: 10px;
-
             font-weight: 500;
-
         }
-
-
 
         .actions {
-
             display: flex;
-
             align-items: center;
-
             gap: 7px;
-
         }
-
-
 
         .icon-button {
-
             display: grid;
-
             place-items: center;
-
             width: 34px;
-
             height: 34px;
-
             color: #4c6650;
-
             background: #f2f6ed;
-
             border: 1px solid #e8eee0;
-
             border-radius: 9px;
-
         }
-
-
 
         .icon-button:hover {
-
             color: var(--forest);
-
             background: var(--lime);
-
         }
-
-
 
         .icon-button.delete {
-
             color: #c44e4e;
-
             background: #fff2f1;
-
             border-color: #f8e2e0;
-
         }
-
-
 
         .icon-button.delete:hover {
-
             color: white;
-
             background: var(--danger);
-
         }
-
-
 
         .empty-state {
-
             padding: 42px 20px;
-
             color: var(--muted);
-
             text-align: center;
-
             line-height: 1.8;
-
         }
-
-
 
         .empty-state i {
-
             display: block;
-
             margin-bottom: 12px;
-
             color: #9cac91;
-
             font-size: 27px;
-
         }
-
-
 
         .pagination {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 16px;
-
             padding: 17px 23px;
-
             border-top: 1px solid var(--border);
-
         }
-
-
 
         .pagination-info {
-
             color: var(--muted);
-
             font-size: 11px;
-
         }
-
-
 
         .pagination-controls {
-
             display: flex;
-
             align-items: center;
-
             gap: 7px;
-
         }
-
-
 
         .page-button {
-
             min-width: 34px;
-
             height: 34px;
-
             padding: 0 9px;
-
             color: #526056;
-
             background: white;
-
             border: 1px solid var(--border);
-
             border-radius: 9px;
-
             font-size: 11px;
-
             font-weight: 700;
-
         }
-
-
 
         .page-button.active {
-
             color: var(--forest);
-
             background: var(--lime);
-
             border-color: var(--lime);
-
         }
-
-
 
         .page-button:disabled {
-
             opacity: .4;
-
             cursor: not-allowed;
-
         }
-
-
 
         .modal-backdrop {
-
             position: fixed;
-
             inset: 0;
-
             z-index: 3000;
-
             display: none;
-
             align-items: center;
-
             justify-content: center;
-
             overflow-y: auto;
-
             padding: 20px;
-
             background: rgba(5,20,13,.62);
-
             backdrop-filter: blur(4px);
-
         }
-
-
 
         .modal-backdrop.open { display: flex; }
 
-
-
         .modal {
-
             width: min(680px, 100%);
-
             max-height: calc(100vh - 40px);
-
             overflow-y: auto;
-
             background: white;
-
             border-radius: 20px;
-
             box-shadow: 0 24px 80px rgba(0,0,0,.2);
-
         }
-
-
 
         .modal-header {
-
             display: flex;
-
             align-items: center;
-
             justify-content: space-between;
-
             gap: 15px;
-
             padding: 22px 24px;
-
             border-bottom: 1px solid var(--border);
-
         }
-
-
 
         .modal-header h2 {
-
             margin: 0;
-
             font-size: 18px;
-
             font-weight: 800;
-
         }
-
-
 
         .modal-header p {
-
             margin: 6px 0 0;
-
             color: var(--muted);
-
             font-size: 11px;
-
         }
-
-
 
         .modal-close {
-
             display: grid;
-
             place-items: center;
-
             flex: 0 0 auto;
-
             width: 36px;
-
             height: 36px;
-
             color: #68766a;
-
             background: #f4f6f1;
-
             border: 0;
-
             border-radius: 10px;
-
         }
-
-
 
         .modal-body { padding: 24px; }
 
-
-
         .form-grid {
-
             display: grid;
-
             grid-template-columns: repeat(2, minmax(0, 1fr));
-
             gap: 17px;
-
         }
-
-
 
         .field.full { grid-column: 1 / -1; }
 
-
-
         textarea.control {
-
             min-height: 95px;
-
             resize: vertical;
-
         }
-
-
 
         .image-preview {
-
             display: none;
-
             width: 100%;
-
             max-height: 180px;
-
             margin-top: 10px;
-
             object-fit: contain;
-
             background: #f7f8f3;
-
             border: 1px solid var(--border);
-
             border-radius: 12px;
-
         }
 
-
-
         .image-preview.visible { display: block; }
-
-
 
         .optional-label { color: var(--muted); font-weight: 500; }
         .upload-zone { border: 1px dashed #bdcbb7; border-radius: 12px; background: #fbfcf8; min-height: 120px; padding: 12px 14px; text-align: center; transition: border-color .2s ease, background .2s ease, box-shadow .2s ease; outline: none; }
@@ -1110,468 +565,238 @@
         @media (max-width: 520px) { .upload-zone { min-height: 112px; padding: 10px; } .upload-empty strong { font-size: 12px; } .upload-empty small { font-size: 10px; } }
 
         .modal-footer {
-
             display: flex;
-
             justify-content: flex-end;
-
             gap: 10px;
-
             padding: 18px 24px;
-
             background: #fbfcf8;
-
             border-top: 1px solid var(--border);
-
         }
-
-
 
         .notice {
-
             margin-bottom: 18px;
-
             padding: 13px 15px;
-
             color: #6b5a2c;
-
             background: #fff8e6;
-
             border: 1px solid #f3e5b9;
-
             border-radius: 11px;
-
             font-size: 11px;
-
             line-height: 1.7;
-
         }
-
-
 
         .toast {
-
             position: fixed;
-
             right: 20px;
-
             bottom: 20px;
-
             z-index: 5000;
-
             max-width: min(420px, calc(100vw - 40px));
-
             padding: 14px 18px;
-
             color: white;
-
             background: var(--forest);
-
             border: 1px solid rgba(195,244,91,.3);
-
             border-radius: 12px;
-
             box-shadow: 0 12px 35px rgba(0,0,0,.15);
-
             font-size: 12px;
-
         }
-
-
 
         .toast.error { background: #a83232; }
-
         .toast.warning { background: #8c6419; }
 
-
-
         @media (max-width: 1150px) {
-
             .filter-area {
-
                 grid-template-columns: repeat(2, minmax(0, 1fr));
-
             }
 
-
-
             .filter-reset { align-self: end; }
-
         }
-
-
 
         @media (max-width: 900px) {
-
             .page { padding: 24px 20px 35px; }
-
             .page-header { padding-left: 52px; }
-
         }
-
-
 
         @media (max-width: 650px) {
-
             .page { padding: 18px 13px 28px; }
-
             .page-header { flex-direction: column; }
-
             .page-header > .btn { width: 100%; }
-
             .stats { grid-template-columns: 1fr; gap: 10px; }
-
             .stat-card { padding: 15px; }
-
             .stat-value { font-size: 23px; }
-
             .panel-header { align-items: flex-start; padding: 18px 15px; }
-
             .filter-area { grid-template-columns: 1fr; padding: 15px; }
-
             .pagination { align-items: flex-start; flex-direction: column; padding: 15px; }
-
             .pagination-controls { flex-wrap: wrap; }
-
             .form-grid { grid-template-columns: 1fr; }
-
             .field.full { grid-column: auto; }
-
             .modal-backdrop { padding: 10px; }
-
             .modal { max-height: calc(100vh - 20px); }
-
             .modal-header, .modal-body, .modal-footer { padding: 18px; }
-
         }
-
     </style>
-
 </head>
 
+<body class="sicamp-admin-layout">
 
-
-<body>
-
-    <!-- Sidebar dibuat oleh js/app.js -->
-
-
+    <!-- Container Sidebar Administrator Static (diisi menu oleh js/app.js) -->
+    <aside id="sidebarAdmin" aria-label="Navigasi administrator"></aside>
 
     <main class="page">
-
         <header class="page-header">
-
             <div class="page-title">
-
                 <h1>Kelola Alat</h1>
-
                 <p>Kelola inventaris, harga sewa, stok, dan kondisi peralatan camping.</p>
-
             </div>
-
-
 
             <button type="button" class="btn btn-primary" id="addEquipmentButton">
-
                 <i class="fa-solid fa-plus"></i>
-
                 Tambah Peralatan
-
             </button>
-
         </header>
 
-
-
         <section class="stats">
-
             <article class="stat-card">
-
                 <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
-
                 <div>
-
                     <div class="stat-label">Jenis Peralatan</div>
-
                     <div class="stat-value" id="totalEquipment">—</div>
-
                 </div>
-
             </article>
 
-
-
             <article class="stat-card">
-
                 <div class="stat-icon"><i class="fa-solid fa-cubes"></i></div>
-
                 <div>
-
                     <div class="stat-label">Total Unit Stok</div>
-
                     <div class="stat-value" id="totalStock">—</div>
-
                 </div>
-
             </article>
-
-
 
             <article class="stat-card">
-
                 <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
-
                 <div>
-
                     <div class="stat-label">Stok Habis</div>
-
                     <div class="stat-value" id="outOfStock">—</div>
-
                 </div>
-
             </article>
-
         </section>
-
-
 
         <section class="panel">
-
             <div class="panel-header">
-
                 <div>
-
                     <h2>Daftar Peralatan</h2>
-
                     <p>Data diambil dari database melalui API SiCamp.</p>
-
                 </div>
-
             </div>
-
-
 
             <div class="filter-area">
-
                 <div class="field">
-
                     <label for="searchInput">Cari peralatan</label>
-
                     <div class="search-wrap">
-
                         <i class="fa-solid fa-magnifying-glass"></i>
-
                         <input
-
                             class="control"
-
                             id="searchInput"
-
                             type="search"
-
                             placeholder="Nama atau deskripsi..."
-
                         >
-
                     </div>
-
                 </div>
 
-
-
                 <div class="field">
-
                     <label for="categoryFilter">Kategori</label>
-
                     <select class="control" id="categoryFilter">
-
                         <option value="">Semua kategori</option>
-
                     </select>
-
                 </div>
 
-
-
                 <div class="field">
-
                     <label for="stockFilter">Ketersediaan stok</label>
-
                     <select class="control" id="stockFilter">
-
                         <option value="">Semua stok</option>
-
                         <option value="available">Tersedia</option>
-
                         <option value="low">Stok menipis (1–2)</option>
-
                         <option value="empty">Stok habis</option>
-
                     </select>
-
                 </div>
-
-
 
                 <div class="field">
-
                     <label for="sortFilter">Urutkan</label>
-
                     <select class="control" id="sortFilter">
-
                         <option value="newest">Terbaru</option>
-
                         <option value="nameAsc">Nama A–Z</option>
-
                         <option value="nameDesc">Nama Z–A</option>
-
                         <option value="priceAsc">Harga terendah</option>
-
                         <option value="priceDesc">Harga tertinggi</option>
-
                         <option value="stockAsc">Stok terendah</option>
-
                     </select>
-
                 </div>
-
-
 
                 <button type="button" class="filter-reset" id="resetFilters">
-
                     <i class="fa-solid fa-rotate-left"></i>
-
                     Reset
-
                 </button>
-
             </div>
-
-
 
             <div class="table-wrap">
-
                 <table>
-
                     <thead>
-
                         <tr>
-
                             <th>Peralatan</th>
-
                             <th>Kategori</th>
-
                             <th>Harga Sewa</th>
-
                             <th>Stok</th>
-
                             <th>Kondisi</th>
-
                             <th>Status</th>
-
                             <th>Aksi</th>
-
                         </tr>
-
                     </thead>
-
                     <tbody id="equipmentTableBody">
-
                         <tr>
-
                             <td colspan="7" class="empty-state">
-
                                 <i class="fa-solid fa-spinner fa-spin"></i>
-
                                 Memuat data peralatan...
-
                             </td>
-
                         </tr>
-
                     </tbody>
-
                 </table>
-
             </div>
-
-
 
             <div class="pagination">
-
                 <div class="pagination-info" id="paginationInfo">
-
                     Memuat data...
-
                 </div>
-
-
 
                 <div class="pagination-controls" id="paginationControls"></div>
-
             </div>
-
         </section>
-
     </main>
 
-
-
     <!-- Modal tambah/edit -->
-
     <div class="modal-backdrop" id="equipmentModalBackdrop" aria-hidden="true">
-
         <section
-
             class="modal"
-
             role="dialog"
-
             aria-modal="true"
-
             aria-labelledby="modalTitle"
-
         >
-
             <div class="modal-header">
-
                 <div>
-
                     <h2 id="modalTitle">Tambah Peralatan</h2>
-
                     <p>Lengkapi informasi peralatan camping.</p>
-
                 </div>
 
-
-
                 <button
-
                     type="button"
-
                     class="modal-close"
-
                     id="closeModalButton"
-
                     aria-label="Tutup modal"
-
                 >
-
                     <i class="fa-solid fa-xmark"></i>
-
                 </button>
-
             </div>
 
-
-
             <form id="equipmentForm">
-
                 <div class="modal-body">
-
                     <input type="hidden" id="equipmentId">
-
-
 
                     <div class="field full image-upload-field">
                         <label for="equipmentImage">Gambar Peralatan <span class="optional-label">(opsional)</span></label>
@@ -1593,1274 +818,638 @@
                     </div>
 
                     <div class="form-grid">
-
                         <div class="field">
-
                             <label for="equipmentName">Nama peralatan *</label>
-
                             <input
-
                                 class="control"
-
                                 id="equipmentName"
-
                                 name="nama_peralatan"
-
                                 required
-
                                 maxlength="150"
-
                                 placeholder="Contoh: Tenda Dome"
-
                             >
-
                         </div>
 
-
-
                         <div class="field">
-
                             <label for="equipmentCategory">Kategori *</label>
-
                             <select
-
                                 class="control"
-
                                 id="equipmentCategory"
-
                                 name="id_kategori"
-
                                 required
-
                             >
-
                                 <option value="">Pilih kategori</option>
-
                             </select>
-
                         </div>
 
-
-
                         <div class="field">
-
                             <label for="equipmentPrice">Harga sewa per hari *</label>
-
                             <input
-
                                 class="control"
-
                                 id="equipmentPrice"
-
                                 name="harga_sewa"
-
                                 type="number"
-
                                 min="0"
-
                                 step="1000"
-
                                 required
-
                                 placeholder="Contoh: 50000"
-
                             >
-
                         </div>
 
-
-
                         <div class="field">
-
                             <label for="equipmentStock">Stok *</label>
-
                             <input
-
                                 class="control"
-
                                 id="equipmentStock"
-
                                 name="stok"
-
                                 type="number"
-
                                 min="0"
-
                                 step="1"
-
                                 required
-
                                 placeholder="Contoh: 10"
-
                             >
-
                         </div>
 
-
-
                         <div class="field">
-
                             <label for="equipmentCondition">Kondisi *</label>
-
                             <select
-
                                 class="control"
-
                                 id="equipmentCondition"
-
                                 name="kondisi"
-
                                 required
-
                             >
-
                                 <option value="">Pilih kondisi</option>
-
                                 <option value="Baik">Baik</option>
-
                                 <option value="Perlu Perbaikan">Perlu Perbaikan</option>
-
                                 <option value="Rusak">Rusak</option>
-
                             </select>
-
                         </div>
-
-
 
                         <div class="field">
-
                             <label for="equipmentStatus">Status *</label>
-
                             <select
-
                                 class="control"
-
                                 id="equipmentStatus"
-
                                 name="status"
-
                                 required
-
                             >
-
                                 <option value="Aktif">Aktif</option>
-
                                 <option value="Tidak Aktif">Tidak Aktif</option>
-
                             </select>
-
                         </div>
-
-
 
                         <div class="field full">
-
                             <label for="equipmentDescription">Deskripsi</label>
-
                             <textarea
-
                                 class="control"
-
                                 id="equipmentDescription"
-
                                 name="deskripsi"
-
                                 maxlength="2000"
-
                                 placeholder="Deskripsi singkat peralatan..."
-
                             ></textarea>
-
                         </div>
-
-
-
-
                     </div>
-
                 </div>
-
-
 
                 <div class="modal-footer">
-
                     <button type="button" class="btn btn-secondary" id="cancelModalButton">
-
                         Batal
-
                     </button>
-
-
 
                     <button type="submit" class="btn btn-primary" id="saveEquipmentButton">
-
                         <i class="fa-solid fa-floppy-disk"></i>
-
                         Simpan Peralatan
-
                     </button>
-
                 </div>
-
             </form>
-
         </section>
-
     </div>
 
-
-
-    <script src="js/app.js"></script>
-
-
+    <script src="js/app.js?v=1.1"></script>
 
     <script>
-
         (() => {
-
             "use strict";
 
-
-
             const API_EQUIPMENT = "api/api_peralatan.php";
-
             const API_CATEGORY = "api/api_kategori.php";
-
             const PAGE_SIZE = 8;
-
-
 
             const $ = (id) => document.getElementById(id);
 
-
-
             let equipmentData = [];
-
             let categoryData = [];
-
             let currentPage = 1;
-
             let isSaving = false;
 
-
-
             function escape(value) {
-
                 return typeof window.escapeHTML === "function"
-
                     ? window.escapeHTML(value)
-
                     : String(value ?? "").replace(/[&<>"']/g, (char) => ({
-
                         "&": "&amp;",
-
                         "<": "&lt;",
-
                         ">": "&gt;",
-
                         '"': "&quot;",
-
                         "'": "&#39;"
-
                     })[char]);
-
             }
-
-
 
             async function request(url, options = {}) {
-
                 const response = await fetch(url, {
-
                     headers: {
-
                         Accept: "application/json",
-
                         ...(options.body !== undefined && !(options.body instanceof FormData) ? { "Content-Type": "application/json" } : {}),
-
                         ...(options.headers || {})
-
                     },
-
                     ...options
-
                 });
 
-
-
                 const text = await response.text();
-
                 let result;
 
-
-
                 try {
-
                     result = text ? JSON.parse(text) : {};
-
                 } catch {
-
                     throw new Error(
-
                         "Respons API bukan JSON yang valid. Periksa file PHP."
-
                     );
-
                 }
-
-
 
                 if (!response.ok || result.success === false) {
-
                     throw new Error(
-
                         result.message ||
-
                         result.pesan ||
-
                         `Permintaan gagal (${response.status}).`
-
                     );
-
                 }
-
-
 
                 return result;
-
             }
-
-
 
             function unwrapList(result, keys) {
-
                 if (Array.isArray(result)) return result;
 
-
-
                 for (const key of keys) {
-
                     if (Array.isArray(result?.[key])) {
-
                         return result[key];
-
                     }
-
                 }
-
-
 
                 return [];
-
             }
-
-
 
             function idOf(item) {
-
                 return item.id_peralatan ?? item.id ?? item.id_alat ?? "";
-
             }
-
-
 
             function categoryIdOf(item) {
-
                 return item.id_kategori ?? item.kategori_id ?? "";
-
             }
-
-
 
             function nameOf(item) {
-
                 return item.nama_peralatan ?? item.nama_alat ?? item.nama ?? "-";
-
             }
-
-
 
             function categoryNameOf(item) {
-
                 if (item.nama_kategori) return item.nama_kategori;
 
-
-
                 const id = categoryIdOf(item);
-
                 const category = categoryData.find(
-
                     (entry) => String(entry.id_kategori ?? entry.id) === String(id)
-
                 );
 
-
-
                 return category?.nama_kategori ?? "Tanpa kategori";
-
             }
-
-
 
             function stockOf(item) {
-
                 return Number(item.stok ?? item.jumlah_stok ?? 0);
-
             }
-
-
 
             function priceOf(item) {
-
                 return Number(item.harga_sewa ?? item.harga ?? 0);
-
             }
-
-
 
             function rupiah(value) {
-
                 return new Intl.NumberFormat("id-ID", {
-
                     style: "currency",
-
                     currency: "IDR",
-
                     maximumFractionDigits: 0
-
                 }).format(Number(value) || 0);
-
             }
-
-
 
             function notify(message, type = "success") {
-
                 document.getElementById("equipmentToast")?.remove();
 
-
-
                 const toast = document.createElement("div");
-
                 toast.id = "equipmentToast";
-
                 toast.className = `toast ${type === "error" ? "error" : type === "warning" ? "warning" : ""}`;
-
                 toast.textContent = message;
-
                 document.body.appendChild(toast);
 
-
-
                 window.setTimeout(() => toast.remove(), 3500);
-
             }
-
-
 
             async function loadCategories() {
-
                 const result = await request(API_CATEGORY);
-
                 categoryData = unwrapList(result, [
-
                     "data", "kategori", "result"
-
                 ]);
 
-
-
                 const options = categoryData.map((item) => {
-
                     const id = item.id_kategori ?? item.id;
-
                     const name = item.nama_kategori ?? item.nama ?? "Kategori";
 
-
-
                     return `
-
                         <option value="${escape(id)}">
-
                             ${escape(name)}
-
                         </option>
-
                     `;
-
                 }).join("");
 
-
-
                 $("categoryFilter").innerHTML =
-
                     '<option value="">Semua kategori</option>' + options;
 
-
-
                 $("equipmentCategory").innerHTML =
-
                     '<option value="">Pilih kategori</option>' + options;
-
             }
-
-
 
             async function loadEquipment() {
-
                 $("equipmentTableBody").innerHTML = `
-
                     <tr>
-
                         <td colspan="7" class="empty-state">
-
                             <i class="fa-solid fa-spinner fa-spin"></i>
-
                             Memuat data peralatan...
-
                         </td>
-
                     </tr>
-
                 `;
 
-
-
                 try {
-
                     const result = await request(API_EQUIPMENT);
 
-
-
                     equipmentData = unwrapList(result, [
-
                         "data", "peralatan", "result"
-
                     ]);
 
-
-
                     renderTable();
-
                     updateStats();
-
                 } catch (error) {
-
                     console.error("Gagal memuat peralatan:", error);
 
-
-
                     $("equipmentTableBody").innerHTML = `
-
                         <tr>
-
                             <td colspan="7" class="empty-state">
-
                                 <i class="fa-solid fa-triangle-exclamation"></i>
-
                                 Gagal memuat data peralatan.<br>
-
                                 ${escape(error.message)}
-
                                 <br><br>
-
                                 <button type="button" class="btn btn-secondary"
-
                                     id="retryEquipmentLoad">
-
                                     <i class="fa-solid fa-rotate"></i>
-
                                     Coba Lagi
-
                                 </button>
-
                             </td>
-
                         </tr>
-
                     `;
 
-
-
                     $("retryEquipmentLoad")?.addEventListener(
-
                         "click",
-
                         loadEquipment
-
                     );
 
-
-
                     $("totalEquipment").textContent = "—";
-
                     $("totalStock").textContent = "—";
-
                     $("outOfStock").textContent = "—";
-
                 }
-
             }
 
-
-
             function getFilteredData() {
-
                 const keyword = $("searchInput").value.trim().toLowerCase();
-
                 const category = $("categoryFilter").value;
-
                 const stockFilter = $("stockFilter").value;
-
                 const sort = $("sortFilter").value;
 
-
-
                 let result = equipmentData.filter((item) => {
-
                     const text = [
-
                         nameOf(item),
-
                         item.deskripsi ?? "",
-
                         categoryNameOf(item)
-
                     ].join(" ").toLowerCase();
-
-
 
                     if (keyword && !text.includes(keyword)) return false;
 
-
-
                     if (
-
                         category &&
-
                         String(categoryIdOf(item)) !== String(category)
-
                     ) {
-
                         return false;
-
                     }
-
-
 
                     const stock = stockOf(item);
 
-
-
                     if (stockFilter === "available" && stock <= 0) {
-
                         return false;
-
                     }
-
-
 
                     if (stockFilter === "low" && !(stock > 0 && stock <= 2)) {
-
                         return false;
-
                     }
-
-
 
                     if (stockFilter === "empty" && stock > 0) {
-
                         return false;
-
                     }
 
-
-
                     return true;
-
                 });
 
-
-
                 switch (sort) {
-
                     case "nameAsc":
-
                         result.sort((a, b) =>
-
                             nameOf(a).localeCompare(nameOf(b), "id")
-
                         );
-
                         break;
-
-
 
                     case "nameDesc":
-
                         result.sort((a, b) =>
-
                             nameOf(b).localeCompare(nameOf(a), "id")
-
                         );
-
                         break;
-
-
 
                     case "priceAsc":
-
                         result.sort((a, b) => priceOf(a) - priceOf(b));
-
                         break;
-
-
 
                     case "priceDesc":
-
                         result.sort((a, b) => priceOf(b) - priceOf(a));
-
                         break;
-
-
 
                     case "stockAsc":
-
                         result.sort((a, b) => stockOf(a) - stockOf(b));
-
                         break;
 
-
-
                     default:
-
                         result.sort((a, b) =>
-
                             Number(idOf(b)) - Number(idOf(a))
-
                         );
-
                 }
 
-
-
                 return result;
-
             }
 
-
-
             function renderTable() {
-
                 const filtered = getFilteredData();
-
                 const totalPages = Math.max(
-
                     1,
-
                     Math.ceil(filtered.length / PAGE_SIZE)
-
                 );
-
-
 
                 currentPage = Math.min(currentPage, totalPages);
 
-
-
                 const startIndex = (currentPage - 1) * PAGE_SIZE;
-
                 const pageItems = filtered.slice(
-
                     startIndex,
-
                     startIndex + PAGE_SIZE
-
                 );
 
-
-
                 if (!pageItems.length) {
-
                     $("equipmentTableBody").innerHTML = `
-
                         <tr>
-
                             <td colspan="7" class="empty-state">
-
                                 <i class="fa-regular fa-folder-open"></i>
-
                                 Tidak ada peralatan yang sesuai dengan filter.
-
                             </td>
-
                         </tr>
-
                     `;
-
                 } else {
-
                     $("equipmentTableBody").innerHTML = pageItems.map((item) => {
-
                         const id = idOf(item);
-
                         const stock = stockOf(item);
-
                         const image = item.gambar || item.foto || "";
-
                         const condition = item.kondisi || "-";
-
                         const status = item.status || "Aktif";
 
-
-
                         let stockClass = "stock-ok";
-
                         let stockLabel = "Tersedia";
 
-
-
                         if (stock <= 0) {
-
                             stockClass = "stock-empty";
-
                             stockLabel = "Habis";
-
                         } else if (stock <= 2) {
-
                             stockClass = "stock-low";
-
                             stockLabel = "Menipis";
-
                         }
 
-
-
                         const active =
-
                             String(status).toLowerCase() === "aktif";
 
-
-
                         const imageHTML = image
-
                             ? `<img src="${escape(image)}" alt="${escape(nameOf(item))}"
-
                                    loading="lazy"
-
                                    onerror="this.style.display='none';this.parentElement.innerHTML='<i class=&quot;fa-solid fa-campground&quot;></i>'">`
-
                             : '<i class="fa-solid fa-campground"></i>';
 
-
-
                         return `
-
                             <tr>
-
                                 <td>
-
                                     <div class="equipment">
-
                                         <div class="equipment-image">
-
                                             ${imageHTML}
-
                                         </div>
-
                                         <div>
-
                                             <div class="equipment-name">
-
                                                 ${escape(nameOf(item))}
-
                                             </div>
-
                                             <div class="equipment-description">
-
                                                 ${escape(item.deskripsi || "Tidak ada deskripsi")}
-
                                             </div>
-
                                         </div>
-
                                     </div>
-
                                 </td>
 
-
-
                                 <td>
-
                                     <span class="category-badge">
-
                                         ${escape(categoryNameOf(item))}
-
                                     </span>
-
                                 </td>
 
-
-
                                 <td>
-
                                     <span class="price">
-
                                         ${rupiah(priceOf(item))}
-
                                         <small>per hari</small>
-
                                     </span>
-
                                 </td>
-
-
 
                                 <td>
-
                                     <span class="stock-badge ${stockClass}">
-
                                         ${stock} unit · ${stockLabel}
-
                                     </span>
-
                                 </td>
-
-
 
                                 <td>${escape(condition)}</td>
 
-
-
                                 <td>
-
                                     <span class="status-badge ${active ? "status-active" : "status-inactive"}">
-
                                         ${escape(status)}
-
                                     </span>
-
                                 </td>
-
-
 
                                 <td>
-
                                     <div class="actions">
-
                                         <button
-
                                             type="button"
-
                                             class="icon-button edit-button"
-
                                             data-id="${escape(id)}"
-
                                             title="Edit peralatan"
-
                                             aria-label="Edit ${escape(nameOf(item))}"
-
                                         >
-
                                             <i class="fa-solid fa-pen"></i>
-
                                         </button>
-
-
 
                                         <button
-
                                             type="button"
-
                                             class="icon-button delete delete-button"
-
                                             data-id="${escape(id)}"
-
                                             title="Hapus peralatan"
-
                                             aria-label="Hapus ${escape(nameOf(item))}"
-
                                         >
-
                                             <i class="fa-solid fa-trash"></i>
-
                                         </button>
-
                                     </div>
-
                                 </td>
-
                             </tr>
-
                         `;
-
                     }).join("");
-
                 }
 
-
-
                 const from = filtered.length ? startIndex + 1 : 0;
-
                 const to = Math.min(startIndex + PAGE_SIZE, filtered.length);
 
-
-
                 $("paginationInfo").textContent =
-
                     `Menampilkan ${from}–${to} dari ${filtered.length} peralatan`;
 
-
-
                 renderPagination(totalPages);
-
             }
 
-
-
             function renderPagination(totalPages) {
-
                 const container = $("paginationControls");
-
                 container.innerHTML = "";
 
-
-
                 const previous = document.createElement("button");
-
                 previous.className = "page-button";
-
                 previous.type = "button";
-
                 previous.textContent = "‹";
-
                 previous.title = "Halaman sebelumnya";
-
                 previous.disabled = currentPage <= 1;
-
                 previous.addEventListener("click", () => {
-
                     if (currentPage > 1) {
-
                         currentPage--;
-
                         renderTable();
-
                     }
-
                 });
-
                 container.appendChild(previous);
 
-
-
                 const pages = new Set([
-
                     1,
-
                     totalPages,
-
                     currentPage - 1,
-
                     currentPage,
-
                     currentPage + 1
-
                 ]);
-
-
 
                 let last = 0;
 
-
-
                 [...pages]
-
                     .filter((page) => page >= 1 && page <= totalPages)
-
                     .sort((a, b) => a - b)
-
                     .forEach((page) => {
-
                         if (last && page - last > 1) {
-
                             const dots = document.createElement("span");
-
                             dots.textContent = "…";
-
                             dots.style.padding = "0 4px";
-
                             container.appendChild(dots);
-
                         }
 
-
-
                         const button = document.createElement("button");
-
                         button.type = "button";
-
                         button.className =
-
                             `page-button ${page === currentPage ? "active" : ""}`;
-
                         button.textContent = String(page);
-
                         button.setAttribute("aria-label", `Halaman ${page}`);
 
-
-
                         button.addEventListener("click", () => {
-
                             currentPage = page;
-
                             renderTable();
-
                         });
 
-
-
                         container.appendChild(button);
-
                         last = page;
-
                     });
 
-
-
                 const next = document.createElement("button");
-
                 next.className = "page-button";
-
                 next.type = "button";
-
                 next.textContent = "›";
-
                 next.title = "Halaman berikutnya";
-
                 next.disabled = currentPage >= totalPages;
-
                 next.addEventListener("click", () => {
-
                     if (currentPage < totalPages) {
-
                         currentPage++;
-
                         renderTable();
-
                     }
-
                 });
-
                 container.appendChild(next);
-
             }
-
-
 
             function updateStats() {
-
                 $("totalEquipment").textContent =
-
                     equipmentData.length.toLocaleString("id-ID");
 
-
-
                 $("totalStock").textContent =
-
                     equipmentData.reduce(
-
                         (total, item) => total + stockOf(item),
-
                         0
-
                     ).toLocaleString("id-ID");
 
-
-
                 $("outOfStock").textContent =
-
                     equipmentData.filter(
-
                         (item) => stockOf(item) <= 0
-
                     ).length.toLocaleString("id-ID");
-
             }
-
-
 
             function openModal(item = null) {
-
                 $("equipmentForm").reset();
-
                 $("equipmentId").value = "";
-
                 $("imagePreview").src = "";
-
                 $("imagePreview").classList.remove("visible");
 
-
-
                 if (item) {
-
                     $("modalTitle").textContent = "Edit Peralatan";
-
                     $("equipmentId").value = idOf(item);
-
                     $("equipmentName").value = nameOf(item);
-
                     $("equipmentCategory").value = categoryIdOf(item);
-
                     $("equipmentPrice").value = priceOf(item);
-
                     $("equipmentStock").value = stockOf(item);
-
                     $("equipmentCondition").value = item.kondisi || "Baik";
-
                     $("equipmentStatus").value = item.status || "Aktif";
-
                     $("equipmentDescription").value = item.deskripsi || "";
-
                     $("imageDropZone").dataset.existingImage = item.gambar || item.foto || "";
                     if (item.gambar || item.foto) showExistingImage(item.gambar || item.foto);
-
                 } else {
-
                     $("modalTitle").textContent = "Tambah Peralatan";
-
                     $("equipmentStatus").value = "Aktif";
-
                 }
 
-
-
                 $("equipmentModalBackdrop").classList.add("open");
-
                 $("equipmentModalBackdrop").setAttribute("aria-hidden", "false");
-
                 document.body.style.overflow = "hidden";
 
-
-
                 window.setTimeout(() => $("equipmentName").focus(), 50);
-
             }
-
-
 
             function closeModal() {
-
                 $("equipmentModalBackdrop").classList.remove("open");
-
                 $("equipmentModalBackdrop").setAttribute("aria-hidden", "true");
-
                 document.body.style.overflow = "";
-
             }
-
-
 
             function formatFileSize(bytes) {
                 if (bytes < 1024) return `${bytes} B`;
@@ -2892,93 +1481,49 @@
             }
 
             async function saveEquipment(event) {
-
                 event.preventDefault();
-
-
 
                 if (isSaving) return;
 
-
-
                 const id = $("equipmentId").value.trim();
-
                 const payload = {
-
                     nama_peralatan: $("equipmentName").value.trim(),
-
                     id_kategori: $("equipmentCategory").value,
-
                     harga_sewa: Number($("equipmentPrice").value),
-
                     stok: Number($("equipmentStock").value),
-
                     kondisi: $("equipmentCondition").value,
-
                     status: $("equipmentStatus").value,
-
                     deskripsi: $("equipmentDescription").value.trim()
-
                 };
 
-
-
                 if (!payload.nama_peralatan) {
-
                     notify("Nama peralatan wajib diisi.", "error");
-
                     return;
-
                 }
-
-
 
                 if (!payload.id_kategori) {
-
                     notify("Silakan pilih kategori peralatan.", "error");
-
                     return;
-
                 }
-
-
 
                 if (
-
                     !Number.isFinite(payload.harga_sewa) ||
-
                     payload.harga_sewa < 0 ||
-
                     !Number.isInteger(payload.stok) ||
-
                     payload.stok < 0
-
                 ) {
-
                     notify("Harga dan stok harus bernilai valid.", "error");
-
                     return;
-
                 }
-
-
 
                 isSaving = true;
 
-
-
                 const button = $("saveEquipmentButton");
-
                 button.disabled = true;
-
                 button.innerHTML =
-
                     '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
 
-
-
                 try {
-
                     const formData = new FormData();
                     Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
                     if (id) formData.append("id_peralatan", id);
@@ -2987,153 +1532,78 @@
                     if ($("imageDropZone").dataset.removeImage === "true") formData.append("hapus_gambar", "1");
                     const result = await request(API_EQUIPMENT, { method: "POST", body: formData });
 
-
-
                     notify(
-
                         result.message ||
-
                         result.pesan ||
-
                         (id
-
                             ? "Peralatan berhasil diperbarui."
-
                             : "Peralatan berhasil ditambahkan.")
-
                     );
 
-
-
                     closeModal();
-
                     await loadEquipment();
-
                 } catch (error) {
-
                     console.error("Gagal menyimpan peralatan:", error);
-
                     notify(error.message || "Gagal menyimpan peralatan.", "error");
-
                 } finally {
-
                     isSaving = false;
-
                     button.disabled = false;
-
                     button.innerHTML =
-
                         '<i class="fa-solid fa-floppy-disk"></i> Simpan Peralatan';
-
                 }
-
             }
 
-
-
             async function deleteEquipment(id) {
-
                 const item = equipmentData.find(
-
                     (entry) => String(idOf(entry)) === String(id)
-
                 );
-
-
 
                 if (!item) {
-
                     notify("Data peralatan tidak ditemukan.", "error");
-
                     return;
-
                 }
 
-
-
                 const confirmed = window.confirm(
-
                     `Hapus peralatan "${nameOf(item)}"?\n\n` +
-
                     "Tindakan ini akan menghapus data melalui API."
-
                 );
-
-
 
                 if (!confirmed) return;
 
-
-
                 try {
-
                     const result = await request(API_EQUIPMENT, {
-
                         method: "DELETE",
-
                         body: JSON.stringify({
-
                             id_peralatan: id
-
                         })
-
                     });
 
-
-
                     notify(
-
                         result.message ||
-
                         result.pesan ||
-
                         "Peralatan berhasil dihapus."
-
                     );
-
-
 
                     await loadEquipment();
-
                 } catch (error) {
-
                     console.error("Gagal menghapus peralatan:", error);
-
                     notify(
-
                         error.message ||
-
                         "Gagal menghapus peralatan. Periksa API dan relasi database.",
-
                         "error"
-
                     );
-
                 }
-
             }
 
-
-
             function initializeEvents() {
-
                 $("addEquipmentButton").addEventListener(
-
                     "click",
-
                     () => openModal()
-
                 );
 
-
-
                 $("closeModalButton").addEventListener("click", closeModal);
-
                 $("cancelModalButton").addEventListener("click", closeModal);
-
                 $("equipmentForm").addEventListener("submit", saveEquipment);
-
-
 
                 const dropZone = $("imageDropZone");
                 const fileInput = $("equipmentImage");
@@ -3147,176 +1617,89 @@
                 ["dragleave", "drop"].forEach(type => dropZone.addEventListener(type, event => { event.preventDefault(); dropZone.classList.remove("drag-over"); }));
                 dropZone.addEventListener("drop", event => { const file = event.dataTransfer.files && event.dataTransfer.files[0]; if (!file) return; const transfer = new DataTransfer(); transfer.items.add(file); fileInput.files = transfer.files; updateImagePreview(); });
 
-
-
                 $("equipmentTableBody").addEventListener("click", (event) => {
-
                     const editButton = event.target.closest(".edit-button");
-
                     const deleteButton = event.target.closest(".delete-button");
 
-
-
                     if (editButton) {
-
                         const item = equipmentData.find(
-
                             (entry) =>
-
                                 String(idOf(entry)) ===
-
                                 String(editButton.dataset.id)
-
                         );
 
-
-
                         if (item) openModal(item);
-
                     }
-
-
 
                     if (deleteButton) {
-
                         deleteEquipment(deleteButton.dataset.id);
-
                     }
-
                 });
-
-
 
                 [
-
                     "searchInput",
-
                     "categoryFilter",
-
                     "stockFilter",
-
                     "sortFilter"
-
                 ].forEach((id) => {
-
                     $(id).addEventListener("input", () => {
-
                         currentPage = 1;
-
                         renderTable();
-
                     });
-
-
 
                     $(id).addEventListener("change", () => {
-
                         currentPage = 1;
-
                         renderTable();
-
                     });
-
                 });
-
-
 
                 $("resetFilters").addEventListener("click", () => {
-
                     $("searchInput").value = "";
-
                     $("categoryFilter").value = "";
-
                     $("stockFilter").value = "";
-
                     $("sortFilter").value = "newest";
-
                     currentPage = 1;
-
                     renderTable();
-
                 });
-
-
 
                 $("equipmentModalBackdrop").addEventListener("click", (event) => {
-
                     if (event.target === $("equipmentModalBackdrop")) {
-
                         closeModal();
-
                     }
-
                 });
-
-
 
                 document.addEventListener("keydown", (event) => {
-
                     if (
-
                         event.key === "Escape" &&
-
                         $("equipmentModalBackdrop").classList.contains("open")
-
                     ) {
-
                         closeModal();
-
                     }
-
                 });
-
             }
-
-
 
             async function initialize() {
-
                 initializeEvents();
 
-
-
                 try {
-
                     await loadCategories();
-
                 } catch (error) {
-
                     console.error("Gagal memuat kategori:", error);
-
                     notify(
-
                         "Kategori gagal dimuat. Periksa API kategori.",
-
                         "error"
-
                     );
-
                 }
 
-
-
                 await loadEquipment();
-
             }
-
-
 
             if (document.readyState === "loading") {
-
                 document.addEventListener("DOMContentLoaded", initialize);
-
             } else {
-
                 initialize();
-
             }
-
         })();
-
     </script>
-
 </body>
-
 </html>

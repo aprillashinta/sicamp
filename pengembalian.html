@@ -3,23 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#071713">
 
     <title>Pengembalian Peralatan | SiCamp Admin</title>
 
+    <link rel="icon" href="assets/sicamp-logo.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
 
     <!-- Google Fonts -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    >
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- File CSS Utama SiCamp -->
+    <link rel="stylesheet" href="css/style.css?v=1.1">
 
     <script>
         tailwind.config = {
@@ -517,23 +516,17 @@
             opacity: 0.4;
         }
 
-        /* ======================================
-           MODAL
-        ====================================== */
-
+        /* MODAL */
         .modal-overlay {
             position: fixed;
             inset: 0;
             z-index: 1000;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             padding: 20px;
             background: rgba(24, 34, 24, 0.45);
             backdrop-filter: blur(4px);
-
             opacity: 0;
             visibility: hidden;
             transition: opacity 200ms ease, visibility 200ms ease;
@@ -549,13 +542,10 @@
             max-width: 650px;
             max-height: calc(100vh - 40px);
             overflow-y: auto;
-
             border: 1px solid #e9e9df;
             border-radius: 20px;
             background: #fff;
-
             box-shadow: 0 25px 80px rgba(20, 30, 20, 0.2);
-
             transform: translateY(12px);
             transition: transform 200ms ease;
         }
@@ -653,13 +643,11 @@
             min-height: 40px;
             padding: 10px 12px;
             outline: none;
-
             border: 1px solid #e5e8df;
             border-radius: 10px;
             background: #fcfcf9;
             color: #344034;
             font-size: 11px;
-
             transition: border-color 160ms ease, background 160ms ease;
         }
 
@@ -787,10 +775,7 @@
             font-size: 20px;
         }
 
-        /* ======================================
-           TOAST
-        ====================================== */
-
+        /* TOAST NOTIFICATION */
         .toast-container {
             position: fixed;
             top: 22px;
@@ -806,25 +791,16 @@
             display: flex;
             align-items: flex-start;
             gap: 11px;
-
             padding: 14px 42px 14px 14px;
-
             border: 1px solid #eee8df;
             border-left: 3px solid #b94a48;
             border-radius: 13px;
             background: #fffdfa;
-
             box-shadow: 0 10px 30px rgba(32, 46, 32, 0.1);
-
             opacity: 0;
             visibility: hidden;
             transform: translateY(-8px);
-
-            transition:
-                opacity 220ms ease,
-                transform 220ms ease,
-                visibility 220ms ease;
-
+            transition: opacity 220ms ease, transform 220ms ease, visibility 220ms ease;
             pointer-events: none;
         }
 
@@ -835,21 +811,10 @@
             pointer-events: auto;
         }
 
-        .toast.error {
-            border-left-color: #b94a48;
-        }
-
-        .toast.success {
-            border-left-color: #327653;
-        }
-
-        .toast.warning {
-            border-left-color: #b18131;
-        }
-
-        .toast.info {
-            border-left-color: #587b9e;
-        }
+        .toast.error { border-left-color: #b94a48; }
+        .toast.success { border-left-color: #327653; }
+        .toast.warning { border-left-color: #b18131; }
+        .toast.info { border-left-color: #587b9e; }
 
         .toast-icon {
             display: flex;
@@ -862,59 +827,24 @@
             font-size: 13px;
         }
 
-        .toast.error .toast-icon {
-            color: #ad413e;
-            background: #f9eae7;
-        }
+        .toast.error .toast-icon { color: #ad413e; background: #f9eae7; }
+        .toast.success .toast-icon { color: #327653; background: #e9f3ec; }
+        .toast.warning .toast-icon { color: #986b20; background: #faf1dc; }
+        .toast.info .toast-icon { color: #587b9e; background: #eaf0f6; }
 
-        .toast.success .toast-icon {
-            color: #327653;
-            background: #e9f3ec;
-        }
-
-        .toast.warning .toast-icon {
-            color: #986b20;
-            background: #faf1dc;
-        }
-
-        .toast.info .toast-icon {
-            color: #587b9e;
-            background: #eaf0f6;
-        }
-
-        .toast-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .toast-title {
-            margin: 0;
-            color: #29352e;
-            font-size: 11px;
-            font-weight: 800;
-            line-height: 1.6;
-        }
-
-        .toast-message {
-            margin: 3px 0 0;
-            color: #737b74;
-            font-size: 10px;
-            line-height: 1.7;
-            overflow-wrap: anywhere;
-        }
+        .toast-content { flex: 1; min-width: 0; }
+        .toast-title { margin: 0; color: #29352e; font-size: 11px; font-weight: 800; line-height: 1.6; }
+        .toast-message { margin: 3px 0 0; color: #737b74; font-size: 10px; line-height: 1.7; overflow-wrap: anywhere; }
 
         .toast-close {
             position: absolute;
             top: 8px;
             right: 8px;
-
             display: flex;
             align-items: center;
             justify-content: center;
-
             width: 27px;
             height: 27px;
-
             padding: 0;
             border: 0;
             border-radius: 8px;
@@ -923,145 +853,48 @@
             font-size: 12px;
         }
 
-        .toast-close:hover {
-            background: #f1eee8;
-            color: #374139;
-        }
-
-        /* ======================================
-           RESPONSIVE
-        ====================================== */
+        .toast-close:hover { background: #f1eee8; color: #374139; }
 
         @media (max-width: 1100px) {
-            .summary-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
         }
 
         @media (max-width: 768px) {
-            .main-content {
-                padding: 22px 16px;
-            }
-
-            .page-header {
-                flex-direction: column;
-                align-items: stretch;
-                margin-bottom: 22px;
-            }
-
-            .page-title {
-                font-size: 22px;
-            }
-
-            .content-card-header {
-                padding: 18px;
-            }
-
-            .toolbar {
-                padding: 16px 18px;
-            }
-
-            .table-footer {
-                padding: 15px 18px;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-group.full {
-                grid-column: auto;
-            }
-
-            .modal-body {
-                padding: 18px;
-            }
-
-            .modal-header,
-            .modal-footer {
-                padding: 17px 18px;
-            }
-
-            .item-return-grid {
-                grid-template-columns: 1fr;
-            }
+            .main-content { padding: 22px 16px; }
+            .page-header { flex-direction: column; align-items: stretch; margin-bottom: 22px; }
+            .page-title { font-size: 22px; }
+            .content-card-header { padding: 18px; }
+            .toolbar { padding: 16px 18px; }
+            .table-footer { padding: 15px 18px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-group.full { grid-column: auto; }
+            .modal-body { padding: 18px; }
+            .modal-header, .modal-footer { padding: 17px 18px; }
+            .item-return-grid { grid-template-columns: 1fr; }
         }
 
         @media (max-width: 480px) {
-            .summary-grid {
-                gap: 10px;
-            }
-
-            .summary-card {
-                min-height: 120px;
-                padding: 14px;
-                border-radius: 14px;
-            }
-
-            .summary-number {
-                font-size: 23px;
-            }
-
-            .summary-icon {
-                width: 30px;
-                height: 30px;
-                font-size: 12px;
-            }
-
-            .summary-label {
-                font-size: 10px;
-            }
-
-            .toolbar {
-                align-items: stretch;
-            }
-
-            .search-box {
-                flex-basis: 100%;
-            }
-
-            .filter-select {
-                flex: 1;
-                min-width: 0;
-            }
-
-            .table-footer {
-                align-items: flex-start;
-                flex-direction: column;
-            }
-
-            .transaction-info {
-                grid-template-columns: 1fr;
-            }
-
-            .toast-container {
-                top: 14px;
-                right: 12px;
-                width: calc(100vw - 24px);
-            }
-
-            .modal-overlay {
-                padding: 10px;
-            }
-
-            .modal {
-                max-height: calc(100vh - 20px);
-                border-radius: 16px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                scroll-behavior: auto !important;
-                transition-duration: 0.01ms !important;
-            }
+            .summary-grid { gap: 10px; }
+            .summary-card { min-height: 120px; padding: 14px; border-radius: 14px; }
+            .summary-number { font-size: 23px; }
+            .summary-icon { width: 30px; height: 30px; font-size: 12px; }
+            .summary-label { font-size: 10px; }
+            .toolbar { align-items: stretch; }
+            .search-box { flex-basis: 100%; }
+            .filter-select { flex: 1; min-width: 0; }
+            .table-footer { align-items: flex-start; flex-direction: column; }
+            .transaction-info { grid-template-columns: 1fr; }
+            .toast-container { top: 14px; right: 12px; width: calc(100vw - 24px); }
+            .modal-overlay { padding: 10px; }
+            .modal { max-height: calc(100vh - 20px); border-radius: 16px; }
         }
     </style>
 </head>
 
-<body>
+<body class="sicamp-admin-layout">
+
+    <!-- Container Sidebar Administrator Static -->
+    <aside id="sidebarAdmin" aria-label="Navigasi administrator"></aside>
 
     <!-- TOAST NOTIFICATION -->
     <div class="toast-container" aria-live="polite" aria-atomic="true">
@@ -1075,12 +908,7 @@
                 <p id="toastMessage" class="toast-message"></p>
             </div>
 
-            <button
-                type="button"
-                id="toastClose"
-                class="toast-close"
-                aria-label="Tutup notifikasi"
-            >
+            <button type="button" id="toastClose" class="toast-close" aria-label="Tutup notifikasi">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -1119,63 +947,49 @@
 
         <!-- SUMMARY -->
         <section class="summary-grid">
-
             <article class="summary-card">
                 <div class="summary-top">
                     <span class="summary-label">Total Transaksi</span>
-
                     <div class="summary-icon bg-forest-50 text-forest-700">
                         <i class="fa-solid fa-clipboard-list"></i>
                     </div>
                 </div>
-
                 <div class="summary-number" id="totalTransactions">0</div>
-
                 <p class="summary-caption">Seluruh data penyewaan</p>
             </article>
 
             <article class="summary-card">
                 <div class="summary-top">
                     <span class="summary-label">Belum Dikembalikan</span>
-
                     <div class="summary-icon bg-amber-50 text-amber-700">
                         <i class="fa-solid fa-clock"></i>
                     </div>
                 </div>
-
                 <div class="summary-number" id="pendingReturns">0</div>
-
                 <p class="summary-caption">Transaksi yang masih berjalan</p>
             </article>
 
             <article class="summary-card">
                 <div class="summary-top">
                     <span class="summary-label">Selesai Dikembalikan</span>
-
                     <div class="summary-icon bg-emerald-50 text-emerald-700">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
                 </div>
-
                 <div class="summary-number" id="completedReturns">0</div>
-
                 <p class="summary-caption">Pengembalian telah dicatat</p>
             </article>
 
             <article class="summary-card">
                 <div class="summary-top">
                     <span class="summary-label">Total Denda</span>
-
                     <div class="summary-icon bg-rose-50 text-rose-700">
                         <i class="fa-solid fa-receipt"></i>
                     </div>
                 </div>
-
                 <div class="summary-number" id="totalFines">Rp0</div>
-
                 <p class="summary-caption">Akumulasi denda tercatat</p>
             </article>
-
         </section>
 
         <!-- DATA TABLE -->
@@ -1184,39 +998,24 @@
             <div class="content-card-header">
                 <div>
                     <h2 class="section-title">Daftar Pengembalian</h2>
-
                     <p class="section-subtitle">
                         Data transaksi penyewaan dan status pengembaliannya
                     </p>
                 </div>
 
-                <span
-                    id="dataCountBadge"
-                    class="px-3 py-1.5 rounded-lg bg-forest-50 text-forest-700 text-[10px] font-bold"
-                >
+                <span id="dataCountBadge" class="px-3 py-1.5 rounded-lg bg-forest-50 text-forest-700 text-[10px] font-bold">
                     0 transaksi
                 </span>
             </div>
 
             <!-- TOOLBAR -->
             <div class="toolbar">
-
                 <div class="search-box">
                     <i class="fa-solid fa-magnifying-glass"></i>
-
-                    <input
-                        type="search"
-                        id="searchInput"
-                        placeholder="Cari kode transaksi atau nama pelanggan..."
-                        aria-label="Cari transaksi"
-                    >
+                    <input type="search" id="searchInput" placeholder="Cari kode transaksi atau nama pelanggan..." aria-label="Cari transaksi">
                 </div>
 
-                <select
-                    id="statusFilter"
-                    class="filter-select"
-                    aria-label="Filter status pengembalian"
-                >
+                <select id="statusFilter" class="filter-select" aria-label="Filter status pengembalian">
                     <option value="">Semua Status</option>
                     <option value="pending">Belum Dikembalikan</option>
                     <option value="completed">Selesai Dikembalikan</option>
@@ -1262,7 +1061,6 @@
                 <p id="tableInfo" class="table-info">
                     Menampilkan 0 transaksi
                 </p>
-
                 <div class="pagination" id="pagination"></div>
             </div>
 
@@ -1270,45 +1068,22 @@
 
     </main>
 
-    <!-- ======================================
-         MODAL FORM PENGEMBALIAN
-    ====================================== -->
-
-    <div
-        id="returnModal"
-        class="modal-overlay"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="modalTitle"
-        aria-hidden="true"
-    >
+    <!-- MODAL FORM PENGEMBALIAN -->
+    <div id="returnModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-hidden="true">
         <div class="modal">
-
             <div class="modal-header">
                 <div>
-                    <h2 id="modalTitle" class="modal-title">
-                        Catat Pengembalian
-                    </h2>
-
-                    <p class="modal-description">
-                        Periksa jumlah dan kondisi peralatan sebelum menyimpan data.
-                    </p>
+                    <h2 id="modalTitle" class="modal-title">Catat Pengembalian</h2>
+                    <p class="modal-description">Periksa jumlah dan kondisi peralatan sebelum menyimpan data.</p>
                 </div>
 
-                <button
-                    type="button"
-                    class="modal-close"
-                    id="closeModalButton"
-                    aria-label="Tutup form"
-                >
+                <button type="button" class="modal-close" id="closeModalButton" aria-label="Tutup form">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
             <form id="returnForm">
-
                 <div class="modal-body">
-
                     <input type="hidden" id="returnTransactionId">
 
                     <!-- TRANSACTION INFO -->
@@ -1357,113 +1132,51 @@
                         </h3>
 
                         <div class="form-grid">
-
                             <div class="form-group">
-                                <label for="actualReturnDate" class="form-label">
-                                    Tanggal Pengembalian
-                                </label>
-
-                                <input
-                                    type="date"
-                                    id="actualReturnDate"
-                                    class="form-control"
-                                    required
-                                >
+                                <label for="actualReturnDate" class="form-label">Tanggal Pengembalian</label>
+                                <input type="date" id="actualReturnDate" class="form-control" required>
                             </div>
 
                             <div class="form-group">
-                                <label for="additionalFine" class="form-label">
-                                    Denda Tambahan (Rp)
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="additionalFine"
-                                    class="form-control"
-                                    min="0"
-                                    step="1000"
-                                    value="0"
-                                    placeholder="0"
-                                >
-
-                                <p class="form-hint">
-                                    Masukkan denda tambahan jika ada.
-                                </p>
+                                <label for="additionalFine" class="form-label">Denda Tambahan (Rp)</label>
+                                <input type="number" id="additionalFine" class="form-control" min="0" step="1000" value="0" placeholder="0">
+                                <p class="form-hint">Masukkan denda tambahan jika ada.</p>
                             </div>
 
                             <div class="form-group full">
-                                <label for="returnNotes" class="form-label">
-                                    Catatan Pengembalian
-                                </label>
-
-                                <textarea
-                                    id="returnNotes"
-                                    class="form-control"
-                                    placeholder="Contoh: Peralatan diterima dalam kondisi baik."
-                                ></textarea>
+                                <label for="returnNotes" class="form-label">Catatan Pengembalian</label>
+                                <textarea id="returnNotes" class="form-control" placeholder="Contoh: Peralatan diterima dalam kondisi baik."></textarea>
                             </div>
-
                         </div>
 
                         <div class="fine-preview">
                             <div>
                                 <div class="fine-label">Total Estimasi Denda</div>
-
-                                <p class="text-[9px] text-stone-400 mt-1">
-                                    Berdasarkan kondisi barang dan denda tambahan
-                                </p>
+                                <p class="text-[9px] text-stone-400 mt-1">Berdasarkan kondisi barang dan denda tambahan</p>
                             </div>
-
-                            <div id="fineTotalPreview" class="fine-amount">
-                                Rp0
-                            </div>
+                            <div id="fineTotalPreview" class="fine-amount">Rp0</div>
                         </div>
                     </div>
-
                 </div>
 
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn-secondary"
-                        id="cancelReturnButton"
-                    >
-                        Batal
-                    </button>
-
-                    <button
-                        type="submit"
-                        class="btn-primary"
-                        id="saveReturnButton"
-                    >
+                    <button type="button" class="btn-secondary" id="cancelReturnButton">Batal</button>
+                    <button type="submit" class="btn-primary" id="saveReturnButton">
                         <i class="fa-solid fa-check"></i>
                         Simpan Pengembalian
                     </button>
                 </div>
-
             </form>
-
         </div>
     </div>
 
-    <!-- ======================================
-         JAVASCRIPT
-    ====================================== -->
-
+    <!-- SCRIPT JS -->
+    <script src="js/app.js?v=1.1"></script>
     <script>
-        /* ======================================
-           KONFIGURASI
-        ====================================== */
-
         const API_PENYEWAAN = 'api/api_penyewaan.php';
         const API_PENGEMBALIAN = 'api/api_pengembalian.php';
-
         const ITEMS_PER_PAGE = 10;
 
-        /*
-         * Tarif denda per item jika kondisi barang rusak.
-         * Sesuaikan dengan kebijakan penyewaan SiCamp.
-         */
         const FINE_DAMAGED_ITEM = 50000;
         const FINE_LOST_ITEM = 150000;
         const FINE_DIRTY_ITEM = 10000;
@@ -1476,10 +1189,6 @@
         let toastTimer = null;
         let toastAnimationTimer = null;
 
-        /* ======================================
-           UTILITAS
-        ====================================== */
-
         function escapeHTML(value) {
             return String(value ?? '').replace(/[&<>"']/g, function (char) {
                 const entities = {
@@ -1489,7 +1198,6 @@
                     '"': '&quot;',
                     "'": '&#039;'
                 };
-
                 return entities[char];
             });
         }
@@ -1525,32 +1233,7 @@
             const localDate = new Date(
                 now.getTime() - now.getTimezoneOffset() * 60000
             );
-
             return localDate.toISOString().slice(0, 10);
-        }
-
-        function normalizeStatus(status) {
-            const value = String(status || '')
-                .toLowerCase()
-                .trim();
-
-            if (
-                value.includes('selesai') ||
-                value.includes('dikembalikan') ||
-                value.includes('complete')
-            ) {
-                return 'completed';
-            }
-
-            if (
-                value.includes('sewa') ||
-                value.includes('disetujui') ||
-                value.includes('berjalan')
-            ) {
-                return 'pending';
-            }
-
-            return 'pending';
         }
 
         function getTransactionId(transaction) {
@@ -1614,15 +1297,6 @@
             );
         }
 
-        function getTransactionStatus(transaction) {
-            return String(
-                transaction.status_pengembalian ??
-                transaction.status_return ??
-                transaction.status ??
-                ''
-            );
-        }
-
         function isReturned(transaction) {
             const returnStatus = String(
                 transaction.status_pengembalian ??
@@ -1655,38 +1329,17 @@
             );
         }
 
-        /* ======================================
-           TOAST NOTIFICATION
-        ====================================== */
-
-        function showToast(
-            message,
-            type = 'error',
-            title = '',
-            duration = 4000
-        ) {
+        function showToast(message, type = 'error', title = '', duration = 4000) {
             const toast = document.getElementById('toast');
             const icon = document.getElementById('toastIcon');
             const titleElement = document.getElementById('toastTitle');
             const messageElement = document.getElementById('toastMessage');
 
             const types = {
-                error: {
-                    title: 'Terjadi Kesalahan',
-                    icon: 'fa-circle-exclamation'
-                },
-                success: {
-                    title: 'Berhasil',
-                    icon: 'fa-circle-check'
-                },
-                warning: {
-                    title: 'Periksa Kembali',
-                    icon: 'fa-triangle-exclamation'
-                },
-                info: {
-                    title: 'Informasi',
-                    icon: 'fa-circle-info'
-                }
+                error: { title: 'Terjadi Kesalahan', icon: 'fa-circle-exclamation' },
+                success: { title: 'Berhasil', icon: 'fa-circle-check' },
+                warning: { title: 'Periksa Kembali', icon: 'fa-triangle-exclamation' },
+                info: { title: 'Informasi', icon: 'fa-circle-info' }
             };
 
             const selected = types[type] || types.info;
@@ -1695,9 +1348,7 @@
             clearTimeout(toastAnimationTimer);
 
             toast.className = 'toast ' + type;
-
-            icon.innerHTML =
-                '<i class="fa-solid ' + selected.icon + '"></i>';
+            icon.innerHTML = '<i class="fa-solid ' + selected.icon + '"></i>';
 
             titleElement.textContent = title || selected.title;
             messageElement.textContent = message;
@@ -1713,12 +1364,10 @@
 
         function hideToast() {
             const toast = document.getElementById('toast');
-
             clearTimeout(toastTimer);
             clearTimeout(toastAnimationTimer);
 
             toast.classList.remove('show');
-
             toastAnimationTimer = setTimeout(() => {
                 if (!toast.classList.contains('show')) {
                     toast.setAttribute('aria-hidden', 'true');
@@ -1726,81 +1375,47 @@
             }, 250);
         }
 
-        document
-            .getElementById('toastClose')
-            .addEventListener('click', hideToast);
-
-        /* ======================================
-           API HELPER
-        ====================================== */
+        document.getElementById('toastClose').addEventListener('click', hideToast);
 
         async function fetchJSON(url, options = {}) {
             let response;
-
             try {
                 response = await fetch(url, {
                     ...options,
                     headers: {
                         'Accept': 'application/json',
-                        ...(options.body ? {
-                            'Content-Type': 'application/json'
-                        } : {}),
+                        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
                         ...(options.headers || {})
                     }
                 });
             } catch (error) {
-                throw new Error(
-                    'Tidak dapat menghubungi server. Pastikan server PHP berjalan.'
-                );
+                throw new Error('Tidak dapat menghubungi server. Pastikan server berjalan.');
             }
 
             let result;
-
             try {
                 result = await response.json();
             } catch (error) {
-                throw new Error(
-                    'Respons server tidak valid. Periksa konfigurasi API.'
-                );
+                throw new Error('Respons server tidak valid. Periksa konfigurasi API.');
             }
 
             if (!response.ok) {
-                throw new Error(
-                    result.message ||
-                    'Server gagal memproses permintaan.'
-                );
+                throw new Error(result.message || 'Server gagal memproses permintaan.');
             }
 
             return result;
         }
 
         function extractArray(result) {
-            if (Array.isArray(result)) {
-                return result;
-            }
-
-            if (result && Array.isArray(result.data)) {
-                return result.data;
-            }
-
-            if (result && Array.isArray(result.penyewaan)) {
-                return result.penyewaan;
-            }
-
-            if (result && Array.isArray(result.transaksi)) {
-                return result.transaksi;
-            }
-
+            if (Array.isArray(result)) return result;
+            if (result && Array.isArray(result.data)) return result.data;
+            if (result && Array.isArray(result.penyewaan)) return result.penyewaan;
+            if (result && Array.isArray(result.transaksi)) return result.transaksi;
             return [];
         }
 
-        /* ======================================
-           LOAD DATA
-        ====================================== */
-
         async function loadTransactions(showMessage = false) {
             const tbody = document.getElementById('returnTableBody');
-
             tbody.innerHTML = `
                 <tr>
                     <td colspan="8">
@@ -1813,159 +1428,72 @@
             `;
 
             try {
-                const result = await fetchJSON(
-                    API_PENYEWAAN + '?action=get_all'
-                );
+                const result = await fetchJSON(API_PENYEWAAN + '?action=get_all');
 
-                if (
-                    result &&
-                    result.status &&
-                    String(result.status).toLowerCase() === 'error'
-                ) {
-                    throw new Error(
-                        result.message || 'Gagal mengambil data penyewaan.'
-                    );
+                if (result && result.status && String(result.status).toLowerCase() === 'error') {
+                    throw new Error(result.message || 'Gagal mengambil data penyewaan.');
                 }
 
                 transactions = extractArray(result);
-
-                /*
-                 * Endpoint get_all diharapkan menyertakan status transaksi
-                 * dan detail penyewaan.
-                 */
                 applyFilters();
                 updateSummary();
 
                 if (showMessage) {
-                    showToast(
-                        'Data pengembalian berhasil diperbarui.',
-                        'success',
-                        'Data Diperbarui'
-                    );
+                    showToast('Data pengembalian berhasil diperbarui.', 'success', 'Data Diperbarui');
                 }
-
             } catch (error) {
-                console.error('Gagal memuat data:', error);
-
                 transactions = [];
                 filteredTransactions = [];
-
                 updateSummary();
 
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="8">
                             <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fa-solid fa-triangle-exclamation"></i>
-                                </div>
-
-                                <div class="empty-title">
-                                    Data belum dapat dimuat
-                                </div>
-
-                                <p class="empty-description">
-                                    ${escapeHTML(error.message)}
-                                </p>
-
-                                <button
-                                    type="button"
-                                    onclick="loadTransactions(true)"
-                                    class="btn-secondary mt-4"
-                                >
-                                    <i class="fa-solid fa-rotate"></i>
-                                    Coba Lagi
+                                <div class="empty-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                                <div class="empty-title">Data belum dapat dimuat</div>
+                                <p class="empty-description">${escapeHTML(error.message)}</p>
+                                <button type="button" onclick="loadTransactions(true)" class="btn-secondary mt-4">
+                                    <i class="fa-solid fa-rotate"></i> Coba Lagi
                                 </button>
                             </div>
                         </td>
                     </tr>
                 `;
 
-                document.getElementById('tableInfo').textContent =
-                    'Data tidak tersedia';
-
+                document.getElementById('tableInfo').textContent = 'Data tidak tersedia';
                 document.getElementById('pagination').innerHTML = '';
-
-                showToast(
-                    error.message,
-                    'error',
-                    'Gagal Memuat Data'
-                );
+                showToast(error.message, 'error', 'Gagal Memuat Data');
             }
         }
 
-        /* ======================================
-           SUMMARY
-        ====================================== */
-
         function updateSummary() {
             const total = transactions.length;
+            const completed = transactions.filter(t => isReturned(t)).length;
+            const pending = transactions.filter(t => !isReturned(t) && isEligibleForReturn(t)).length;
+            const totalFine = transactions.reduce((sum, t) => sum + getReturnFine(t), 0);
 
-            const completed = transactions.filter(
-                transaction => isReturned(transaction)
-            ).length;
-
-            const pending = transactions.filter(
-                transaction =>
-                    !isReturned(transaction) &&
-                    isEligibleForReturn(transaction)
-            ).length;
-
-            const totalFine = transactions.reduce(
-                (sum, transaction) => {
-                    return sum + getReturnFine(transaction);
-                },
-                0
-            );
-
-            document.getElementById('totalTransactions').textContent =
-                total.toLocaleString('id-ID');
-
-            document.getElementById('pendingReturns').textContent =
-                pending.toLocaleString('id-ID');
-
-            document.getElementById('completedReturns').textContent =
-                completed.toLocaleString('id-ID');
-
-            document.getElementById('totalFines').textContent =
-                formatRupiah(totalFine);
-
-            document.getElementById('dataCountBadge').textContent =
-                total + ' transaksi';
+            document.getElementById('totalTransactions').textContent = total.toLocaleString('id-ID');
+            document.getElementById('pendingReturns').textContent = pending.toLocaleString('id-ID');
+            document.getElementById('completedReturns').textContent = completed.toLocaleString('id-ID');
+            document.getElementById('totalFines').textContent = formatRupiah(totalFine);
+            document.getElementById('dataCountBadge').textContent = total + ' transaksi';
         }
 
-        /* ======================================
-           FILTER
-        ====================================== */
-
         function applyFilters() {
-            const keyword = document
-                .getElementById('searchInput')
-                .value
-                .trim()
-                .toLowerCase();
-
-            const selectedStatus = document
-                .getElementById('statusFilter')
-                .value;
+            const keyword = document.getElementById('searchInput').value.trim().toLowerCase();
+            const selectedStatus = document.getElementById('statusFilter').value;
 
             filteredTransactions = transactions.filter(transaction => {
                 const code = getTransactionCode(transaction).toLowerCase();
                 const customer = getCustomerName(transaction).toLowerCase();
 
-                const matchesKeyword =
-                    !keyword ||
-                    code.includes(keyword) ||
-                    customer.includes(keyword);
-
+                const matchesKeyword = !keyword || code.includes(keyword) || customer.includes(keyword);
                 const returned = isReturned(transaction);
 
                 let matchesStatus = true;
-
                 if (selectedStatus === 'pending') {
-                    matchesStatus =
-                        !returned &&
-                        isEligibleForReturn(transaction);
+                    matchesStatus = !returned && isEligibleForReturn(transaction);
                 } else if (selectedStatus === 'completed') {
                     matchesStatus = returned;
                 }
@@ -1974,60 +1502,33 @@
             });
 
             currentPage = 1;
-
             renderTable();
         }
 
-        /* ======================================
-           RENDER TABLE
-        ====================================== */
-
         function renderTable() {
             const tbody = document.getElementById('returnTableBody');
-
             const total = filteredTransactions.length;
-            const totalPages = Math.max(
-                1,
-                Math.ceil(total / ITEMS_PER_PAGE)
-            );
+            const totalPages = Math.max(1, Math.ceil(total / ITEMS_PER_PAGE));
 
-            if (currentPage > totalPages) {
-                currentPage = totalPages;
-            }
+            if (currentPage > totalPages) currentPage = totalPages;
 
             const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-
-            const pageItems = filteredTransactions.slice(
-                startIndex,
-                startIndex + ITEMS_PER_PAGE
-            );
+            const pageItems = filteredTransactions.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
             if (pageItems.length === 0) {
                 tbody.innerHTML = `
                     <tr>
                         <td colspan="8">
                             <div class="empty-state">
-                                <div class="empty-icon">
-                                    <i class="fa-solid fa-box-open"></i>
-                                </div>
-
-                                <div class="empty-title">
-                                    Tidak ada data pengembalian
-                                </div>
-
-                                <p class="empty-description">
-                                    Belum ada transaksi yang sesuai dengan pencarian atau filter.
-                                </p>
+                                <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+                                <div class="empty-title">Tidak ada data pengembalian</div>
+                                <p class="empty-description">Belum ada transaksi yang sesuai dengan pencarian atau filter.</p>
                             </div>
                         </td>
                     </tr>
                 `;
-
-                document.getElementById('tableInfo').textContent =
-                    'Menampilkan 0 transaksi';
-
+                document.getElementById('tableInfo').textContent = 'Menampilkan 0 transaksi';
                 document.getElementById('pagination').innerHTML = '';
-
                 return;
             }
 
@@ -2041,142 +1542,56 @@
                 const fine = getReturnFine(transaction);
 
                 const returned = isReturned(transaction);
-
-                const statusClass = returned
-                    ? 'status-completed'
-                    : 'status-pending';
-
-                const statusText = returned
-                    ? 'Selesai'
-                    : 'Belum Dikembalikan';
+                const statusClass = returned ? 'status-completed' : 'status-pending';
+                const statusText = returned ? 'Selesai' : 'Belum Dikembalikan';
 
                 const actionButton = returned
-                    ? `
-                        <button
-                            type="button"
-                            class="icon-button"
-                            title="Lihat detail pengembalian"
-                            aria-label="Lihat detail pengembalian"
-                            data-action="detail"
-                            data-id="${escapeHTML(id)}"
-                        >
+                    ? `<button type="button" class="icon-button" title="Lihat detail pengembalian" aria-label="Lihat detail pengembalian" data-action="detail" data-id="${escapeHTML(id)}">
                             <i class="fa-regular fa-eye"></i>
-                        </button>
-                    `
+                       </button>`
                     : isEligibleForReturn(transaction)
-                        ? `
-                            <button
-                                type="button"
-                                class="icon-button return-button"
-                                title="Catat pengembalian"
-                                aria-label="Catat pengembalian"
-                                data-action="return"
-                                data-id="${escapeHTML(id)}"
-                            >
+                        ? `<button type="button" class="icon-button return-button" title="Catat pengembalian" aria-label="Catat pengembalian" data-action="return" data-id="${escapeHTML(id)}">
                                 <i class="fa-solid fa-rotate-left"></i>
-                            </button>
-                        `
-                        : `
-                            <button
-                                type="button"
-                                class="icon-button"
-                                title="Transaksi belum dapat dikembalikan"
-                                aria-label="Transaksi belum dapat dikembalikan"
-                                disabled
-                            >
+                           </button>`
+                        : `<button type="button" class="icon-button" title="Transaksi belum dapat dikembalikan" aria-label="Transaksi belum dapat dikembalikan" disabled>
                                 <i class="fa-solid fa-lock"></i>
-                            </button>
-                        `;
+                           </button>`;
 
                 return `
                     <tr>
+                        <td><div class="transaction-code">${escapeHTML(code)}</div></td>
                         <td>
-                            <div class="transaction-code">
-                                ${escapeHTML(code)}
-                            </div>
+                            <div class="customer-name">${escapeHTML(customer)}</div>
+                            <div class="secondary-text">ID: ${escapeHTML(id || '-')}</div>
                         </td>
-
-                        <td>
-                            <div class="customer-name">
-                                ${escapeHTML(customer)}
-                            </div>
-                            <div class="secondary-text">
-                                ID: ${escapeHTML(id || '-')}
-                            </div>
-                        </td>
-
                         <td>${escapeHTML(formatDate(startDate))}</td>
-
                         <td>${escapeHTML(formatDate(dueDate))}</td>
-
-                        <td>
-                            <span class="font-bold text-slate-700">
-                                ${escapeHTML(formatRupiah(totalPrice))}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="status-badge ${statusClass}">
-                                ${statusText}
-                            </span>
-                        </td>
-
-                        <td>
-                            <span class="font-bold ${fine > 0 ? 'text-rose-600' : 'text-slate-500'}">
-                                ${escapeHTML(formatRupiah(fine))}
-                            </span>
-                        </td>
-
-                        <td>
-                            <div class="action-buttons">
-                                ${actionButton}
-                            </div>
-                        </td>
+                        <td><span class="font-bold text-slate-700">${escapeHTML(formatRupiah(totalPrice))}</span></td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td><span class="font-bold ${fine > 0 ? 'text-rose-600' : 'text-slate-500'}">${escapeHTML(formatRupiah(fine))}</span></td>
+                        <td><div class="action-buttons">${actionButton}</div></td>
                     </tr>
                 `;
             }).join('');
 
             document.getElementById('tableInfo').textContent =
-                `Menampilkan ${startIndex + 1}–${Math.min(
-                    startIndex + pageItems.length,
-                    total
-                )} dari ${total} transaksi`;
+                `Menampilkan ${startIndex + 1}–${Math.min(startIndex + pageItems.length, total)} dari ${total} transaksi`;
 
             renderPagination(totalPages);
         }
 
-        /* ======================================
-           PAGINATION
-        ====================================== */
-
         function renderPagination(totalPages) {
             const container = document.getElementById('pagination');
-
             if (totalPages <= 1) {
                 container.innerHTML = '';
                 return;
             }
 
-            let html = `
-                <button
-                    type="button"
-                    class="page-button"
-                    data-page="${currentPage - 1}"
-                    ${currentPage === 1 ? 'disabled' : ''}
-                    aria-label="Halaman sebelumnya"
-                >
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-            `;
+            let html = `<button type="button" class="page-button" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''} aria-label="Halaman sebelumnya">
+                            <i class="fa-solid fa-chevron-left"></i>
+                        </button>`;
 
-            const pagesToShow = new Set([
-                1,
-                totalPages,
-                currentPage,
-                currentPage - 1,
-                currentPage + 1
-            ]);
-
+            const pagesToShow = new Set([1, totalPages, currentPage, currentPage - 1, currentPage + 1]);
             let previousPage = 0;
 
             [...pagesToShow]
@@ -2184,108 +1599,55 @@
                 .sort((a, b) => a - b)
                 .forEach(page => {
                     if (previousPage && page - previousPage > 1) {
-                        html += `
-                            <span class="px-1 text-stone-400 text-xs">
-                                ...
-                            </span>
-                        `;
+                        html += `<span class="px-1 text-stone-400 text-xs">...</span>`;
                     }
-
-                    html += `
-                        <button
-                            type="button"
-                            class="page-button ${page === currentPage ? 'active' : ''}"
-                            data-page="${page}"
-                            aria-label="Halaman ${page}"
-                            ${page === currentPage ? 'aria-current="page"' : ''}
-                        >
-                            ${page}
-                        </button>
-                    `;
-
+                    html += `<button type="button" class="page-button ${page === currentPage ? 'active' : ''}" data-page="${page}" aria-label="Halaman ${page}" ${page === currentPage ? 'aria-current="page"' : ''}>
+                                ${page}
+                            </button>`;
                     previousPage = page;
                 });
 
-            html += `
-                <button
-                    type="button"
-                    class="page-button"
-                    data-page="${currentPage + 1}"
-                    ${currentPage === totalPages ? 'disabled' : ''}
-                    aria-label="Halaman berikutnya"
-                >
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-            `;
+            html += `<button type="button" class="page-button" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''} aria-label="Halaman berikutnya">
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>`;
 
             container.innerHTML = html;
         }
 
-        document
-            .getElementById('pagination')
-            .addEventListener('click', function (event) {
-                const button = event.target.closest('[data-page]');
+        document.getElementById('pagination').addEventListener('click', function (event) {
+            const button = event.target.closest('[data-page]');
+            if (!button || button.disabled) return;
 
-                if (!button || button.disabled) return;
+            const page = Number(button.dataset.page);
+            if (!Number.isFinite(page) || page < 1) return;
 
-                const page = Number(button.dataset.page);
-
-                if (!Number.isFinite(page) || page < 1) return;
-
-                currentPage = page;
-
-                renderTable();
-            });
-
-        /* ======================================
-           MODAL
-        ====================================== */
+            currentPage = page;
+            renderTable();
+        });
 
         function openModal() {
             const modal = document.getElementById('returnModal');
-
             modal.classList.add('show');
             modal.setAttribute('aria-hidden', 'false');
-
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
             const modal = document.getElementById('returnModal');
-
             modal.classList.remove('show');
             modal.setAttribute('aria-hidden', 'true');
-
             document.body.style.overflow = '';
-
             selectedTransaction = null;
         }
 
-        document
-            .getElementById('closeModalButton')
-            .addEventListener('click', closeModal);
-
-        document
-            .getElementById('cancelReturnButton')
-            .addEventListener('click', closeModal);
-
-        document
-            .getElementById('returnModal')
-            .addEventListener('click', function (event) {
-                if (event.target === this) {
-                    closeModal();
-                }
-            });
-
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape') {
-                closeModal();
-            }
+        document.getElementById('closeModalButton').addEventListener('click', closeModal);
+        document.getElementById('cancelReturnButton').addEventListener('click', closeModal);
+        document.getElementById('returnModal').addEventListener('click', function (event) {
+            if (event.target === this) closeModal();
         });
-
-        /* ======================================
-           GET DETAIL ITEMS
-        ====================================== */
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') closeModal();
+        });
 
         function getRentalItems(transaction) {
             const possibleArrays = [
@@ -2295,40 +1657,22 @@
                 transaction.detail_penyewaan_list,
                 transaction.peralatan
             ];
-
             for (const value of possibleArrays) {
-                if (Array.isArray(value)) {
-                    return value;
-                }
+                if (Array.isArray(value)) return value;
             }
-
             return [];
         }
 
         function getItemId(item) {
-            return (
-                item.id_peralatan ??
-                item.id_barang ??
-                item.id ??
-                ''
-            );
+            return item.id_peralatan ?? item.id_barang ?? item.id ?? '';
         }
 
         function getItemName(item) {
-            return (
-                item.nama_peralatan ??
-                item.nama_barang ??
-                item.nama_produk ??
-                item.nama ??
-                'Peralatan'
-            );
+            return item.nama_peralatan ?? item.nama_barang ?? item.nama_produk ?? item.nama ?? 'Peralatan';
         }
 
         function getItemQuantity(item) {
-            return Math.max(
-                0,
-                Number(item.jumlah ?? item.quantity ?? 0)
-            );
+            return Math.max(0, Number(item.jumlah ?? item.quantity ?? 0));
         }
 
         function renderReturnItems(items) {
@@ -2339,22 +1683,13 @@
                     <div class="rounded-xl border border-amber-200 bg-amber-50 p-4">
                         <div class="flex items-start gap-3">
                             <i class="fa-solid fa-triangle-exclamation text-amber-600 mt-0.5"></i>
-
                             <div>
-                                <p class="text-[11px] font-bold text-amber-800">
-                                    Detail peralatan tidak tersedia
-                                </p>
-
-                                <p class="text-[10px] leading-relaxed text-amber-700 mt-1">
-                                    API penyewaan perlu mengembalikan daftar detail peralatan,
-                                    termasuk id_peralatan, nama_peralatan, dan jumlah.
-                                    Pengembalian tidak dapat disimpan tanpa detail tersebut.
-                                </p>
+                                <p class="text-[11px] font-bold text-amber-800">Detail peralatan tidak tersedia</p>
+                                <p class="text-[10px] leading-relaxed text-amber-700 mt-1">API penyewaan perlu mengembalikan daftar detail peralatan.</p>
                             </div>
                         </div>
                     </div>
                 `;
-
                 return;
             }
 
@@ -2364,67 +1699,25 @@
                 const quantity = getItemQuantity(item);
 
                 return `
-                    <div
-                        class="item-return-card"
-                        data-item-index="${index}"
-                        data-item-id="${escapeHTML(id)}"
-                    >
+                    <div class="item-return-card" data-item-index="${index}" data-item-id="${escapeHTML(id)}">
                         <div class="item-return-header">
                             <div>
-                                <div class="item-return-name">
-                                    ${escapeHTML(name)}
-                                </div>
-
-                                <div class="item-return-meta">
-                                    Jumlah disewa: ${quantity} unit
-                                </div>
+                                <div class="item-return-name">${escapeHTML(name)}</div>
+                                <div class="item-return-meta">Jumlah disewa: ${quantity} unit</div>
                             </div>
-
-                            <span class="rounded-lg bg-forest-50 px-2.5 py-1.5 text-[9px] font-bold text-forest-700">
-                                Item ${index + 1}
-                            </span>
+                            <span class="rounded-lg bg-forest-50 px-2.5 py-1.5 text-[9px] font-bold text-forest-700">Item ${index + 1}</span>
                         </div>
 
                         <div class="item-return-grid">
                             <div class="form-group">
-                                <label
-                                    class="form-label"
-                                    for="returnedQuantity_${index}"
-                                >
-                                    Jumlah Kembali
-                                </label>
-
-                                <input
-                                    type="number"
-                                    id="returnedQuantity_${index}"
-                                    class="form-control returned-quantity"
-                                    min="0"
-                                    max="${quantity}"
-                                    value="${quantity}"
-                                    required
-                                    data-index="${index}"
-                                    aria-label="Jumlah kembali ${escapeHTML(name)}"
-                                >
-
-                                <p class="form-hint">
-                                    Maksimal ${quantity} unit
-                                </p>
+                                <label class="form-label" for="returnedQuantity_${index}">Jumlah Kembali</label>
+                                <input type="number" id="returnedQuantity_${index}" class="form-control returned-quantity" min="0" max="${quantity}" value="${quantity}" required data-index="${index}" aria-label="Jumlah kembali ${escapeHTML(name)}">
+                                <p class="form-hint">Maksimal ${quantity} unit</p>
                             </div>
 
                             <div class="form-group">
-                                <label
-                                    class="form-label"
-                                    for="itemCondition_${index}"
-                                >
-                                    Kondisi Barang
-                                </label>
-
-                                <select
-                                    id="itemCondition_${index}"
-                                    class="form-control item-condition"
-                                    data-index="${index}"
-                                    required
-                                >
+                                <label class="form-label" for="itemCondition_${index}">Kondisi Barang</label>
+                                <select id="itemCondition_${index}" class="form-control item-condition" data-index="${index}" required>
                                     <option value="Baik">Baik</option>
                                     <option value="Kotor">Kotor</option>
                                     <option value="Rusak">Rusak</option>
@@ -2433,155 +1726,76 @@
                             </div>
 
                             <div class="form-group">
-                                <label
-                                    class="form-label"
-                                    for="itemFine_${index}"
-                                >
-                                    Denda Item
-                                </label>
-
-                                <input
-                                    type="text"
-                                    id="itemFine_${index}"
-                                    class="form-control item-fine"
-                                    value="${formatRupiah(0)}"
-                                    disabled
-                                    data-index="${index}"
-                                >
+                                <label class="form-label" for="itemFine_${index}">Denda Item</label>
+                                <input type="text" id="itemFine_${index}" class="form-control item-fine" value="${formatRupiah(0)}" disabled data-index="${index}">
                             </div>
                         </div>
                     </div>
                 `;
             }).join('');
 
-            container
-                .querySelectorAll('.returned-quantity, .item-condition')
-                .forEach(input => {
-                    input.addEventListener('input', calculateFine);
-                    input.addEventListener('change', calculateFine);
-                });
+            container.querySelectorAll('.returned-quantity, .item-condition').forEach(input => {
+                input.addEventListener('input', calculateFine);
+                input.addEventListener('change', calculateFine);
+            });
 
             calculateFine();
         }
 
-        /* ======================================
-           HITUNG DENDA
-        ====================================== */
-
         function calculateLateFine(transaction) {
             const dueDateString = getDueDate(transaction);
-
             if (!dueDateString) return 0;
 
-            const returnDateString =
-                document.getElementById('actualReturnDate').value ||
-                getTodayDate();
-
+            const returnDateString = document.getElementById('actualReturnDate').value || getTodayDate();
             const dueDate = new Date(dueDateString + 'T00:00:00');
             const returnDate = new Date(returnDateString + 'T00:00:00');
 
-            if (
-                Number.isNaN(dueDate.getTime()) ||
-                Number.isNaN(returnDate.getTime())
-            ) {
-                return 0;
-            }
+            if (Number.isNaN(dueDate.getTime()) || Number.isNaN(returnDate.getTime())) return 0;
 
-            const difference = Math.floor(
-                (returnDate.getTime() - dueDate.getTime()) /
-                (1000 * 60 * 60 * 24)
-            );
-
+            const difference = Math.floor((returnDate.getTime() - dueDate.getTime()) / (1000 * 60 * 60 * 24));
             return Math.max(0, difference) * FINE_LATE_PER_DAY;
         }
 
         function calculateFine() {
             const container = document.getElementById('returnItemsContainer');
-
             let totalItemFine = 0;
 
-            container
-                .querySelectorAll('.item-return-card')
-                .forEach(card => {
-                    const index = card.dataset.itemIndex;
+            container.querySelectorAll('.item-return-card').forEach(card => {
+                const index = card.dataset.itemIndex;
+                const quantityInput = card.querySelector('.returned-quantity');
+                const conditionInput = card.querySelector('.item-condition');
+                const fineInput = card.querySelector('.item-fine');
 
-                    const quantityInput = card.querySelector(
-                        '.returned-quantity'
-                    );
+                if (!quantityInput || !conditionInput || !fineInput) return;
 
-                    const conditionInput = card.querySelector(
-                        '.item-condition'
-                    );
+                const quantity = Math.max(0, Number(quantityInput.value) || 0);
+                const condition = conditionInput.value;
 
-                    const fineInput = card.querySelector('.item-fine');
+                let finePerItem = 0;
+                if (condition === 'Kotor') finePerItem = FINE_DIRTY_ITEM;
+                else if (condition === 'Rusak') finePerItem = FINE_DAMAGED_ITEM;
+                else if (condition === 'Hilang') finePerItem = FINE_LOST_ITEM;
 
-                    if (!quantityInput || !conditionInput || !fineInput) {
-                        return;
-                    }
+                const rentedItem = selectedTransaction ? getRentalItems(selectedTransaction)[Number(index)] : null;
+                const rentedQuantity = rentedItem ? getItemQuantity(rentedItem) : 0;
 
-                    const quantity = Math.max(
-                        0,
-                        Number(quantityInput.value) || 0
-                    );
+                let itemFine = 0;
+                if (condition === 'Hilang') {
+                    const missingQuantity = Math.max(0, rentedQuantity - quantity);
+                    itemFine = missingQuantity * finePerItem;
+                } else {
+                    itemFine = quantity * finePerItem;
+                }
 
-                    const condition = conditionInput.value;
+                fineInput.value = formatRupiah(itemFine);
+                totalItemFine += itemFine;
+            });
 
-                    let finePerItem = 0;
-
-                    if (condition === 'Kotor') {
-                        finePerItem = FINE_DIRTY_ITEM;
-                    } else if (condition === 'Rusak') {
-                        finePerItem = FINE_DAMAGED_ITEM;
-                    } else if (condition === 'Hilang') {
-                        finePerItem = FINE_LOST_ITEM;
-                    }
-
-                    /*
-                     * Untuk kondisi rusak atau kotor, denda diterapkan
-                     * pada jumlah unit yang tercatat kembali.
-                     * Barang hilang dihitung dari unit yang tidak kembali.
-                     */
-                    const rentedItem = selectedTransaction
-                        ? getRentalItems(selectedTransaction)[Number(index)]
-                        : null;
-
-                    const rentedQuantity = rentedItem
-                        ? getItemQuantity(rentedItem)
-                        : 0;
-
-                    let itemFine = 0;
-
-                    if (condition === 'Hilang') {
-                        const missingQuantity = Math.max(
-                            0,
-                            rentedQuantity - quantity
-                        );
-
-                        itemFine = missingQuantity * finePerItem;
-                    } else {
-                        itemFine = quantity * finePerItem;
-                    }
-
-                    fineInput.value = formatRupiah(itemFine);
-
-                    totalItemFine += itemFine;
-                });
-
-            const lateFine = selectedTransaction
-                ? calculateLateFine(selectedTransaction)
-                : 0;
-
-            const additionalFine = Math.max(
-                0,
-                Number(
-                    document.getElementById('additionalFine').value
-                ) || 0
-            );
-
+            const lateFine = selectedTransaction ? calculateLateFine(selectedTransaction) : 0;
+            const additionalFine = Math.max(0, Number(document.getElementById('additionalFine').value) || 0);
             const totalFine = totalItemFine + lateFine + additionalFine;
 
-            document.getElementById('fineTotalPreview').textContent =
-                formatRupiah(totalFine);
+            document.getElementById('fineTotalPreview').textContent = formatRupiah(totalFine);
 
             return {
                 denda_item: totalItemFine,
@@ -2591,308 +1805,166 @@
             };
         }
 
-        document
-            .getElementById('actualReturnDate')
-            .addEventListener('change', calculateFine);
-
-        document
-            .getElementById('additionalFine')
-            .addEventListener('input', calculateFine);
-
-        /* ======================================
-           BUKA FORM PENGEMBALIAN
-        ====================================== */
+        document.getElementById('actualReturnDate').addEventListener('change', calculateFine);
+        document.getElementById('additionalFine').addEventListener('input', calculateFine);
 
         async function openReturnForm(transaction) {
             selectedTransaction = transaction;
 
-            document.getElementById('returnTransactionId').value =
-                getTransactionId(transaction);
-
-            document.getElementById('modalTransactionCode').textContent =
-                getTransactionCode(transaction);
-
-            document.getElementById('modalCustomerName').textContent =
-                getCustomerName(transaction);
-
-            document.getElementById('modalStartDate').textContent =
-                formatDate(getStartDate(transaction));
-
-            document.getElementById('modalDueDate').textContent =
-                formatDate(getDueDate(transaction));
-
-            document.getElementById('actualReturnDate').value =
-                getTodayDate();
-
+            document.getElementById('returnTransactionId').value = getTransactionId(transaction);
+            document.getElementById('modalTransactionCode').textContent = getTransactionCode(transaction);
+            document.getElementById('modalCustomerName').textContent = getCustomerName(transaction);
+            document.getElementById('modalStartDate').textContent = formatDate(getStartDate(transaction));
+            document.getElementById('modalDueDate').textContent = formatDate(getDueDate(transaction));
+            document.getElementById('actualReturnDate').value = getTodayDate();
             document.getElementById('additionalFine').value = '0';
-
             document.getElementById('returnNotes').value = '';
 
             renderReturnItems(getRentalItems(transaction));
-
             openModal();
         }
 
-        /* ======================================
-           DETAIL PENGEMBALIAN
-        ====================================== */
-
         function showReturnDetail(transaction) {
             const fine = getReturnFine(transaction);
-
             showToast(
-                'Transaksi ' + getTransactionCode(transaction) +
-                ' tercatat dengan total denda ' + formatRupiah(fine) + '.',
+                'Transaksi ' + getTransactionCode(transaction) + ' tercatat dengan total denda ' + formatRupiah(fine) + '.',
                 'info',
                 'Informasi Pengembalian'
             );
         }
 
-        document
-            .getElementById('returnTableBody')
-            .addEventListener('click', function (event) {
-                const button = event.target.closest('[data-action]');
+        document.getElementById('returnTableBody').addEventListener('click', function (event) {
+            const button = event.target.closest('[data-action]');
+            if (!button) return;
 
-                if (!button) return;
+            const action = button.dataset.action;
+            const id = String(button.dataset.id);
 
-                const action = button.dataset.action;
-                const id = String(button.dataset.id);
+            const transaction = transactions.find(item => String(getTransactionId(item)) === id);
 
-                const transaction = transactions.find(item => {
-                    return String(getTransactionId(item)) === id;
+            if (!transaction) {
+                showToast('Data transaksi tidak ditemukan. Muat ulang data terlebih dahulu.', 'error', 'Data Tidak Ditemukan');
+                return;
+            }
+
+            if (action === 'return') {
+                openReturnForm(transaction);
+            } else if (action === 'detail') {
+                showReturnDetail(transaction);
+            }
+        });
+
+        document.getElementById('returnForm').addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            if (!selectedTransaction) {
+                showToast('Pilih transaksi yang akan dikembalikan.', 'warning');
+                return;
+            }
+
+            const items = getRentalItems(selectedTransaction);
+            if (!items.length) {
+                showToast('Detail peralatan tidak tersedia. Periksa respons API penyewaan terlebih dahulu.', 'error', 'Detail Peralatan Tidak Ada');
+                return;
+            }
+
+            const returnDate = document.getElementById('actualReturnDate').value;
+            if (!returnDate) {
+                showToast('Tanggal pengembalian wajib diisi.', 'warning', 'Tanggal Belum Diisi');
+                return;
+            }
+
+            const dueDate = getDueDate(selectedTransaction);
+            if (dueDate && returnDate < dueDate) {
+                const confirmEarlyReturn = confirm('Tanggal pengembalian lebih awal daripada jadwal. Lanjutkan pencatatan?');
+                if (!confirmEarlyReturn) return;
+            }
+
+            const details = [];
+            let invalidQuantity = false;
+
+            document.querySelectorAll('.item-return-card').forEach(card => {
+                const index = Number(card.dataset.itemIndex);
+                const originalItem = items[index];
+
+                const quantityInput = card.querySelector('.returned-quantity');
+                const conditionInput = card.querySelector('.item-condition');
+
+                const jumlahKembali = Number(quantityInput.value);
+                const jumlahDisewa = getItemQuantity(originalItem);
+
+                if (!Number.isInteger(jumlahKembali) || jumlahKembali < 0 || jumlahKembali > jumlahDisewa) {
+                    invalidQuantity = true;
+                }
+
+                details.push({
+                    id_peralatan: getItemId(originalItem),
+                    jumlah_disewa: jumlahDisewa,
+                    jumlah_kembali: jumlahKembali,
+                    kondisi: conditionInput.value
+                });
+            });
+
+            if (invalidQuantity) {
+                showToast('Jumlah kembali harus berupa bilangan bulat dan tidak boleh melebihi jumlah yang disewa.', 'warning', 'Jumlah Tidak Valid');
+                return;
+            }
+
+            const fineDetails = calculateFine();
+
+            const payload = {
+                id_penyewaan: getTransactionId(selectedTransaction),
+                tanggal_pengembalian: returnDate,
+                total_denda: fineDetails.total_denda,
+                denda_item: fineDetails.denda_item,
+                denda_keterlambatan: fineDetails.denda_keterlambatan,
+                denda_tambahan: fineDetails.denda_tambahan,
+                catatan: document.getElementById('returnNotes').value.trim(),
+                detail: details
+            };
+
+            const button = document.getElementById('saveReturnButton');
+            const originalButtonHTML = button.innerHTML;
+
+            button.disabled = true;
+            button.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+
+            try {
+                const result = await fetchJSON(API_PENGEMBALIAN + '?action=create', {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
                 });
 
-                if (!transaction) {
-                    showToast(
-                        'Data transaksi tidak ditemukan. Muat ulang data terlebih dahulu.',
-                        'error',
-                        'Data Tidak Ditemukan'
-                    );
-
-                    return;
+                if (result && String(result.status).toLowerCase() === 'error') {
+                    throw new Error(result.message || 'Pengembalian gagal disimpan.');
                 }
 
-                if (action === 'return') {
-                    openReturnForm(transaction);
-                } else if (action === 'detail') {
-                    showReturnDetail(transaction);
-                }
-            });
+                closeModal();
+                showToast(result.message || 'Data pengembalian berhasil disimpan.', 'success', 'Pengembalian Berhasil');
+                await loadTransactions(false);
+            } catch (error) {
+                showToast(error.message || 'Pengembalian gagal disimpan. Silakan coba kembali.', 'error', 'Gagal Menyimpan Pengembalian');
+            } finally {
+                button.disabled = false;
+                button.innerHTML = originalButtonHTML;
+            }
+        });
 
-        /* ======================================
-           SIMPAN PENGEMBALIAN
-        ====================================== */
+        document.getElementById('searchInput').addEventListener('input', applyFilters);
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('resetFilterButton').addEventListener('click', function () {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('statusFilter').value = '';
+            applyFilters();
+        });
 
-        document
-            .getElementById('returnForm')
-            .addEventListener('submit', async function (event) {
-                event.preventDefault();
-
-                if (!selectedTransaction) {
-                    showToast(
-                        'Pilih transaksi yang akan dikembalikan.',
-                        'warning'
-                    );
-
-                    return;
-                }
-
-                const items = getRentalItems(selectedTransaction);
-
-                if (!items.length) {
-                    showToast(
-                        'Detail peralatan tidak tersedia. Periksa respons API penyewaan terlebih dahulu.',
-                        'error',
-                        'Detail Peralatan Tidak Ada'
-                    );
-
-                    return;
-                }
-
-                const returnDate =
-                    document.getElementById('actualReturnDate').value;
-
-                if (!returnDate) {
-                    showToast(
-                        'Tanggal pengembalian wajib diisi.',
-                        'warning',
-                        'Tanggal Belum Diisi'
-                    );
-
-                    return;
-                }
-
-                const dueDate = getDueDate(selectedTransaction);
-
-                if (dueDate && returnDate < dueDate) {
-                    const confirmEarlyReturn = confirm(
-                        'Tanggal pengembalian lebih awal daripada jadwal. Lanjutkan pencatatan?'
-                    );
-
-                    if (!confirmEarlyReturn) return;
-                }
-
-                const details = [];
-                let invalidQuantity = false;
-
-                document
-                    .querySelectorAll('.item-return-card')
-                    .forEach(card => {
-                        const index = Number(card.dataset.itemIndex);
-                        const originalItem = items[index];
-
-                        const quantityInput = card.querySelector(
-                            '.returned-quantity'
-                        );
-
-                        const conditionInput = card.querySelector(
-                            '.item-condition'
-                        );
-
-                        const jumlahKembali = Number(quantityInput.value);
-                        const jumlahDisewa = getItemQuantity(originalItem);
-
-                        if (
-                            !Number.isInteger(jumlahKembali) ||
-                            jumlahKembali < 0 ||
-                            jumlahKembali > jumlahDisewa
-                        ) {
-                            invalidQuantity = true;
-                        }
-
-                        details.push({
-                            id_peralatan: getItemId(originalItem),
-                            jumlah_disewa: jumlahDisewa,
-                            jumlah_kembali: jumlahKembali,
-                            kondisi: conditionInput.value
-                        });
-                    });
-
-                if (invalidQuantity) {
-                    showToast(
-                        'Jumlah kembali harus berupa bilangan bulat dan tidak boleh melebihi jumlah yang disewa.',
-                        'warning',
-                        'Jumlah Tidak Valid'
-                    );
-
-                    return;
-                }
-
-                const fineDetails = calculateFine();
-
-                const payload = {
-                    id_penyewaan: getTransactionId(selectedTransaction),
-                    tanggal_pengembalian: returnDate,
-                    total_denda: fineDetails.total_denda,
-                    denda_item: fineDetails.denda_item,
-                    denda_keterlambatan: fineDetails.denda_keterlambatan,
-                    denda_tambahan: fineDetails.denda_tambahan,
-                    catatan: document
-                        .getElementById('returnNotes')
-                        .value
-                        .trim(),
-                    detail: details
-                };
-
-                const button = document.getElementById('saveReturnButton');
-                const originalButtonHTML = button.innerHTML;
-
-                button.disabled = true;
-
-                button.innerHTML =
-                    '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-
-                try {
-                    /*
-                     * Endpoint ini harus tersedia di:
-                     * api/api_pengembalian.php
-                     *
-                     * Endpoint bertanggung jawab menyimpan pengembalian,
-                     * detail pengembalian, memperbarui status transaksi,
-                     * dan menyesuaikan stok secara konsisten.
-                     */
-                    const result = await fetchJSON(
-                        API_PENGEMBALIAN + '?action=create',
-                        {
-                            method: 'POST',
-                            body: JSON.stringify(payload)
-                        }
-                    );
-
-                    if (
-                        result &&
-                        String(result.status).toLowerCase() === 'error'
-                    ) {
-                        throw new Error(
-                            result.message || 'Pengembalian gagal disimpan.'
-                        );
-                    }
-
-                    closeModal();
-
-                    showToast(
-                        result.message ||
-                        'Data pengembalian berhasil disimpan.',
-                        'success',
-                        'Pengembalian Berhasil'
-                    );
-
-                    await loadTransactions(false);
-
-                } catch (error) {
-                    console.error('Gagal menyimpan pengembalian:', error);
-
-                    showToast(
-                        error.message ||
-                        'Pengembalian gagal disimpan. Silakan coba kembali.',
-                        'error',
-                        'Gagal Menyimpan Pengembalian'
-                    );
-
-                } finally {
-                    button.disabled = false;
-                    button.innerHTML = originalButtonHTML;
-                }
-            });
-
-        /* ======================================
-           EVENT FILTER & REFRESH
-        ====================================== */
-
-        document
-            .getElementById('searchInput')
-            .addEventListener('input', applyFilters);
-
-        document
-            .getElementById('statusFilter')
-            .addEventListener('change', applyFilters);
-
-        document
-            .getElementById('resetFilterButton')
-            .addEventListener('click', function () {
-                document.getElementById('searchInput').value = '';
-                document.getElementById('statusFilter').value = '';
-
-                applyFilters();
-            });
-
-        document
-            .getElementById('refreshButton')
-            .addEventListener('click', function () {
-                loadTransactions(true);
-            });
-
-        /* ======================================
-           INISIALISASI
-        ====================================== */
+        document.getElementById('refreshButton').addEventListener('click', function () {
+            loadTransactions(true);
+        });
 
         document.addEventListener('DOMContentLoaded', function () {
             loadTransactions();
         });
     </script>
-
-    <!-- Shared application script -->
-    <script src="js/app.js"></script>
-
 </body>
 </html>

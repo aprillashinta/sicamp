@@ -1,14 +1,4 @@
-/* =========================================================
-   SICAMP ADMIN CONTROL
-   File: js/app.js
-   Shared sidebar, navigation, helpers, and API utilities
-   ========================================================= */
-
 "use strict";
-
-/* =========================================================
-   1. KONFIGURASI DAN STATE
-   ========================================================= */
 
 const SICAMP_CONFIG = {
     api: {
@@ -38,10 +28,6 @@ let dataKategori = [];
 let dataPeralatan = [];
 
 let sidebarInitialized = false;
-
-/* =========================================================
-   2. HELPER UMUM
-   ========================================================= */
 
 function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, (char) => ({
@@ -107,7 +93,8 @@ function formatTanggal(value) {
 }
 
 function getCurrentPage() {
-    return window.location.pathname.split("/").pop() || "index.html";
+    const page = window.location.pathname.split("/").pop().split("?")[0].split("#")[0];
+    return page || "index.html";
 }
 
 function isAdminPage() {
@@ -150,10 +137,6 @@ function showNotification(message, type = "info") {
     }, 3000);
 }
 
-/* =========================================================
-   3. LOGOUT
-   ========================================================= */
-
 function logout() {
     const confirmed = window.confirm(
         "Apakah kamu yakin ingin keluar dari SiCamp Admin?"
@@ -168,12 +151,6 @@ function logout() {
     window.location.href = "login.html";
 }
 
-/* =========================================================
-   4. STRUKTUR SIDEBAR TERPUSAT
-   Sidebar dibuat otomatis oleh app.js.
-   HTML halaman cukup berisi konten utama.
-   ========================================================= */
-
 function ensureSidebarMount() {
     if (!isAdminPage()) return;
 
@@ -187,10 +164,7 @@ function ensureSidebarMount() {
         const mainContent = document.querySelector("main");
 
         if (mainContent && mainContent.parentNode) {
-            mainContent.parentNode.insertBefore(
-                sidebar,
-                mainContent
-            );
+            mainContent.parentNode.insertBefore(sidebar, mainContent);
         } else {
             document.body.prepend(sidebar);
         }
@@ -223,10 +197,6 @@ function ensureSidebarMount() {
         document.body.appendChild(toggle);
     }
 }
-
-/* =========================================================
-   5. MENU ADMIN
-   ========================================================= */
 
 function renderUserNavigation() {
     const sidebar = document.getElementById("sidebarAdmin");
@@ -324,11 +294,6 @@ function renderUserNavigation() {
                         class="sicamp-brand-logo"
                         onerror="this.style.display='none'"
                     >
-
-                    <span class="sicamp-brand-text">
-                        <strong>SiCamp</strong>
-                        <small>ADMIN CONTROL</small>
-                    </span>
                 </a>
 
                 <button
@@ -397,637 +362,6 @@ function renderUserNavigation() {
 
     collapseButton?.addEventListener("click", toggleSidebarCollapse);
 }
-
-/* =========================================================
-   6. CSS SIDEBAR DAN TEMA
-   ========================================================= */
-
-function installSharedSidebarStyles() {
-    if (document.getElementById("sicampSharedSidebarStyles")) {
-        return;
-    }
-
-    const style = document.createElement("style");
-    style.id = "sicampSharedSidebarStyles";
-
-    style.textContent = `
-        :root {
-            --sicamp-sidebar-width: 264px;
-            --sicamp-sidebar-collapsed: 82px;
-
-            --sicamp-forest-950: #071713;
-            --sicamp-forest-900: #0a1f18;
-            --sicamp-forest-800: #102b20;
-            --sicamp-forest-700: #183b2a;
-
-            --sicamp-lime: #c3f45b;
-            --sicamp-lime-hover: #d4ff7b;
-            --sicamp-green: #2bd982;
-
-            --sicamp-cream: #f7f7ef;
-            --sicamp-white: #ffffff;
-            --sicamp-text: #17251d;
-            --sicamp-muted: #8b9b91;
-
-            --sicamp-sidebar-radius: 18px;
-            --sicamp-sidebar-transition: 220ms ease;
-        }
-
-        body {
-            min-height: 100vh;
-        }
-
-        #sidebarAdmin {
-            position: fixed;
-            inset: 12px auto 12px 12px;
-            z-index: 1000;
-
-            width: var(--sicamp-sidebar-width);
-            height: auto;
-
-            overflow: hidden;
-            color: #f4f7ef;
-
-            background:
-                radial-gradient(
-                    circle at 10% 0%,
-                    rgba(195, 244, 91, .09),
-                    transparent 32%
-                ),
-                linear-gradient(
-                    160deg,
-                    var(--sicamp-forest-900),
-                    var(--sicamp-forest-950)
-                );
-
-            border: 1px solid rgba(255, 255, 255, .07);
-            border-radius: var(--sicamp-sidebar-radius);
-
-            box-shadow: 0 16px 40px rgba(6, 23, 17, .18);
-
-            transition:
-                width var(--sicamp-sidebar-transition),
-                transform var(--sicamp-sidebar-transition);
-        }
-
-        .sicamp-sidebar-inner {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            min-height: 0;
-        }
-
-        .sicamp-brand {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 8px;
-
-            min-height: 88px;
-            padding: 16px 14px;
-
-            border-bottom: 1px solid rgba(255, 255, 255, .07);
-        }
-
-        .sicamp-brand-link {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-
-            min-width: 0;
-            color: inherit;
-            text-decoration: none;
-        }
-
-        .sicamp-brand-logo {
-            display: block;
-            flex: 0 0 auto;
-
-            width: 44px;
-            height: 44px;
-
-            object-fit: contain;
-            border-radius: 12px;
-        }
-
-        .sicamp-brand-text {
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-            min-width: 0;
-        }
-
-        .sicamp-brand-text strong {
-            color: #ffffff;
-            font-size: 20px;
-            line-height: 1.1;
-            font-weight: 800;
-            letter-spacing: -.6px;
-        }
-
-        .sicamp-brand-text small {
-            color: var(--sicamp-lime);
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: 1.6px;
-            white-space: nowrap;
-        }
-
-        .sicamp-collapse-button {
-            display: grid;
-            place-items: center;
-            flex: 0 0 auto;
-
-            width: 30px;
-            height: 30px;
-
-            color: #d9e6d9;
-            background: rgba(255, 255, 255, .06);
-            border: 1px solid rgba(255, 255, 255, .08);
-            border-radius: 9px;
-
-            cursor: pointer;
-            transition: background .2s ease, color .2s ease;
-        }
-
-        .sicamp-collapse-button:hover {
-            color: var(--sicamp-forest-950);
-            background: var(--sicamp-lime);
-        }
-
-        .sicamp-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-
-            margin: 14px 12px 8px;
-            padding: 12px;
-
-            background: rgba(255, 255, 255, .045);
-            border: 1px solid rgba(255, 255, 255, .065);
-            border-radius: 13px;
-        }
-
-        .sicamp-profile-avatar {
-            display: grid;
-            place-items: center;
-            flex: 0 0 auto;
-
-            width: 38px;
-            height: 38px;
-
-            color: var(--sicamp-forest-950);
-            background: var(--sicamp-lime);
-            border-radius: 12px;
-        }
-
-        .sicamp-profile-info {
-            display: flex;
-            flex: 1;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
-        }
-
-        .sicamp-profile-info strong {
-            overflow: hidden;
-            color: #ffffff;
-            font-size: 12px;
-            font-weight: 700;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .sicamp-profile-info span {
-            color: #9aac9f;
-            font-size: 10px;
-        }
-
-        .sicamp-online-indicator,
-        .sicamp-status-dot {
-            flex: 0 0 auto;
-            width: 7px;
-            height: 7px;
-            background: var(--sicamp-green);
-            border-radius: 50%;
-            box-shadow: 0 0 0 4px rgba(43, 217, 130, .10);
-        }
-
-        .sicamp-navigation {
-            flex: 1;
-            min-height: 0;
-            overflow-x: hidden;
-            overflow-y: auto;
-            padding: 8px 12px 16px;
-        }
-
-        .sicamp-navigation::-webkit-scrollbar {
-            width: 4px;
-        }
-
-        .sicamp-navigation::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, .16);
-            border-radius: 8px;
-        }
-
-        .sicamp-menu-list {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-
-            margin: 0;
-            padding: 0;
-            list-style: none;
-        }
-
-        .sicamp-menu-group {
-            padding: 16px 10px 7px;
-
-            color: #748a7b;
-            font-size: 9px;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-        }
-
-        .sicamp-menu-link {
-            position: relative;
-
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            min-height: 44px;
-            padding: 10px 12px;
-
-            color: #bdcec1;
-            text-decoration: none;
-
-            font-size: 12px;
-            font-weight: 600;
-
-            border: 1px solid transparent;
-            border-radius: 11px;
-
-            transition:
-                color .18s ease,
-                background .18s ease,
-                border-color .18s ease;
-        }
-
-        .sicamp-menu-link:hover {
-            color: #ffffff;
-            background: rgba(255, 255, 255, .055);
-        }
-
-        .sicamp-menu-link.active {
-            color: var(--sicamp-lime);
-            background: rgba(195, 244, 91, .105);
-            border-color: rgba(195, 244, 91, .13);
-        }
-
-        .sicamp-menu-link.active::before {
-            position: absolute;
-            top: 9px;
-            bottom: 9px;
-            left: -1px;
-
-            width: 3px;
-            content: "";
-
-            background: var(--sicamp-lime);
-            border-radius: 0 5px 5px 0;
-        }
-
-        .sicamp-menu-icon {
-            display: grid;
-            place-items: center;
-            flex: 0 0 auto;
-
-            width: 20px;
-            font-size: 15px;
-        }
-
-        .sicamp-menu-label {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .sicamp-sidebar-footer {
-            flex: 0 0 auto;
-            padding: 12px;
-
-            border-top: 1px solid rgba(255, 255, 255, .07);
-        }
-
-        .sicamp-footer-status {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-
-            padding: 8px 9px 13px;
-
-            color: #a4b8a9;
-            font-size: 10px;
-        }
-
-        .sicamp-footer-status .sicamp-status-dot {
-            width: 6px;
-            height: 6px;
-        }
-
-        .sicamp-logout-button {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-
-            width: 100%;
-            min-height: 42px;
-            padding: 10px 12px;
-
-            color: #ffb4ad;
-            background: rgba(255, 105, 95, .07);
-            border: 1px solid rgba(255, 105, 95, .10);
-            border-radius: 11px;
-
-            font-size: 12px;
-            font-weight: 700;
-            text-align: left;
-
-            cursor: pointer;
-            transition: background .2s ease;
-        }
-
-        .sicamp-logout-button:hover {
-            background: rgba(255, 105, 95, .15);
-        }
-
-        .sicamp-logout-button > i {
-            width: 20px;
-            text-align: center;
-        }
-
-        .sicamp-footer-version {
-            padding-top: 13px;
-            color: #607669;
-            font-size: 9px;
-            text-align: center;
-        }
-
-        /* Konten bergeser mengikuti lebar sidebar */
-        body.sicamp-admin-layout {
-            padding-left: calc(var(--sicamp-sidebar-width) + 24px);
-        }
-
-        body.sicamp-admin-layout main {
-            min-width: 0;
-        }
-
-        body.sicamp-sidebar-collapsed #sidebarAdmin {
-            width: var(--sicamp-sidebar-collapsed);
-        }
-
-        body.sicamp-sidebar-collapsed {
-            padding-left: calc(var(--sicamp-sidebar-collapsed) + 24px);
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-brand {
-            justify-content: center;
-            padding: 14px 8px;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-brand-link {
-            justify-content: center;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-brand-logo {
-            width: 42px;
-            height: 42px;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-brand-text,
-        body.sicamp-sidebar-collapsed .sicamp-collapse-button,
-        body.sicamp-sidebar-collapsed .sicamp-profile-info,
-        body.sicamp-sidebar-collapsed .sicamp-profile .sicamp-online-indicator,
-        body.sicamp-sidebar-collapsed .sicamp-menu-label,
-        body.sicamp-sidebar-collapsed .sicamp-menu-group,
-        body.sicamp-sidebar-collapsed .sicamp-footer-status,
-        body.sicamp-sidebar-collapsed .sicamp-footer-version {
-            display: none;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-profile {
-            justify-content: center;
-            margin: 14px 8px;
-            padding: 8px 4px;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-navigation {
-            padding-right: 8px;
-            padding-left: 8px;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-menu-link,
-        body.sicamp-sidebar-collapsed .sicamp-logout-button {
-            justify-content: center;
-            padding-right: 5px;
-            padding-left: 5px;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-menu-icon,
-        body.sicamp-sidebar-collapsed .sicamp-logout-button > i {
-            width: 100%;
-        }
-
-        body.sicamp-sidebar-collapsed .sicamp-menu-link.active::before {
-            left: -8px;
-        }
-
-        #sidebarOverlay {
-            display: none;
-        }
-
-        .sicamp-mobile-toggle {
-            display: none;
-            position: fixed;
-            top: 16px;
-            left: 16px;
-            z-index: 1100;
-
-            width: 44px;
-            height: 44px;
-
-            color: var(--sicamp-lime);
-            background: var(--sicamp-forest-900);
-            border: 1px solid rgba(195, 244, 91, .25);
-            border-radius: 12px;
-
-            box-shadow: 0 8px 22px rgba(0, 0, 0, .15);
-            cursor: pointer;
-        }
-
-        #mobileSidebarBackdrop {
-            display: none;
-        }
-
-        .sicamp-toast {
-            position: fixed;
-            right: 22px;
-            bottom: 22px;
-            z-index: 9999;
-
-            max-width: min(420px, calc(100vw - 32px));
-            padding: 14px 18px;
-
-            color: #ffffff;
-            background: var(--sicamp-forest-900);
-            border: 1px solid rgba(195, 244, 91, .3);
-            border-radius: 12px;
-
-            box-shadow: 0 12px 32px rgba(0, 0, 0, .18);
-
-            opacity: 0;
-            transform: translateY(8px);
-            transition: opacity .2s ease, transform .2s ease;
-        }
-
-        .sicamp-toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .sicamp-toast-success {
-            border-color: rgba(43, 217, 130, .5);
-        }
-
-        .sicamp-toast-error {
-            border-color: rgba(255, 105, 95, .5);
-        }
-
-        .sicamp-toast-warning {
-            border-color: rgba(255, 193, 7, .5);
-        }
-
-        @media (max-width: 900px) {
-            body.sicamp-admin-layout,
-            body.sicamp-sidebar-collapsed {
-                padding-left: 0;
-            }
-
-            #sidebarAdmin {
-                width: min(290px, calc(100vw - 56px));
-                inset: 0 auto 0 0;
-
-                border-radius: 0 18px 18px 0;
-                transform: translateX(-105%);
-            }
-
-            body.sicamp-mobile-sidebar-open #sidebarAdmin {
-                transform: translateX(0);
-            }
-
-            body.sicamp-sidebar-collapsed #sidebarAdmin {
-                width: min(290px, calc(100vw - 56px));
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-brand {
-                justify-content: space-between;
-                padding: 16px 14px;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-brand-text,
-            body.sicamp-sidebar-collapsed .sicamp-collapse-button,
-            body.sicamp-sidebar-collapsed .sicamp-profile-info,
-            body.sicamp-sidebar-collapsed .sicamp-profile .sicamp-online-indicator,
-            body.sicamp-sidebar-collapsed .sicamp-menu-label,
-            body.sicamp-sidebar-collapsed .sicamp-menu-group,
-            body.sicamp-sidebar-collapsed .sicamp-footer-status,
-            body.sicamp-sidebar-collapsed .sicamp-footer-version {
-                display: initial;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-brand-text,
-            body.sicamp-sidebar-collapsed .sicamp-profile-info {
-                display: flex;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-collapse-button {
-                display: grid;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-menu-group {
-                display: block;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-profile {
-                justify-content: flex-start;
-                margin: 14px 12px 8px;
-                padding: 12px;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-navigation {
-                padding: 8px 12px 16px;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-menu-link,
-            body.sicamp-sidebar-collapsed .sicamp-logout-button {
-                justify-content: flex-start;
-                padding: 10px 12px;
-            }
-
-            body.sicamp-sidebar-collapsed .sicamp-menu-icon,
-            body.sicamp-sidebar-collapsed .sicamp-logout-button > i {
-                width: 20px;
-            }
-
-            .sicamp-mobile-toggle {
-                display: grid;
-                place-items: center;
-            }
-
-            #mobileSidebarBackdrop {
-                position: fixed;
-                inset: 0;
-                z-index: 900;
-
-                background: rgba(4, 16, 11, .55);
-                backdrop-filter: blur(3px);
-            }
-
-            body.sicamp-mobile-sidebar-open #mobileSidebarBackdrop {
-                display: block;
-            }
-
-            body.sicamp-mobile-sidebar-open {
-                overflow: hidden;
-            }
-
-            body.sicamp-mobile-sidebar-open .sicamp-mobile-toggle {
-                left: min(300px, calc(100vw - 50px));
-            }
-
-            body.sicamp-admin-layout main {
-                padding-top: 66px;
-            }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-            #sidebarAdmin,
-            .sicamp-menu-link,
-            .sicamp-toast,
-            .sicamp-mobile-toggle {
-                transition: none !important;
-            }
-        }
-    `;
-
-    document.head.appendChild(style);
-}
-
-/* =========================================================
-   7. COLLAPSE DAN RESPONSIVE SIDEBAR
-   ========================================================= */
 
 function toggleSidebarCollapse() {
     if (window.matchMedia("(max-width: 900px)").matches) {
@@ -1155,10 +489,6 @@ function initializeSharedSidebarControls() {
     });
 }
 
-/* =========================================================
-   8. REQUEST API
-   ========================================================= */
-
 async function requestAPI(url, options = {}) {
     const defaultHeaders = {
         Accept: "application/json"
@@ -1222,10 +552,6 @@ async function requestAPI(url, options = {}) {
     return result;
 }
 
-/* =========================================================
-   9. DATA KATEGORI
-   ========================================================= */
-
 async function loadKategoriFromDB() {
     try {
         const result = await requestAPI(
@@ -1269,10 +595,6 @@ async function loadKategoriFromDB() {
         return dataKategori;
     }
 }
-
-/* =========================================================
-   10. DATA PERALATAN
-   ========================================================= */
 
 async function loadPeralatanFromDB() {
     try {
@@ -1321,10 +643,6 @@ async function loadPeralatanFromDB() {
         return dataPeralatan;
     }
 }
-
-/* =========================================================
-   11. HELPER IDENTITAS DATA
-   ========================================================= */
 
 function getPeralatanId(item) {
     return (
@@ -1378,10 +696,6 @@ function getKategoriName(item) {
         "Tanpa kategori"
     );
 }
-
-/* =========================================================
-   12. FILTER DAN PENCARIAN PERALATAN
-   ========================================================= */
 
 function filterDataPeralatan(data = dataPeralatan) {
     let hasil = [...data];
@@ -1482,10 +796,6 @@ function resetFilterPeralatan() {
     }
 }
 
-/* =========================================================
-   13. INISIALISASI FILTER
-   ========================================================= */
-
 function initializePeralatanFilters() {
     const searchInput = document.getElementById("searchAlat");
     const categorySelect = document.getElementById("filterKategori");
@@ -1528,10 +838,6 @@ function initializePeralatanFilters() {
         }
     });
 }
-
-/* =========================================================
-   14. NAVIGASI PELANGGAN
-   ========================================================= */
 
 function initializeCustomerNavigation() {
     const navPelanggan = document.getElementById("navPelanggan");
@@ -1582,19 +888,12 @@ function initializeCustomerNavigation() {
     }
 }
 
-/* =========================================================
-   15. INISIALISASI APLIKASI
-   ========================================================= */
-
 document.addEventListener("DOMContentLoaded", async () => {
     initializeCustomerNavigation();
 
     if (!isAdminPage()) return;
 
-    document.body.classList.add("sicamp-admin-layout");
-
     ensureSidebarMount();
-    installSharedSidebarStyles();
     renderUserNavigation();
     initializeSharedSidebarControls();
     initializePeralatanFilters();
@@ -1604,11 +903,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         loadPeralatanFromDB()
     ]);
 });
-
-/* =========================================================
-   16. EKSPOR FUNGSI GLOBAL
-   Mendukung pemanggilan dari atribut onclick HTML lama.
-   ========================================================= */
 
 window.escapeHTML = escapeHTML;
 window.getStoredArray = getStoredArray;
@@ -1623,9 +917,7 @@ window.logout = logout;
 
 window.ensureSidebarMount = ensureSidebarMount;
 window.renderUserNavigation = renderUserNavigation;
-window.installSharedSidebarStyles = installSharedSidebarStyles;
-window.initializeSharedSidebarControls =
-    initializeSharedSidebarControls;
+window.initializeSharedSidebarControls = initializeSharedSidebarControls;
 
 window.requestAPI = requestAPI;
 window.loadKategoriFromDB = loadKategoriFromDB;
