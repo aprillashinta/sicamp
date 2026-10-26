@@ -149,7 +149,7 @@ function logout() {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
 
-    window.location.href = "login.html";
+    window.location.href = "index.html";
 }
 
 function ensureSidebarMount() {
@@ -522,6 +522,7 @@ async function loadKategoriFromDB() {
         }
 
         if (typeof renderKategori === "function") renderKategori(dataKategori);
+        
         if (typeof renderKategoriTable === "function") renderKategoriTable(dataKategori);
 
         return dataKategori;

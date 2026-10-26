@@ -607,7 +607,11 @@
                 paginationInfo: document.getElementById('paginationInfo'),
                 overlay: document.getElementById('detailOverlay'),
                 details: document.getElementById('transactionDetails'),
-                equipmentBody: document.getElementById('equipmentBody')
+                equipmentBody: document.getElementById('equipmentBody'),
+                statTotal: document.getElementById('statTotal'),
+                statPending: document.getElementById('statPending'),
+                statActive: document.getElementById('statActive'),
+                statFinished: document.getElementById('statFinished')
             };
 
             function escapeHTML(value) {
@@ -675,8 +679,19 @@
             }
 
             function getDetails(item) {
-                const value = pick(item, ['detail_penyewaan', 'details', 'items', 'peralatan'], []);
-                return Array.isArray(value) ? value : [];
+            const value = pick(
+                item,
+                [
+                    'detail_items',
+                    'detail_penyewaan',
+                    'details',
+                    'items',
+                    'peralatan'
+                ],
+                []
+            );
+
+            return Array.isArray(value) ? value : [];
             }
 
             function normalizeStatus(status) {
@@ -908,6 +923,12 @@
             }
 
             async function loadTransactions() {
+                const session = window.getSessionUser?.();
+
+                if (!session) {
+                    window.location.replace('login.html');
+                    return;
+                }
                 el.tbody.innerHTML = `
                     <tr>
                         <td colspan="7">

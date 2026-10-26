@@ -50,7 +50,6 @@
                 return object[key];
             }
         }
-
         return fallback;
     }
 
@@ -85,9 +84,7 @@
     async function requestAPI(url) {
         const response = await fetch(url, {
             method: 'GET',
-            headers: {
-                Accept: 'application/json'
-            },
+            headers: { Accept: 'application/json' },
             cache: 'no-store'
         });
 
@@ -100,11 +97,7 @@
             throw new Error('Respons API bukan JSON yang valid.');
         }
 
-        if (
-            !response.ok ||
-            result.success === false ||
-            result.status === 'error'
-        ) {
+        if (!response.ok || result.success === false || result.status === 'error') {
             throw new Error(result.message || 'Gagal mengambil data API.');
         }
 
@@ -112,120 +105,58 @@
     }
 
     function idKategori(item) {
-        return String(firstValue(item, [
-            'id_kategori',
-            'kategori_id',
-            'idKategori'
-        ], ''));
+        return String(firstValue(item, ['id_kategori', 'kategori_id', 'idKategori'], ''));
     }
 
     function namaKategori(item) {
-        return String(firstValue(item, [
-            'nama_kategori',
-            'kategori',
-            'namaKategori'
-        ], 'Peralatan Outdoor'));
+        return String(firstValue(item, ['nama_kategori', 'kategori', 'namaKategori'], 'Peralatan Outdoor'));
     }
 
     function idPeralatan(item) {
-        return String(firstValue(item, [
-            'id_peralatan',
-            'id_alat',
-            'peralatan_id',
-            'id'
-        ], ''));
+        return String(firstValue(item, ['id_peralatan', 'id_alat', 'peralatan_id', 'id'], ''));
     }
 
     function namaPeralatan(item) {
-        return String(firstValue(item, [
-            'nama_peralatan',
-            'nama_alat',
-            'nama',
-            'nama_barang'
-        ], 'Peralatan Camping'));
+        return String(firstValue(item, ['nama_peralatan', 'nama_alat', 'nama', 'nama_barang'], 'Peralatan Camping'));
     }
 
     function deskripsiPeralatan(item) {
-        return String(firstValue(item, [
-            'deskripsi',
-            'keterangan',
-            'detail'
-        ], 'Peralatan outdoor untuk kegiatan camping.'));
+        return String(firstValue(item, ['deskripsi', 'keterangan', 'detail'], 'Peralatan outdoor untuk kegiatan camping.'));
     }
 
     function hargaPeralatan(item) {
-        return Number(firstValue(item, [
-            'harga_sewa',
-            'harga',
-            'harga_per_hari'
-        ], 0)) || 0;
+        return Number(firstValue(item, ['harga_sewa', 'harga', 'harga_per_hari'], 0)) || 0;
     }
 
     function stokPeralatan(item) {
-        return Math.max(0, Number(firstValue(item, [
-            'stok',
-            'jumlah_stok',
-            'stock'
-        ], 0)) || 0);
+        return Math.max(0, Number(firstValue(item, ['stok', 'jumlah_stok', 'stock'], 0)) || 0);
     }
 
     function statusAktif(item) {
-        const status = String(firstValue(item, ['status'], 'Aktif'))
-            .trim()
-            .toLowerCase();
-
-        return ![
-            'tidak aktif',
-            'nonaktif',
-            'non-aktif',
-            'inactive',
-            '0',
-            'false',
-            'deleted'
-        ].includes(status);
+        const status = String(firstValue(item, ['status'], 'Aktif')).trim().toLowerCase();
+        return !['tidak aktif', 'nonaktif', 'non-aktif', 'inactive', '0', 'false', 'deleted'].includes(status);
     }
 
     function gambarPeralatan(item) {
-        return String(firstValue(item, [
-            'gambar',
-            'foto',
-            'image',
-            'foto_peralatan',
-            'gambar_peralatan'
-        ], '')).trim() || FALLBACK_IMAGE;
+        return String(firstValue(item, ['gambar', 'foto', 'image', 'foto_peralatan', 'gambar_peralatan'], '')).trim() || FALLBACK_IMAGE;
     }
 
     function kategoriPeralatan(item) {
-        const nama = firstValue(item, [
-            'nama_kategori',
-            'kategori',
-            'kategori_peralatan'
-        ], '');
-
+        const nama = firstValue(item, ['nama_kategori', 'kategori', 'kategori_peralatan'], '');
         if (nama) {
-            return typeof nama === 'object'
-                ? namaKategori(nama)
-                : String(nama);
+            return typeof nama === 'object' ? namaKategori(nama) : String(nama);
         }
-
         const id = idKategori(item);
-        const kategori = state.kategori.find(
-            itemKategori => idKategori(itemKategori) === id
-        );
-
+        const kategori = state.kategori.find(itemKategori => idKategori(itemKategori) === id);
         return kategori ? namaKategori(kategori) : 'Peralatan Outdoor';
     }
 
     function gridKatalog() {
-        return el('equipmentGrid') ||
-            el('katalogPeralatan') ||
-            el('productGrid');
+        return el('equipmentGrid') || el('katalogPeralatan') || el('productGrid');
     }
 
     function containerKategori() {
-        return el('filterCategoryContainer') ||
-            el('categoryContainer') ||
-            el('kategoriContainer');
+        return el('filterCategoryContainer') || el('categoryContainer') || el('kategoriContainer');
     }
 
     function notifikasi(pesan, jenis = 'info') {
@@ -239,21 +170,15 @@
         if (!toast) {
             toast = document.createElement('div');
             toast.id = 'homeToast';
-            toast.className =
-                'fixed bottom-5 right-5 z-[100] max-w-sm rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-xl';
+            toast.className = 'fixed bottom-5 right-5 z-[100] max-w-sm rounded-xl px-4 py-3 text-sm font-semibold text-white shadow-xl';
             document.body.appendChild(toast);
         }
 
         toast.textContent = pesan;
-        toast.style.backgroundColor =
-            jenis === 'error' ? '#e11d48' :
-            jenis === 'success' ? '#15803d' :
-            '#334155';
-
+        toast.style.backgroundColor = jenis === 'error' ? '#e11d48' : jenis === 'success' ? '#15803d' : '#334155';
         toast.style.display = 'block';
 
         clearTimeout(toast._timeout);
-
         toast._timeout = setTimeout(() => {
             toast.style.display = 'none';
         }, 3000);
@@ -272,110 +197,340 @@
         `;
     }
 
-    function bacaKeranjang() {
-        try {
-            const utama = JSON.parse(
-                localStorage.getItem(CART_KEY) || 'null'
-            );
 
-            const alternatif = JSON.parse(
-                localStorage.getItem(CART_KEY_ALT) || 'null'
-            );
+    // ======================================
+    // LOGIKA NAVBAR STATUS LOGIN PELANGGAN
+    // ======================================
+    function renderNavAuth() {
+        const navAuthContainer = document.getElementById('navAuthContainer');
+        const navHistoryContainer = document.getElementById('navHistoryContainer');
 
-            const data = Array.isArray(utama)
-                ? utama
-                : Array.isArray(alternatif)
-                    ? alternatif
-                    : [];
+        if (!navAuthContainer) {
+            console.error('Elemen navAuthContainer tidak ditemukan.');
+            return;
+        }
 
-            return data.map(item => {
-                const jumlah = Math.max(1, Number(firstValue(item, [
-                    'qty',
-                    'jumlah',
-                    'quantity'
-                ], 1)) || 1);
+        // Cari sesi login dari penyimpanan yang umum digunakan.
+        const sessionKeys = [
+            'session_user',
+            'user',
+            'userData',
+            'currentUser',
+            'pengguna',
+            'pelanggan'
+        ];
+
+        let user = null;
+
+        for (const key of sessionKeys) {
+            for (const storage of [localStorage, sessionStorage]) {
+                const raw = storage.getItem(key);
+                if (!raw) continue;
+
+                try {
+                    let parsed = JSON.parse(raw);
+
+                    if (parsed && typeof parsed === 'object') {
+                        if (parsed.user && typeof parsed.user === 'object') {
+                            parsed = parsed.user;
+                        } else if (parsed.data && typeof parsed.data === 'object') {
+                            parsed = parsed.data;
+                        }
+
+                        const namaPengguna =
+                            parsed.nama ||
+                            parsed.nama_pelanggan ||
+                            parsed.nama_admin ||
+                            parsed.name ||
+                            parsed.username;
+
+                        if (namaPengguna) {
+                            user = { ...parsed, nama: namaPengguna };
+                            break;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Data sesi bukan JSON untuk key:', key);
+                }
+            }
+
+            if (user) break;
+        }
+
+        // Jika tidak ada sesi yang valid, tampilkan tombol autentikasi.
+        if (!user) {
+            if (navHistoryContainer) {
+                navHistoryContainer.innerHTML = '';
+            }
+
+            navAuthContainer.innerHTML = `
+                <a href="login.html" class="sc-auth-button">Masuk</a>
+                <a href="register.html" class="sc-auth-button">Daftar</a>
+            `;
+            return;
+        }
+
+        // Tampilkan navigasi untuk pengguna yang sudah login.
+        if (navHistoryContainer) {
+            navHistoryContainer.innerHTML = `
+                <a
+                    href="riwayat-penyewaan-pelanggan.html"
+                    class="text-xs font-bold text-slate-700 hover:text-sicamp-700 transition whitespace-nowrap"
+                >
+                    Riwayat Pesanan
+                </a>
+            `;
+        }
+
+        navAuthContainer.innerHTML = `
+            <span class="text-xs font-extrabold text-slate-800 whitespace-nowrap">
+                Halo, ${escapeHTML(user.nama)}
+            </span>
+            <button type="button" id="btnLogout" class="sc-btn-logout">
+                Logout
+            </button>
+        `;
+
+        document.getElementById('btnLogout').addEventListener('click', function () {
+            for (const storage of [localStorage, sessionStorage]) {
+                for (const key of sessionKeys) {
+                    storage.removeItem(key);
+                }
+                storage.removeItem('token');
+            }
+
+            window.location.href = 'index.html';
+        });
+    }
+
+function getSesiPelanggan() {
+    const sessionKeys = [
+        'session_user',
+        'user',
+        'userData',
+        'currentUser',
+        'pengguna',
+        'pelanggan'
+    ];
+
+    for (const storage of [localStorage, sessionStorage]) {
+        for (const key of sessionKeys) {
+            const raw = storage.getItem(key);
+            if (!raw) continue;
+
+            try {
+                let user = JSON.parse(raw);
+
+                if (!user || typeof user !== 'object') continue;
+
+                if (user.user && typeof user.user === 'object') {
+                    user = user.user;
+                } else if (user.data && typeof user.data === 'object') {
+                    user = user.data;
+                }
+
+                const role = String(
+                    user.role ??
+                    user.rolename ??
+                    user.peran ??
+                    user.jenis_user ??
+                    user.tipe_user ??
+                    user.level ??
+                    ''
+                ).trim().toLowerCase();
+
+                // Tolak akun admin.
+                if (
+                    role.includes('admin') ||
+                    user.is_admin === true ||
+                    user.isAdmin === true
+                ) {
+                    continue;
+                }
+
+                // Prioritaskan ID pelanggan untuk memisahkan keranjang.
+                const idPelanggan =
+                    user.id_pelanggan ??
+                    user.pelanggan_id ??
+                    user.id_customer;
+
+                const idUser =
+                    user.id_user ??
+                    user.user_id ??
+                    user.id ??
+                    user.uid;
+
+                const identitas = idPelanggan ?? idUser ??
+                    user.username ?? user.email;
+
+                const nama =
+                    user.nama_pelanggan ??
+                    user.nama ??
+                    user.name ??
+                    user.username;
+
+                if (!identitas || !nama) continue;
+
+                // Jika peran tersedia, pastikan bukan peran yang tidak dikenal.
+                if (
+                    role &&
+                    !role.includes('pelanggan') &&
+                    !role.includes('customer') &&
+                    !role.includes('user')
+                ) {
+                    continue;
+                }
 
                 return {
-                    ...item,
-                    id_peralatan: String(firstValue(item, [
-                        'id_peralatan',
-                        'id_alat',
-                        'peralatan_id',
-                        'id'
-                    ], '')),
-                    nama_peralatan: String(firstValue(item, [
-                        'nama_peralatan',
-                        'nama_alat',
-                        'nama',
-                        'nama_barang'
-                    ], 'Peralatan Camping')),
-                    harga_sewa: Number(firstValue(item, [
-                        'harga_sewa',
-                        'harga',
-                        'harga_per_hari'
-                    ], 0)) || 0,
-                    gambar: gambarPeralatan(item),
-                    stok: Number(firstValue(item, [
-                        'stok',
-                        'jumlah_stok',
-                        'stock'
-                    ], 999)) || 999,
-                    qty: jumlah,
-                    jumlah: jumlah
+                    id: String(identitas),
+                    user
                 };
-            });
-        } catch (error) {
-            console.error('Gagal membaca keranjang:', error);
-            return [];
+            } catch (error) {
+                console.warn('Gagal membaca sesi:', key, error);
+            }
         }
     }
 
-    function simpanKeranjang(data) {
-        const keranjang = data.map(item => {
-            const jumlah = Math.max(
-                1,
-                Number(item.qty ?? item.jumlah ?? 1) || 1
-            );
+    return null;
+}
 
-            return {
-                ...item,
-                qty: jumlah,
-                jumlah: jumlah
-            };
-        });
+function kunciKeranjangAktif() {
+    const sesi = getSesiPelanggan();
 
-        localStorage.setItem(CART_KEY, JSON.stringify(keranjang));
-        localStorage.setItem(CART_KEY_ALT, JSON.stringify(keranjang));
+    if (!sesi) return null;
 
+    return 'sicamp_keranjang_pelanggan_' +
+        encodeURIComponent(sesi.id);
+}
+
+function pastikanLoginPelanggan() {
+    if (getSesiPelanggan()) return true;
+
+    notifikasi(
+        'Silakan login sebagai pelanggan untuk menggunakan keranjang.',
+        'error'
+    );
+
+    return false;
+}
+
+function bacaKeranjang() {
+    const cartKey = kunciKeranjangAktif();
+
+    // Pengunjung dan admin tidak dapat membaca keranjang pelanggan.
+    if (!cartKey) return [];
+
+    try {
+        const raw = localStorage.getItem(cartKey);
+
+        if (!raw) return [];
+
+        const data = JSON.parse(raw);
+
+        if (!Array.isArray(data)) return [];
+
+        return data
+            .filter(item => item && typeof item === 'object')
+            .map(item => {
+                const qty = Math.max(
+                    1,
+                    Number(
+                        item.qty ??
+                        item.jumlah ??
+                        item.quantity ??
+                        1
+                    ) || 1
+                );
+
+                return {
+                    ...item,
+                    id_peralatan: String(
+                        item.id_peralatan ??
+                        item.id_alat ??
+                        item.id ??
+                        ''
+                    ),
+                    nama_peralatan:
+                        item.nama_peralatan ??
+                        item.nama_alat ??
+                        item.nama ??
+                        'Peralatan',
+                    harga_sewa: Number(
+                        item.harga_sewa ??
+                        item.harga ??
+                        0
+                    ) || 0,
+                    qty,
+                    jumlah: qty,
+                    stok: Number(
+                        item.stok ??
+                        item.jumlah_stok ??
+                        item.stock ??
+                        0
+                    ) || 0
+                };
+            });
+    } catch (error) {
+        console.warn('Gagal membaca keranjang:', error);
+        return [];
+    }
+}
+
+function simpanKeranjang(data) {
+    const cartKey = kunciKeranjangAktif();
+
+    // Jangan menulis data ke keranjang global.
+    if (!cartKey) {
         updateCartBadge();
         renderKeranjang();
+        return;
     }
 
-    function jumlahItemKeranjang() {
-        return bacaKeranjang().reduce((total, item) => {
-            return total + Number(item.qty || 1);
-        }, 0);
-    }
+    const keranjang = data.map(item => {
+        const qty = Math.max(
+            1,
+            Number(item.qty ?? item.jumlah ?? 1) || 1
+        );
 
-    function updateCartBadge() {
-        const badge = el('cartBadgeCount');
-        if (!badge) return;
+        return {
+            ...item,
+            qty,
+            jumlah: qty
+        };
+    });
 
-        const jumlah = jumlahItemKeranjang();
+    localStorage.setItem(
+        cartKey,
+        JSON.stringify(keranjang)
+    );
 
-        badge.textContent = String(jumlah);
-        badge.style.display = 'flex';
-    }
+    updateCartBadge();
+    renderKeranjang();
+}
 
+function jumlahItemKeranjang() {
+    if (!getSesiPelanggan()) return 0;
+
+    return bacaKeranjang().reduce(
+        (total, item) => total + Number(item.qty || 1),
+        0
+    );
+}
+
+function updateCartBadge() {
+    const badge = el('cartBadgeCount');
+
+    if (!badge) return;
+
+    badge.textContent = String(jumlahItemKeranjang());
+    badge.style.display = 'flex';
+}
     function renderKategori() {
         const container = containerKategori();
         if (!container) return;
 
         const daftar = [
-            {
-                id: 'all',
-                nama: 'Semua Peralatan'
-            },
+            { id: 'all', nama: 'Semua Peralatan' },
             ...state.kategori.map(item => ({
                 id: idKategori(item),
                 nama: namaKategori(item)
@@ -383,9 +538,7 @@
         ];
 
         container.innerHTML = daftar.map(item => {
-            const aktif =
-                String(state.kategoriAktif) === String(item.id);
-
+            const aktif = String(state.kategoriAktif) === String(item.id);
             return `
                 <button
                     type="button"
@@ -402,13 +555,131 @@
         }).join('');
     }
 
+
+function renderKategoriDropdown() {
+    const select = document.getElementById('filterKategori');
+
+    if (!select) return;
+
+    const kategoriTerpilih = select.value;
+
+    select.innerHTML = `
+        <option value="">Semua Kategori</option>
+        ${state.kategori.map(item => `
+            <option value="${escapeHTML(String(idKategori(item)))}">
+                ${escapeHTML(namaKategori(item))}
+            </option>
+        `).join('')}
+    `;
+
+    const pilihanMasihAda = Array.from(select.options)
+        .some(option => option.value === kategoriTerpilih);
+
+    if (pilihanMasihAda) {
+        select.value = kategoriTerpilih;
+    }
+}
+
+function pasangFilterBeranda() {
+    const form = document.getElementById('filterSearchForm');
+    const selectKategori = document.getElementById('filterKategori');
+    const tanggalMulai = document.getElementById('tglMulai');
+    const tanggalSelesai = document.getElementById('tglSelesai');
+
+    if (selectKategori && selectKategori.dataset.categoryBound !== 'true') {
+        selectKategori.dataset.categoryBound = 'true';
+
+        selectKategori.addEventListener('change', () => {
+            state.kategoriAktif = selectKategori.value || 'all';
+            renderKategori();
+            renderPeralatan();
+        });
+    }
+
+    if (!form || form.dataset.filterBound === 'true') return;
+
+    form.dataset.filterBound = 'true';
+
+    form.addEventListener('submit', async event => {
+        event.preventDefault();
+
+        const mulai = tanggalMulai?.value || '';
+        const selesai = tanggalSelesai?.value || '';
+
+        if (!mulai || !selesai) {
+            notifikasi(
+                'Silakan isi tanggal mulai dan tanggal kembali terlebih dahulu.',
+                'error'
+            );
+            return;
+        }
+
+        if (selesai <= mulai) {
+            notifikasi(
+                'Tanggal kembali harus setelah tanggal mulai sewa.',
+                'error'
+            );
+            return;
+        }
+
+        state.kategoriAktif = selectKategori?.value || 'all';
+
+        renderKategori();
+
+        try {
+            const params = new URLSearchParams({
+                tanggal_mulai: mulai,
+                tanggal_kembali: selesai
+            });
+
+            const response = await fetch(
+                `${API.peralatan}?${params.toString()}`,
+                {
+                    method: 'GET',
+                    headers: { Accept: 'application/json' },
+                    cache: 'no-store'
+                }
+            );
+
+            const result = await response.json();
+
+            if (!response.ok || result.status === 'error') {
+                throw new Error(
+                    result.message || 'Gagal memuat ketersediaan peralatan.'
+                );
+            }
+
+            state.peralatan = normalizeResponse(result);
+
+            renderPeralatan();
+
+            document.getElementById('katalog')?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        } catch (error) {
+            console.error('Gagal mencari peralatan:', error);
+
+            notifikasi(
+                error.message || 'Gagal mencari peralatan.',
+                'error'
+            );
+        }
+    });
+
+    if (tanggalMulai && tanggalSelesai) {
+        tanggalMulai.addEventListener('change', () => {
+            tanggalSelesai.min = tanggalMulai.value || '';
+        });
+    }
+}
+
+
     function dataPeralatanTersaring() {
         let data = state.peralatan.filter(statusAktif);
 
         if (state.kategoriAktif !== 'all') {
-            data = data.filter(item =>
-                idKategori(item) === String(state.kategoriAktif)
-            );
+            data = data.filter(item => idKategori(item) === String(state.kategoriAktif));
         }
 
         const keyword = String(state.kataKunci || '').trim().toLowerCase();
@@ -445,6 +716,7 @@
             const harga = hargaPeralatan(item);
             const stok = stokPeralatan(item);
             const tersedia = stok > 0;
+            const bolehTambah = Boolean(getSesiPelanggan());
 
             return `
                 <article
@@ -464,9 +736,7 @@
                         </span>
 
                         <span class="absolute right-3 top-3 rounded-full px-3 py-1.5 text-[10px] font-bold ${
-                            tersedia
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-rose-100 text-rose-700'
+                            tersedia ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
                         }">
                             ${tersedia ? 'Stok ' + stok : 'Stok Habis'}
                         </span>
@@ -485,10 +755,7 @@
 
                         <div class="flex items-end justify-between gap-3 border-t border-slate-100 pt-3">
                             <div>
-                                <p class="text-[10px] font-semibold text-slate-400">
-                                    Harga sewa
-                                </p>
-
+                                <p class="text-[10px] font-semibold text-slate-400">Harga sewa</p>
                                 <p class="mt-0.5 text-base font-black text-sicamp-700">
                                     ${rupiah(harga)}
                                     <span class="text-[10px] font-medium text-slate-400">/hari</span>
@@ -498,14 +765,16 @@
                             <button
                                 type="button"
                                 class="home-rent-button rounded-xl px-3.5 py-2.5 text-xs font-bold transition-all ${
-                                    tersedia
+                                    tersedia && bolehTambah
                                         ? 'bg-sicamp-700 text-white hover:bg-sicamp-800'
                                         : 'cursor-not-allowed bg-slate-100 text-slate-400'
                                 }"
                                 data-rent-id="${escapeHTML(id)}"
-                                ${tersedia ? '' : 'disabled'}>
+                                ${tersedia && bolehTambah ? '' : 'disabled'}>
                                 <i class="fa-solid fa-basket-shopping mr-1"></i>
-                                ${tersedia ? 'Tambah' : 'Habis'}
+                                ${!tersedia
+                                    ? 'Habis'
+                                    : (!bolehTambah ? 'Masuk untuk Tambah' : 'Tambah')}
                             </button>
                         </div>
                     </div>
@@ -515,59 +784,93 @@
     }
 
     function tambahKeKeranjang(id) {
-        const peralatan = state.peralatan.find(
-            item => idPeralatan(item) === String(id)
-        );
+    if (!pastikanLoginPelanggan()) return;
 
-        if (!peralatan) {
-            notifikasi('Data peralatan tidak ditemukan.', 'error');
-            return;
-        }
+    const peralatan = state.peralatan.find(
+        item => idPeralatan(item) === String(id)
+    );
 
-        if (!statusAktif(peralatan) || stokPeralatan(peralatan) <= 0) {
-            notifikasi('Peralatan sedang tidak tersedia.', 'error');
-            return;
-        }
-
-        const keranjang = bacaKeranjang();
-        const idBarang = idPeralatan(peralatan);
-
-        const itemLama = keranjang.find(
-            item => String(item.id_peralatan) === idBarang
-        );
-
-        if (itemLama) {
-            if (itemLama.qty >= stokPeralatan(peralatan)) {
-                notifikasi('Jumlah barang sudah mencapai batas stok.', 'error');
-                return;
-            }
-
-            itemLama.qty += 1;
-            itemLama.jumlah = itemLama.qty;
-        } else {
-            keranjang.push({
-                id_peralatan: idBarang,
-                nama_peralatan: namaPeralatan(peralatan),
-                harga_sewa: hargaPeralatan(peralatan),
-                gambar: gambarPeralatan(peralatan),
-                stok: stokPeralatan(peralatan),
-                qty: 1,
-                jumlah: 1
-            });
-        }
-
-        simpanKeranjang(keranjang);
-
-        notifikasi(
-            namaPeralatan(peralatan) + ' berhasil ditambahkan ke keranjang.',
-            'success'
-        );
+    if (!peralatan) {
+        notifikasi('Data peralatan tidak ditemukan.', 'error');
+        return;
     }
+
+    if (
+        !statusAktif(peralatan) ||
+        stokPeralatan(peralatan) <= 0
+    ) {
+        notifikasi('Peralatan sedang tidak tersedia.', 'error');
+        return;
+    }
+
+    const keranjang = bacaKeranjang();
+    const idBarang = idPeralatan(peralatan);
+
+    const itemLama = keranjang.find(
+        item => String(item.id_peralatan) === idBarang
+    );
+
+    if (itemLama) {
+        if (itemLama.qty >= stokPeralatan(peralatan)) {
+            notifikasi(
+                'Jumlah barang sudah mencapai batas stok.',
+                'error'
+            );
+            return;
+        }
+
+        itemLama.qty += 1;
+        itemLama.jumlah = itemLama.qty;
+    } else {
+        keranjang.push({
+            id_peralatan: idBarang,
+            nama_peralatan: namaPeralatan(peralatan),
+            harga_sewa: hargaPeralatan(peralatan),
+            gambar: gambarPeralatan(peralatan),
+            stok: stokPeralatan(peralatan),
+            qty: 1,
+            jumlah: 1
+        });
+    }
+
+    simpanKeranjang(keranjang);
+
+    notifikasi(
+        namaPeralatan(peralatan) +
+        ' berhasil ditambahkan ke keranjang.',
+        'success'
+    );
+}
 
     function renderKeranjang() {
         const container = el('cartItemsContainer');
 
-        if (!container) return;
+        if (!container) {
+            updateCartBadge();
+            return;
+        }
+
+        if (!getSesiPelanggan()) {
+            container.innerHTML = `
+                <div class="rounded-xl border border-dashed border-slate-200 p-5 text-center">
+                    <i class="fa-solid fa-lock text-2xl text-slate-300"></i>
+                    <p class="mt-2 text-xs font-bold text-slate-600">
+                        Masuk untuk menggunakan keranjang
+                    </p>
+                    <p class="mt-1 text-[11px] text-slate-400">
+                        Login sebagai pelanggan untuk melihat keranjangmu.
+                    </p>
+                    <a href="login.html"
+                    class="mt-3 inline-flex rounded-lg bg-sicamp-700 px-4 py-2 text-xs font-bold text-white">
+                        Masuk
+                    </a>
+                </div>
+            `;
+
+            updateCartBadge();
+            hitungkanTotalCheckout();
+            return;
+        }
 
         const keranjang = bacaKeranjang();
 
@@ -590,8 +893,7 @@
         }
 
         container.innerHTML = keranjang.map((item, index) => `
-            <div
-                class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white p-3"
                 data-cart-index="${index}">
 
                 <img
@@ -611,27 +913,19 @@
                     </p>
 
                     <div class="mt-2 flex items-center gap-2">
-                        <button
-                            type="button"
+                        <button type="button"
                             class="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
                             data-cart-action="minus"
-                            data-cart-index="${index}"
-                            aria-label="Kurangi jumlah">
-                            −
-                        </button>
+                            data-cart-index="${index}">−</button>
 
                         <span class="min-w-4 text-center text-xs font-bold">
                             ${item.qty}
                         </span>
 
-                        <button
-                            type="button"
+                        <button type="button"
                             class="flex h-6 w-6 items-center justify-center rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100"
                             data-cart-action="plus"
-                            data-cart-index="${index}"
-                            aria-label="Tambah jumlah">
-                            +
-                        </button>
+                            data-cart-index="${index}">+</button>
                     </div>
                 </div>
 
@@ -640,12 +934,10 @@
                         ${rupiah(item.harga_sewa * item.qty)}
                     </p>
 
-                    <button
-                        type="button"
+                    <button type="button"
                         class="rounded-lg p-2 text-rose-500 hover:bg-rose-50"
                         data-cart-action="remove"
-                        data-cart-index="${index}"
-                        aria-label="Hapus barang">
+                        data-cart-index="${index}">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>
                 </div>
@@ -658,49 +950,29 @@
 
     function hitungkanTotalCheckout() {
         const keranjang = bacaKeranjang();
-
         const tanggalMulai = el('checkoutTglSewa')?.value || '';
         const tanggalKembali = el('checkoutTglKembali')?.value || '';
 
         let durasi = 1;
-
         if (tanggalMulai && tanggalKembali) {
             const mulai = new Date(tanggalMulai + 'T00:00:00');
             const kembali = new Date(tanggalKembali + 'T00:00:00');
-
-            const selisih = Math.round(
-                (kembali.getTime() - mulai.getTime()) /
-                (1000 * 60 * 60 * 24)
-            );
-
+            const selisih = Math.round((kembali.getTime() - mulai.getTime()) / (1000 * 60 * 60 * 24));
             durasi = selisih > 0 ? selisih : 1;
         }
 
         const total = keranjang.reduce((jumlah, item) => {
-            return jumlah +
-                (Number(item.harga_sewa) || 0) *
-                (Number(item.qty) || 1) *
-                durasi;
+            return jumlah + (Number(item.harga_sewa) || 0) * (Number(item.qty) || 1) * durasi;
         }, 0);
 
-        const totalElement = el('cartTotalHarga');
-
-        if (totalElement) {
-            totalElement.textContent = rupiah(total);
-        }
-
-        const durasiElement = el('checkoutRincianDurasi');
-
-        if (durasiElement) {
-            durasiElement.textContent = durasi + ' Hari';
-        }
+        if (el('cartTotalHarga')) el('cartTotalHarga').textContent = rupiah(total);
+        if (el('checkoutRincianDurasi')) el('checkoutRincianDurasi').textContent = durasi + ' Hari';
 
         return total;
     }
 
     function updateCheckoutStep(step) {
         currentCheckoutStep = step;
-
         const step1 = el('checkoutStep1');
         const step2 = el('checkoutStep2');
         const step3 = el('checkoutStep3');
@@ -738,7 +1010,6 @@
             step1.classList.remove('hidden');
             if (dateSection) dateSection.classList.remove('hidden');
             if (subtitle) subtitle.textContent = 'Tahap 1 dari 3: Ringkasan Keranjang';
-
             buttonsArea.innerHTML = `
                 <button type="button" onclick="nextCheckoutStep(2)" class="w-full sc-btn-primary py-3 rounded-xl font-bold flex items-center justify-center gap-2">
                     <span>Lanjut Ke Data Penyewa</span>
@@ -749,7 +1020,6 @@
             step2.classList.remove('hidden');
             if (dateSection) dateSection.classList.add('hidden');
             if (subtitle) subtitle.textContent = 'Tahap 2 dari 3: Data Penyewa & Jaminan';
-
             buttonsArea.innerHTML = `
                 <button type="button" onclick="nextCheckoutStep(1)" class="w-1/3 sc-btn-secondary py-3 rounded-xl font-bold flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-arrow-left"></i>
@@ -764,7 +1034,6 @@
             step3.classList.remove('hidden');
             if (dateSection) dateSection.classList.add('hidden');
             if (subtitle) subtitle.textContent = 'Tahap 3 dari 3: Pembayaran & Bukti Transfer';
-
             buttonsArea.innerHTML = `
                 <button type="button" onclick="nextCheckoutStep(2)" class="w-1/3 sc-btn-secondary py-3 rounded-xl font-bold flex items-center justify-center gap-1.5">
                     <i class="fa-solid fa-arrow-left"></i>
@@ -779,16 +1048,15 @@
     }
 
     function nextCheckoutStep(targetStep) {
+        if (!pastikanLoginPelanggan()) return;
         if (targetStep === 2) {
             const keranjang = bacaKeranjang();
             if (!keranjang.length) {
                 notifikasi('Keranjang Anda masih kosong.', 'error');
                 return;
             }
-
             const tglSewa = el('checkoutTglSewa')?.value;
             const tglKembali = el('checkoutTglKembali')?.value;
-
             if (!tglSewa || !tglKembali) {
                 notifikasi('Harap isi tanggal mulai dan rencana kembali sewa.', 'error');
                 return;
@@ -811,61 +1079,170 @@
         updateCheckoutStep(targetStep);
     }
 
-    function submitPesanan() {
-        const bukti = el('checkoutBukti')?.files.length;
+async function submitPesanan() {
+    if (!pastikanLoginPelanggan()) return;
 
-        if (!bukti) {
-            notifikasi('Wajib mengunggah bukti transfer pembayaran.', 'error');
-            return;
+    const tombol = document.querySelector(
+        'button[onclick="submitPesanan()"]'
+    );
+
+    // Ambil data sesi pelanggan dengan aman
+    const sesi = getSesiPelanggan();
+    const user = sesi?.user || sesi || {};
+
+    const idPelanggan = Number(
+        user.id_pelanggan ??
+        user.pelanggan_id ??
+        user.id_customer ??
+        user.id_user ??
+        user.user_id ??
+        user.id ??
+        0
+    );
+
+    if (!Number.isInteger(idPelanggan) || idPelanggan <= 0) {
+        notifikasi(
+            'ID pelanggan tidak ditemukan. Silakan login ulang.',
+            'error'
+        );
+        return;
+    }
+
+    const keranjang = bacaKeranjang();
+
+    if (!keranjang.length) {
+        notifikasi('Keranjang masih kosong.', 'error');
+        return;
+    }
+
+    const tanggalMulai = el('checkoutTglSewa')?.value;
+    const tanggalKembali = el('checkoutTglKembali')?.value;
+
+    const nama = el('checkoutNama')?.value.trim();
+    const wa = el('checkoutWA')?.value.trim();
+    const darurat = el('checkoutKontakDarurat')?.value.trim();
+    const alamat = el('checkoutAlamat')?.value.trim();
+
+    const ktp = el('checkoutKTP')?.files?.[0];
+    const bukti = el('checkoutBukti')?.files?.[0];
+
+    if (!tanggalMulai || !tanggalKembali ||
+        tanggalKembali <= tanggalMulai) {
+        notifikasi('Tanggal penyewaan tidak valid.', 'error');
+        return;
+    }
+
+    if (!nama || !wa || !darurat || !alamat || !ktp) {
+        notifikasi('Lengkapi data penyewa dan unggah KTP/KTM.', 'error');
+        return;
+    }
+
+    if (!bukti) {
+        notifikasi('Silakan unggah bukti pembayaran.', 'error');
+        return;
+    }
+
+    if (keranjang.some(item =>
+        !Number.isInteger(Number(item.id_peralatan)) ||
+        Number(item.id_peralatan) <= 0
+    )) {
+        notifikasi(
+            'Paket bundling belum terhubung ke ID peralatan database.',
+            'error'
+        );
+        return;
+    }
+
+    const durasi = Math.max(
+        1,
+        Math.round(
+            (new Date(tanggalKembali + 'T00:00:00') -
+             new Date(tanggalMulai + 'T00:00:00')) / 86400000
+        )
+    );
+
+    const detailItems = keranjang.map(item => ({
+        id_peralatan: Number(item.id_peralatan),
+        jumlah: Number(item.qty ?? item.jumlah ?? 1),
+        harga_satuan: Number(item.harga_sewa) * durasi
+    }));
+
+    if (tombol) tombol.disabled = true;
+
+    try {
+        // Gunakan FormData agar file gambar (ktp dan bukti) bisa ikut terkirim
+        const formData = new FormData();
+        formData.append('id_pelanggan', idPelanggan);
+        formData.append('tanggal_mulai', tanggalMulai);
+        formData.append('tanggal_kembali_rencana', tanggalKembali);
+        formData.append('detail_items', JSON.stringify(detailItems));
+
+        if (ktp) formData.append('ktp', ktp);
+        if (bukti) formData.append('bukti', bukti);
+
+        const response = await fetch('api/api_penyewaan.php', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json'
+            },
+            body: formData
+        });
+
+        const hasil = await response.json();
+
+        if (!response.ok || hasil.status !== 'success') {
+            throw new Error(
+                hasil.message || 'Gagal menyimpan transaksi.'
+            );
         }
 
-        notifikasi('Pesanan Anda berhasil dikirim!', 'success');
+        notifikasi(
+            'Transaksi tersimpan dengan kode ' + hasil.kode_transaksi,
+            'success'
+        );
 
         simpanKeranjang([]);
 
-        if (typeof window.closeModalKeranjang === 'function') {
-            window.closeModalKeranjang();
-        }
+        setTimeout(() => {
+            window.location.href = 'riwayat-penyewaan-pelanggan.html';
+        }, 1000);
+
+    } catch (error) {
+        console.error('Gagal menyimpan transaksi:', error);
+        notifikasi(error.message || 'Gagal menyimpan transaksi.', 'error');
+    } finally {
+        if (tombol) tombol.disabled = false;
     }
+}
 
     function pasangEventKatalog() {
         const grid = gridKatalog();
-
         if (grid && grid.dataset.homeCartBound !== 'true') {
             grid.dataset.homeCartBound = 'true';
-
             grid.addEventListener('click', event => {
                 const button = event.target.closest('[data-rent-id]');
-
                 if (!button || button.disabled) return;
-
                 event.preventDefault();
                 tambahKeKeranjang(button.dataset.rentId);
             });
         }
 
         const kategori = containerKategori();
-
         if (kategori && kategori.dataset.homeCategoryBound !== 'true') {
             kategori.dataset.homeCategoryBound = 'true';
-
             kategori.addEventListener('click', event => {
                 const button = event.target.closest('[data-home-category]');
-
                 if (!button) return;
-
+                if (!pastikanLoginPelanggan()) return;
                 state.kategoriAktif = button.dataset.homeCategory;
-
                 renderKategori();
                 renderPeralatan();
             });
         }
 
         const input = el('searchInput');
-
         if (input && input.dataset.homeSearchBound !== 'true') {
             input.dataset.homeSearchBound = 'true';
-
             input.addEventListener('input', () => {
                 state.kataKunci = input.value || '';
                 renderPeralatan();
@@ -874,7 +1251,6 @@
 
         document.addEventListener('click', event => {
             const button = event.target.closest('[data-cart-action]');
-
             if (!button) return;
 
             const index = Number(button.dataset.cartIndex);
@@ -890,7 +1266,6 @@
                     notifikasi('Jumlah barang sudah mencapai batas stok.', 'error');
                     return;
                 }
-
                 item.qty += 1;
                 item.jumlah = item.qty;
             } else if (action === 'minus') {
@@ -919,14 +1294,18 @@
         });
     }
 
+
     async function loadKategori() {
         try {
             state.kategori = await requestAPI(API.kategori);
+
             renderKategori();
+            renderKategoriDropdown();
         } catch (error) {
             console.error('Gagal memuat kategori:', error);
         }
     }
+
 
     async function loadPeralatan() {
         try {
@@ -934,13 +1313,50 @@
             renderPeralatan();
         } catch (error) {
             console.error('Gagal memuat peralatan:', error);
-
-            tampilkanPesanKatalog(
-                'Data peralatan gagal dimuat. Periksa API peralatan.',
-                true
-            );
+            tampilkanPesanKatalog('Data peralatan gagal dimuat. Periksa API peralatan.', true);
         }
     }
+
+    window.sewaItem = function (namaPaket) {
+        if (!pastikanLoginPelanggan()) return;
+
+        const paketBundling = {
+            id_peralatan: 'paket-bundling-muncak-starter-4p',
+            nama_peralatan: namaPaket,
+            harga_sewa: 85000,
+            gambar: FALLBACK_IMAGE,
+            stok: 999,
+            qty: 1,
+            jumlah: 1,
+            tipe: 'bundling'
+        };
+
+        const keranjang = bacaKeranjang();
+
+        const paketSudahAda = keranjang.find(
+            item =>
+                item.id_peralatan === paketBundling.id_peralatan
+        );
+
+        if (paketSudahAda) {
+            notifikasi(
+                'Paket bundling sudah ada di keranjang.',
+                'info'
+            );
+            return;
+        }
+
+        keranjang.push(paketBundling);
+
+        simpanKeranjang(keranjang);
+
+        notifikasi(
+            namaPaket + ' berhasil ditambahkan ke keranjang.',
+            'success'
+        );
+
+        // Tidak membuka modal keranjang secara otomatis.
+    };
 
     window.renderKeranjang = renderKeranjang;
     window.hitungkanTotalCheckout = hitungkanTotalCheckout;
@@ -966,14 +1382,12 @@
         }
     });
 
+
     async function init() {
-        const halaman = window.location.pathname
-            .split('/')
-            .pop()
-            .toLowerCase();
+        // Eksekusi perubahan navbar langsung tanpa cek nama file
+        renderNavAuth();
 
-        if (halaman && halaman !== 'index.html') return;
-
+        pasangFilterBeranda();
         pasangEventKatalog();
         renderKeranjang();
         tampilkanPesanKatalog('Memuat peralatan...');
@@ -986,6 +1400,7 @@
         renderKeranjang();
         updateCartBadge();
     }
+
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);

@@ -251,6 +251,8 @@
         .sc-nav-links a:hover {
             color: var(--primary);
         }
+        
+        
 
         .sc-nav-actions {
             display: flex;
@@ -1147,6 +1149,32 @@
                 height: 200px;
             }
         }
+
+        .sc-btn-logout {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 16px;
+            border: 1px solid #dc2626;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #dc2626;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .sc-btn-logout:hover {
+            background-color: #dc2626;
+            color: #ffffff;
+        }
+
+        .sc-btn-logout:focus-visible {
+            outline: 2px solid #dc2626;
+            outline-offset: 3px;
+        }
+    
     </style>
 </head>
 
@@ -1178,41 +1206,50 @@
                 <a href="#katalog">Katalog</a>
                 <a href="#bundling">Paket Bundling</a>
                 <a href="#basecamp">Lokasi</a>
+                <span id="navHistoryContainer"></span>
             </nav>
 
-            <div class="sc-nav-actions">
 
-                <button
-                    type="button"
-                    onclick="openModalKeranjang()"
-                    class="sc-cart-button"
-                    aria-label="Buka keranjang"
-                >
-                    <i class="fa-solid fa-basket-shopping"></i>
-                    <span id="cartBadgeCount" class="sc-cart-badge">0</span>
-                </button>
+        <div class="sc-nav-actions">
+            <!-- Keranjang -->
+            <button
+                type="button"
+                onclick="openModalKeranjang()"
+                class="sc-cart-button"
+                aria-label="Buka keranjang"
+            >
+                <i class="fa-solid fa-basket-shopping"></i>
+                <span id="cartBadgeCount" class="sc-cart-badge">0</span>
+            </button>
 
+            <!-- Semua navigasi autentikasi berada dalam satu container -->
+            <div id="navAuthContainer" class="flex items-center gap-2">
                 <a href="login.html" class="sc-auth-button">Masuk</a>
-
                 <a href="register.html" class="sc-auth-button">Daftar</a>
-
-                <button
-                    type="button"
-                    id="scMobileMenuButton"
-                    class="sc-mobile-menu-button"
-                    aria-label="Buka menu navigasi"
-                    aria-expanded="false"
-                    aria-controls="scMobileMenu"
-                >
-                    <i class="fa-solid fa-bars"></i>
-                </button>
             </div>
+
+            <!-- Tombol menu mobile -->
+            <button
+                type="button"
+                id="scMobileMenuButton"
+                class="sc-mobile-menu-button"
+                aria-label="Buka menu navigasi"
+                aria-expanded="false"
+                aria-controls="scMobileMenu"
+            >
+                <i class="fa-solid fa-bars"></i>
+            </button>
         </div>
+
+
 
         <nav id="scMobileMenu" class="sc-mobile-menu" aria-label="Navigasi mobile">
             <a href="#katalog"><i class="fa-solid fa-campground"></i>Katalog</a>
             <a href="#bundling"><i class="fa-solid fa-box-open"></i>Paket Bundling</a>
             <a href="#basecamp"><i class="fa-solid fa-location-dot"></i>Lokasi Basecamp</a>
+            <a href="riwayat-penyewaan-pelanggan.html">
+  Riwayat Penyewaan
+</a>
             <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i>Masuk</a>
             <a href="register.html"><i class="fa-solid fa-user-plus"></i>Daftar</a>
 
