@@ -258,10 +258,13 @@
         }
 
         // Jika tidak ada sesi yang valid, tampilkan tombol autentikasi.
+        const mobileHistoryLink = document.getElementById('mobileHistoryLink');
+
         if (!user) {
             if (navHistoryContainer) {
                 navHistoryContainer.innerHTML = '';
             }
+            if (mobileHistoryLink) mobileHistoryLink.style.display = 'none';
 
             navAuthContainer.innerHTML = `
                 <a href="login.html" class="sc-auth-button">Masuk</a>
@@ -271,10 +274,12 @@
         }
 
         // Tampilkan navigasi untuk pengguna yang sudah login.
+        if (mobileHistoryLink) mobileHistoryLink.style.display = 'flex';
         if (navHistoryContainer) {
             navHistoryContainer.innerHTML = `
                 <a
-                    href="riwayat-penyewaan-pelanggan.html"
+                    href="#riwayat-pesanan"
+                    data-sicamp-view="history"
                     class="text-xs font-bold text-slate-700 hover:text-sicamp-700 transition whitespace-nowrap"
                 >
                     Riwayat Pesanan
@@ -1204,7 +1209,11 @@ async function submitPesanan() {
         simpanKeranjang([]);
 
         setTimeout(() => {
-            window.location.href = 'riwayat-penyewaan-pelanggan.html';
+            if (typeof window.showSiCampHistory === 'function') {
+                window.showSiCampHistory();
+            } else {
+                window.location.hash = 'riwayat-pesanan';
+            }
         }, 1000);
 
     } catch (error) {

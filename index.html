@@ -36,6 +36,10 @@
     <link rel="stylesheet" href="css/style.css">
 
     <style>
+        #sicampMain.sicamp-history-active > :not(#sicampHistoryMount) { display: none !important; }
+        #sicampHistoryMount[hidden] { display: none !important; }
+        #sicampHistoryMount:not([hidden]) { display: block; }
+        #sicampHistoryMount .wrap { max-width: 1200px; }
         :root {
             --primary: #15803d;
             --primary-hover: #166534;
@@ -1247,9 +1251,7 @@
             <a href="#katalog"><i class="fa-solid fa-campground"></i>Katalog</a>
             <a href="#bundling"><i class="fa-solid fa-box-open"></i>Paket Bundling</a>
             <a href="#basecamp"><i class="fa-solid fa-location-dot"></i>Lokasi Basecamp</a>
-            <a href="riwayat-penyewaan-pelanggan.html">
-  Riwayat Penyewaan
-</a>
+            <a href="#riwayat-pesanan" id="mobileHistoryLink" data-sicamp-view="history"><i class="fa-solid fa-clock-rotate-left"></i>Riwayat Pesanan</a>
             <a href="login.html"><i class="fa-solid fa-right-to-bracket"></i>Masuk</a>
             <a href="register.html"><i class="fa-solid fa-user-plus"></i>Daftar</a>
 
@@ -1266,7 +1268,7 @@
         </nav>
     </header>
 
-    <main>
+    <main id="sicampMain">
         <section class="sc-container sc-hero" id="beranda">
             <div>
                 <span class="sc-location-pill">
@@ -1441,6 +1443,7 @@
                 </div>
             </div>
         </section>
+        <section id="sicampHistoryMount" hidden aria-live="polite" aria-busy="false"></section>
     </main>
 
     <div
@@ -1875,5 +1878,6 @@
 
     <script src="js/app.js"></script>
     <script src="js/home.js"></script>
+    <script src="js/riwayat-pelanggan.js"></script>
 </body>
 </html>
