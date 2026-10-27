@@ -32,6 +32,7 @@ try {
         throw new RuntimeException('Variabel koneksi $conn tidak tersedia. Periksa koneksi.php.');
     }
     $conn->set_charset('utf8mb4');
+    require_once __DIR__ . '/ktp_helper.php';
 
     function respond(array $payload, int $httpCode = 200): void {
         http_response_code($httpCode);
@@ -46,7 +47,8 @@ try {
         return is_array($data) ? $data : [];
     }
 
-    function fetchTransactions(mysqli $conn): array {
+    function fetchTransactions(mysqli $conn, ?int $customerFilter = null): array {
+        $where = $customerFilter ? 'WHERE p.id_pelanggan = ' . (int)$customerFilter : '';
         $sql = "SELECT
             p.id_penyewaan,
             p.id_pelanggan,
@@ -56,6 +58,7 @@ try {
             p.tanggal_kembali_rencana,
             p.total_harga,
             p.status AS status_transaksi,
+            p.ktp,
 
             pl.nama_pelanggan,
             pl.no_telepon,
@@ -81,6 +84,7 @@ try {
                 WHERE pb2.id_penyewaan = p.id_penyewaan
             )
 
+        $where
         ORDER BY p.id_penyewaan DESC";
         
 $result = $conn->query($sql);
@@ -120,6 +124,9 @@ while ($row = $result->fetch_assoc()) {
 
     // Alias untuk kompatibilitas dengan halaman riwayat.
     $row['id'] = $row['id_penyewaan'];
+
+    // KTP tidak pernah dikirim sebagai path file, hanya URL yang dicek login.
+    $row['ktp'] = !empty($row['ktp']) ? 'api/api_ktp.php?id=' . $id : '';
     $row['kode_booking'] = $row['kode_transaksi'];
 
     $row['nama'] = $row['nama_pelanggan'] ?? 'Pelanggan';
@@ -153,7 +160,8 @@ return $transactions;
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
     if ($method === 'GET') {
-        respond(['status' => 'success', 'data' => fetchTransactions($conn)]);
+        $filterId = filter_var($_GET['id_pelanggan'] ?? '', FILTER_VALIDATE_INT) ?: null;
+        respond(['status' => 'success', 'data' => fetchTransactions($conn, $filterId)]);
     }
 
 if ($method === 'POST') {
@@ -267,15 +275,11 @@ if ($method === 'POST') {
             $total += $qty * $price;
         }
 
-        // Tangkap file KTP / Jaminan
-        $ktpPath = null;
-        if (isset($_FILES['ktp']) && $_FILES['ktp']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../uploads/';
-            if (!is_dir($uploadDir)) { mkdir($uploadDir, 0755, true); }
-            $fileNameKtp = 'ktp_' . time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $_FILES['ktp']['name']);
-            if (move_uploaded_file($_FILES['ktp']['tmp_name'], $uploadDir . $fileNameKtp)) {
-                $ktpPath = 'uploads/' . $fileNameKtp;
-            }
+        // Simpan foto KTP / jaminan (wajib) ke folder terproteksi
+        try {
+            $ktpPath = saveKtpUpload($_FILES['ktp'] ?? []);
+        } catch (RuntimeException $e) {
+            respond(['status' => 'error', 'message' => $e->getMessage()], 422);
         }
 
         // Tangkap file bukti pembayaran jika ada yang di-upload
@@ -305,7 +309,7 @@ if ($method === 'POST') {
 
             $rentalStatus = 'Menunggu Verifikasi';
             $insertRental = $conn->prepare('INSERT INTO penyewaan (id_pelanggan, kode_transaksi, tanggal_penyewaan, tanggal_mulai, tanggal_kembali_rencana, total_harga, status, ktp) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-            $insertRental->bind_param('issssds', $customerId, $code, $transactionDate, $startDate, $returnDate, $total, $rentalStatus, $ktpPath);
+            $insertRental->bind_param('issssdss', $customerId, $code, $transactionDate, $startDate, $returnDate, $total, $rentalStatus, $ktpPath);
             $insertRental->execute();
             $rentalId = (int)$conn->insert_id;
             $insertRental->close();
@@ -347,107 +351,10 @@ if ($method === 'POST') {
             respond(['status' => 'success', 'message' => 'Penyewaan berhasil disimpan.', 'id_penyewaan' => $rentalId, 'kode_transaksi' => $code]);
         } catch (Throwable $e) {
             $conn->rollback();
+            if (!empty($ktpPath)) { @unlink(KTP_DIR . $ktpPath); }
             throw $e;
         }
     }
-// Pembuatan transaksi menggunakan FormData (mendukung upload file & data teks)
-        $customerId = filter_var($_POST['id_pelanggan'] ?? '', FILTER_VALIDATE_INT);
-        $detailsRaw = $_POST['detail_items'] ?? '[]';
-        $details = json_decode($detailsRaw, true);
-
-        if (!$customerId) {
-            respond(['status' => 'error', 'message' => 'id_pelanggan wajib diisi dan harus terdaftar.'], 422);
-        }
-        if (!is_array($details) || count($details) === 0) {
-            respond(['status' => 'error', 'message' => 'Detail peralatan penyewaan wajib diisi.'], 422);
-        }
-
-        $startDate = (string)($_POST['tanggal_mulai'] ?? date('Y-m-d'));
-        $returnDate = (string)($_POST['tanggal_kembali_rencana'] ?? date('Y-m-d', strtotime($startDate . ' +1 day')));
-        $transactionDate = date('Y-m-d');
-        $code = 'SC-' . date('ymdHis') . random_int(10, 99);
-        $total = 0.0;
-        
-        foreach ($details as $detail) {
-            $qty = (int)($detail['jumlah'] ?? $detail['qty'] ?? 0);
-            $price = (float)($detail['harga_satuan'] ?? $detail['harga_sewa'] ?? 0);
-            if ((int)($detail['id_peralatan'] ?? 0) < 1 || $qty < 1 || $price < 0) {
-                respond(['status' => 'error', 'message' => 'Data detail peralatan tidak valid.'], 422);
-            }
-            $total += $qty * $price;
-        }
-
-        // Proses Upload File Bukti Pembayaran
-        $buktiPath = null;
-        if (isset($_FILES['bukti']) && $_FILES['bukti']['error'] === UPLOAD_ERR_OK) {
-            $uploadDir = __DIR__ . '/../uploads/';
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            $fileName = time() . '_' . preg_replace('/[^a-zA-Z0-9_\.-]/', '_', $_FILES['bukti']['name']);
-            if (move_uploaded_file($_FILES['bukti']['tmp_name'], $uploadDir . $fileName)) {
-                $buktiPath = 'uploads/' . $fileName;
-            }
-        }
-
-        $conn->begin_transaction();
-        try {
-            $customerStmt = $conn->prepare('SELECT id_pelanggan FROM pelanggan WHERE id_pelanggan = ?');
-            $customerStmt->bind_param('i', $customerId);
-            $customerStmt->execute();
-            $customerExists = $customerStmt->get_result()->fetch_assoc();
-            $customerStmt->close();
-            if (!$customerExists) {
-                throw new RuntimeException('Pelanggan tidak ditemukan.');
-            }
-
-            $rentalStatus = 'Menunggu Verifikasi';
-            $insertRental = $conn->prepare('INSERT INTO penyewaan (id_pelanggan, kode_transaksi, tanggal_penyewaan, tanggal_mulai, tanggal_kembali_rencana, total_harga, status) VALUES (?, ?, ?, ?, ?, ?, ?)');
-            $insertRental->bind_param('issssds', $customerId, $code, $transactionDate, $startDate, $returnDate, $total, $rentalStatus);
-            $insertRental->execute();
-            $rentalId = (int)$conn->insert_id;
-            $insertRental->close();
-
-            foreach ($details as $detail) {
-                $equipmentId = (int)$detail['id_peralatan'];
-                $qty = (int)($detail['jumlah'] ?? $detail['qty'] ?? 0);
-                $price = (float)($detail['harga_satuan'] ?? $detail['harga_sewa'] ?? 0);
-                $subtotal = $qty * $price;
-                
-                $stockStmt = $conn->prepare('SELECT stok FROM peralatan WHERE id_peralatan = ? FOR UPDATE');
-                $stockStmt->bind_param('i', $equipmentId);
-                $stockStmt->execute();
-                $equipment = $stockStmt->get_result()->fetch_assoc();
-                $stockStmt->close();
-                if (!$equipment || (int)$equipment['stok'] < $qty) {
-                    throw new RuntimeException('Peralatan tidak ditemukan atau stok tidak mencukupi (ID ' . $equipmentId . ').');
-                }
-                
-                $insertDetail = $conn->prepare('INSERT INTO detail_penyewaan (id_penyewaan, id_peralatan, jumlah, harga_satuan, subtotal) VALUES (?, ?, ?, ?, ?)');
-                $insertDetail->bind_param('iiidd', $rentalId, $equipmentId, $qty, $price, $subtotal);
-                $insertDetail->execute();
-                $insertDetail->close();
-
-                $stockUpdate = $conn->prepare('UPDATE peralatan SET stok = stok - ? WHERE id_peralatan = ?');
-                $stockUpdate->bind_param('ii', $qty, $equipmentId);
-                $stockUpdate->execute();
-                $stockUpdate->close();
-            }
-
-            $paymentStatus = 'Menunggu';
-            $paymentNote = '';
-            // Masukkan NOW() untuk tanggal_pembayaran dan simpan path gambar buktinya
-            $insertPayment = $conn->prepare('INSERT INTO pembayaran (id_penyewaan, tanggal_pembayaran, jumlah_bayar, bukti_pembayaran, status, catatan) VALUES (?, NOW(), ?, ?, ?, ?)');
-            $insertPayment->bind_param('idsss', $rentalId, $total, $buktiPath, $paymentStatus, $paymentNote);
-            $insertPayment->execute();
-            $insertPayment->close();
-
-            $conn->commit();
-            respond(['status' => 'success', 'message' => 'Penyewaan berhasil disimpan.', 'id_penyewaan' => $rentalId, 'kode_transaksi' => $code]);
-        } catch (Throwable $e) {
-            $conn->rollback();
-            throw $e;
-        }
 
     if ($method === 'PUT') {
         $data = readInput();

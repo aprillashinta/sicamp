@@ -577,6 +577,7 @@
                         <tbody id="equipmentBody"></tbody>
                     </table>
                 </div>
+                    <div id="ktpSection" style="margin-top:20px"></div>
             </div>
 
             <div class="modal-footer" style="padding:0 24px 24px;display:flex;justify-content:flex-end">
@@ -1011,6 +1012,18 @@
                         `;
                     }).join('');
                 }
+
+                const ktpUrl = item.ktp || '';
+                document.getElementById('ktpSection').innerHTML = ktpUrl ? `
+                    <h3 class="section-title">Foto Jaminan (KTP/KTM)</h3>
+                    <a href="${escapeHTML(ktpUrl)}" target="_blank" title="Klik untuk memperbesar">
+                        <img src="${escapeHTML(ktpUrl)}" alt="Foto KTP jaminan"
+                             style="max-width:100%;max-height:260px;border-radius:10px;border:1px solid var(--border);object-fit:contain">
+                    </a>
+                ` : `
+                    <h3 class="section-title">Foto Jaminan (KTP/KTM)</h3>
+                    <p style="color:#7c877e;font-size:12px">Belum ada foto KTP.</p>
+                `;
 
                 el.overlay.classList.add('show');
                 el.overlay.setAttribute('aria-hidden', 'false');

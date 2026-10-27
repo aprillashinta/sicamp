@@ -33,7 +33,9 @@ header('Access-Control-Allow-Origin: ' . (
     isset($_SERVER['HTTP_ORIGIN']) &&
     in_array($_SERVER['HTTP_ORIGIN'], [
         'http://localhost:8000',
-        'http://127.0.0.1:8000'
+        'http://127.0.0.1:8000',
+        'http://localhost:8080',
+        'http://127.0.0.1:8080'
     ], true)
         ? $_SERVER['HTTP_ORIGIN']
         : 'null'
@@ -95,6 +97,31 @@ function cleanString($value): string
     return is_string($value) ? trim($value) : '';
 }
 
+function updatePasswordHash(
+    mysqli $conn,
+    string $table,
+    string $idColumn,
+    int $id,
+    string $inputPassword
+): void {
+    try {
+        $newHash = password_hash($inputPassword, PASSWORD_DEFAULT);
+
+        if ($newHash === false) {
+            return;
+        }
+
+        $sql = "UPDATE `$table` SET `password` = ? WHERE `$idColumn` = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        mysqli_stmt_bind_param($stmt, 'si', $newHash, $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_close($stmt);
+    } catch (Throwable $e) {
+        // Login tetap berhasil walaupun hash gagal diperbarui.
+        error_log('Gagal memperbarui hash password: ' . $e->getMessage());
+    }
+}
+
 function verifyPassword(
     mysqli $conn,
     string $table,
@@ -107,72 +134,20 @@ function verifyPassword(
         return false;
     }
 
+    // Password yang sudah berupa hash.
     if (password_verify($inputPassword, $storedPassword)) {
-        if (password_needs_rehash(
-            $storedPassword,
-            PASSWORD_DEFAULT
-        )) {
-            $newHash = password_hash(
-                $inputPassword,
-                PASSWORD_DEFAULT
-            );
-
-            if ($newHash !== false) {
-                $sql = "UPDATE `$table`
-                        SET `password` = ?
-                        WHERE `$idColumn` = ?";
-
-                $stmt = mysqli_prepare($conn, $sql);
-
-                if ($stmt) {
-                    mysqli_stmt_bind_param(
-                        $stmt,
-                        'si',
-                        $newHash,
-                        $id
-                    );
-
-                    mysqli_stmt_execute($stmt);
-                    mysqli_stmt_close($stmt);
-                }
-            }
+        if (password_needs_rehash($storedPassword, PASSWORD_DEFAULT)) {
+            updatePasswordHash($conn, $table, $idColumn, $id, $inputPassword);
         }
 
         return true;
     }
 
+    // Password lama yang masih teks biasa.
     if (hash_equals($storedPassword, $inputPassword)) {
-        $newHash = password_hash(
-            $inputPassword,
-            PASSWORD_DEFAULT
-        );
+        updatePasswordHash($conn, $table, $idColumn, $id, $inputPassword);
 
-        if ($newHash === false) {
-            return false;
-        }
-
-        $sql = "UPDATE `$table`
-                SET `password` = ?
-                WHERE `$idColumn` = ?";
-
-        $stmt = mysqli_prepare($conn, $sql);
-
-        if (!$stmt) {
-            return false;
-        }
-
-        mysqli_stmt_bind_param(
-            $stmt,
-            'si',
-            $newHash,
-            $id
-        );
-
-        $updated = mysqli_stmt_execute($stmt);
-
-        mysqli_stmt_close($stmt);
-
-        return $updated;
+        return true;
     }
 
     return false;
@@ -220,7 +195,7 @@ function login(mysqli $conn, array $input): void
     }
 
     $sqlAdmin = "
-        SELECT id_admin, username, nama_admin, password
+        SELECT *
         FROM admin
         WHERE username = ?
         LIMIT 1
@@ -262,7 +237,7 @@ function login(mysqli $conn, array $input): void
         if ($validPassword) {
             $user = [
                 'id_admin' => (int) $admin['id_admin'],
-                'nama_admin' => $admin['nama_admin']
+                'nama_admin' => ($admin['nama_admin'] ?? '')
                     ?: $admin['username'],
                 'username' => $admin['username'],
                 'role' => 'admin'
