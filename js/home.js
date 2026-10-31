@@ -17,7 +17,6 @@
     };
 
     let currentCheckoutStep = 1;
-
     const FALLBACK_IMAGE =
         'https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=800&q=80';
 
@@ -184,6 +183,59 @@
         }, 3000);
     }
 
+    function initializeImagePreview(inputId, previewId, imageId, fileNameId, label) {
+        const input = el(inputId);
+        const preview = el(previewId);
+        const image = el(imageId);
+        const fileName = el(fileNameId);
+        let previewUrl = null;
+
+        if (!input || !preview || !image || !fileName) return;
+
+        input.addEventListener('change', () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+                previewUrl = null;
+            }
+
+            preview.classList.add('hidden');
+            image.onload = null;
+            image.onerror = null;
+            image.removeAttribute('src');
+            fileName.textContent = '';
+
+            const file = input.files?.[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type) || file.size > 2 * 1024 * 1024) {
+                input.value = '';
+                notifikasi(
+                    `${label} harus berformat JPG, PNG, atau WEBP dan maksimal 2 MB.`,
+                    'error'
+                );
+                return;
+            }
+
+            const imageUrl = URL.createObjectURL(file);
+            previewUrl = imageUrl;
+            image.onload = () => {
+                if (previewUrl !== imageUrl) return;
+                fileName.textContent = file.name;
+                preview.classList.remove('hidden');
+            };
+            image.onerror = () => {
+                if (previewUrl !== imageUrl) return;
+                URL.revokeObjectURL(imageUrl);
+                previewUrl = null;
+                image.removeAttribute('src');
+                input.value = '';
+                notifikasi(`${label} tidak dapat dibaca. Silakan pilih file gambar lain.`, 'error');
+            };
+            image.src = imageUrl;
+        });
+    }
+
     function tampilkanPesanKatalog(pesan, error = false) {
         const grid = gridKatalog();
         if (!grid) return;
@@ -280,7 +332,6 @@
                 <a
                     href="#riwayat-pesanan"
                     data-sicamp-view="history"
-                    class="text-xs font-bold text-slate-700 hover:text-sicamp-700 transition whitespace-nowrap"
                 >
                     Riwayat Pesanan
                 </a>
@@ -288,11 +339,19 @@
         }
 
         navAuthContainer.innerHTML = `
-            <span class="text-xs font-extrabold text-slate-800 whitespace-nowrap">
-                Halo, ${escapeHTML(user.nama)}
+            <span
+                class="sc-user-greeting"
+                aria-label="Pengguna masuk: ${escapeHTML(user.nama)}"
+                title="${escapeHTML(user.nama)}"
+            >
+                <span class="sc-user-avatar" aria-hidden="true">
+                    <i class="fa-solid fa-user"></i>
+                </span>
+                <span class="sc-user-name">Halo, ${escapeHTML(user.nama)}</span>
             </span>
-            <button type="button" id="btnLogout" class="sc-btn-logout">
-                Logout
+            <button type="button" id="btnLogout" class="sc-btn-logout" aria-label="Logout">
+                <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                <span>Logout</span>
             </button>
         `;
 
@@ -1207,14 +1266,7 @@ async function submitPesanan() {
         );
 
         simpanKeranjang([]);
-
-        setTimeout(() => {
-            if (typeof window.showSiCampHistory === 'function') {
-                window.showSiCampHistory();
-            } else {
-                window.location.hash = 'riwayat-pesanan';
-            }
-        }, 1000);
+        window.location.href = 'index.html';
 
     } catch (error) {
         console.error('Gagal menyimpan transaksi:', error);
@@ -1395,6 +1447,20 @@ async function submitPesanan() {
     async function init() {
         // Eksekusi perubahan navbar langsung tanpa cek nama file
         renderNavAuth();
+        initializeImagePreview(
+            'checkoutKTP',
+            'checkoutKTPPreview',
+            'checkoutKTPPreviewImage',
+            'checkoutKTPFileName',
+            'Foto KTP/KTM'
+        );
+        initializeImagePreview(
+            'checkoutBukti',
+            'checkoutBuktiPreview',
+            'checkoutBuktiPreviewImage',
+            'checkoutBuktiFileName',
+            'Bukti transfer'
+        );
 
         pasangFilterBeranda();
         pasangEventKatalog();

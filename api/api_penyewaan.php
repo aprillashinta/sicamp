@@ -165,13 +165,17 @@ return $transactions;
     }
 
 if ($method === 'POST') {
-        $action = $_GET['action'] ?? ($_POST['action'] ?? '');
+        $postData = $_POST;
+        if (empty($postData)) {
+            $postData = readInput();
+        }
+        $action = $_GET['action'] ?? ($postData['action'] ?? '');
 
-        if (in_array($action, ['update_status', 'verify', 'reject'], true) || isset($_POST['status_only'])) {
-            $id = filter_var($_POST['id_penyewaan'] ?? $_POST['id'] ?? '', FILTER_VALIDATE_INT);
-            $code = trim((string)($_POST['kode_transaksi'] ?? $_POST['kode'] ?? ''));
-            $requestedStatus = trim((string)($_POST['status'] ?? ''));
-            $note = trim((string)($_POST['catatan'] ?? $_POST['catatan_pembayaran'] ?? $_POST['alasan_penolakan'] ?? ''));
+        if (in_array($action, ['update_status', 'verify', 'reject'], true) || isset($postData['status_only'])) {
+            $id = filter_var($postData['id_penyewaan'] ?? $postData['id'] ?? '', FILTER_VALIDATE_INT);
+            $code = trim((string)($postData['kode_transaksi'] ?? $postData['kode'] ?? ''));
+            $requestedStatus = trim((string)($postData['status'] ?? ''));
+            $note = trim((string)($postData['catatan'] ?? $postData['catatan_pembayaran'] ?? $postData['alasan_penolakan'] ?? ''));
 
             if (!$id && $code === '') {
                 respond(['status' => 'error', 'message' => 'ID penyewaan atau kode transaksi wajib diisi.'], 422);
@@ -249,8 +253,8 @@ if ($method === 'POST') {
         }
 
         // Pembuatan transaksi baru menggunakan FormData
-        $customerId = filter_var($_POST['id_pelanggan'] ?? '', FILTER_VALIDATE_INT);
-        $detailsRaw = $_POST['detail_items'] ?? '[]';
+        $customerId = filter_var($postData['id_pelanggan'] ?? '', FILTER_VALIDATE_INT);
+        $detailsRaw = $postData['detail_items'] ?? '[]';
         $details = json_decode($detailsRaw, true);
 
         if (!$customerId) {
@@ -260,8 +264,8 @@ if ($method === 'POST') {
             respond(['status' => 'error', 'message' => 'Detail peralatan penyewaan wajib diisi.'], 422);
         }
 
-        $startDate = (string)($_POST['tanggal_mulai'] ?? date('Y-m-d'));
-        $returnDate = (string)($_POST['tanggal_kembali_rencana'] ?? date('Y-m-d', strtotime($startDate . ' +1 day')));
+        $startDate = (string)($postData['tanggal_mulai'] ?? date('Y-m-d'));
+        $returnDate = (string)($postData['tanggal_kembali_rencana'] ?? date('Y-m-d', strtotime($startDate . ' +1 day')));
         $transactionDate = date('Y-m-d');
         $code = 'SC-' . date('ymdHis') . random_int(10, 99);
         $total = 0.0;

@@ -70,6 +70,7 @@ try {
         $items = [];
         while ($item = $detailResult->fetch_assoc()) $items[] = $item;
         $row['detail_items'] = $items;
+        $row['ktp'] = !empty($row['ktp']) ? 'api/api_ktp.php?id=' . $rentalId : '';
         // Status utama menampilkan status penyewaan, status pembayaran disediakan terpisah.
         $row['status'] = $row['status_penyewaan'] ?? 'Menunggu Pembayaran';
         $transactions[] = $row;

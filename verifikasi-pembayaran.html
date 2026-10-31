@@ -600,6 +600,13 @@
                 '';
         }
 
+        function getGuarantee(item) {
+            return item.ktp ??
+                item.foto_ktp ??
+                item.jaminan ??
+                '';
+        }
+
         function getPaymentNote(item) {
             return item.catatan_pembayaran ?? item.catatan ?? item.alasan_penolakan ?? '';
         }
@@ -927,6 +934,7 @@
             const status = getStatus(item);
             const sClean = status.toLowerCase();
             const proof = getProof(item);
+            const guarantee = getGuarantee(item);
             const isPending = ['menunggu pembayaran', 'menunggu verifikasi', 'menunggu', 'sedang disewa', 'proses', ''].includes(sClean);
 
             document.getElementById('modalTitle').textContent =
@@ -965,6 +973,13 @@
                 ${buildProofHTML(proof)}
             </div>
 
+            <div class="font-extrabold text-xs mt-5 mb-3">Foto Jaminan (KTP/KTM)</div>
+            <div class="proof-container" id="guaranteeContainer">
+                ${guarantee
+                    ? `<img src="${escapeHTML(guarantee)}" alt="Foto jaminan KTP/KTM">`
+                    : `<p class="text-xs text-gray-500">Foto jaminan belum tersedia.</p>`}
+            </div>
+
             ${getPaymentNote(item) ? `
                 <div class="mt-4 p-4 rounded-xl" style="background:#fff0f0; border:1px solid #fecaca;">
                     <div class="font-bold text-xs mb-1 text-red-700">Catatan / Alasan Penolakan</div>
@@ -990,6 +1005,16 @@
                     proofImage.replaceWith(Object.assign(document.createElement('p'), {
                         className: 'text-xs text-gray-500 text-center py-8',
                         textContent: 'Bukti tidak dapat ditampilkan. Periksa lokasi file pada server.'
+                    }));
+                });
+            }
+
+            const guaranteeImage = detailContent.querySelector('#guaranteeContainer img');
+            if (guaranteeImage) {
+                guaranteeImage.addEventListener('error', () => {
+                    guaranteeImage.replaceWith(Object.assign(document.createElement('p'), {
+                        className: 'text-xs text-gray-500 text-center py-8',
+                        textContent: 'Foto jaminan tidak dapat ditampilkan. Pastikan sesi admin masih aktif dan file tersedia.'
                     }));
                 });
             }

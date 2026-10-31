@@ -244,6 +244,11 @@
             flex-shrink: 0;
         }
 
+        #navHistoryContainer {
+            display: flex;
+            align-items: center;
+        }
+
         .sc-nav-links a {
             color: #475569;
             font-size: 12px;
@@ -263,6 +268,46 @@
             align-items: center;
             gap: 10px;
             flex-shrink: 0;
+        }
+
+        .sc-nav-auth {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sc-user-greeting {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 42px;
+            padding: 5px 12px 5px 6px;
+            border: 1px solid #e8eef2;
+            border-radius: 999px;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .sc-user-avatar {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: #dcfce7;
+            color: var(--primary);
+            font-size: 12px;
+        }
+
+        .sc-user-name {
+            max-width: 150px;
+            overflow: hidden;
+            font-size: 11px;
+            font-weight: 800;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .sc-auth-button {
@@ -973,6 +1018,28 @@
                 height: 36px;
             }
 
+            .sc-user-greeting {
+                min-height: 36px;
+                padding: 3px;
+            }
+
+            .sc-user-avatar {
+                width: 28px;
+                height: 28px;
+            }
+
+            .sc-user-name,
+            .sc-btn-logout span {
+                display: none;
+            }
+
+            .sc-btn-logout {
+                width: 36px;
+                height: 36px;
+                padding: 0;
+                border-radius: 50%;
+            }
+
             .sc-mobile-menu {
                 padding-right: 16px;
                 padding-left: 16px;
@@ -1145,6 +1212,20 @@
                 height: 33px;
             }
 
+            .sc-user-greeting {
+                min-height: 33px;
+            }
+
+            .sc-user-avatar {
+                width: 25px;
+                height: 25px;
+            }
+
+            .sc-btn-logout {
+                width: 33px;
+                height: 33px;
+            }
+
             .sc-equipment-grid {
                 grid-template-columns: 1fr;
             }
@@ -1158,25 +1239,47 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            padding: 8px 16px;
-            border: 1px solid #dc2626;
-            border-radius: 8px;
+            gap: 7px;
+            min-height: 40px;
+            padding: 8px 14px;
+            border: 1px solid #fca5a5;
+            border-radius: 10px;
             background-color: transparent;
-            color: #dc2626;
+            color: #ef4444;
             font-size: 12px;
             font-weight: 700;
+            white-space: nowrap;
             cursor: pointer;
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
         .sc-btn-logout:hover {
-            background-color: #dc2626;
+            border-color: #ef4444;
+            background-color: #ef4444;
             color: #ffffff;
         }
 
         .sc-btn-logout:focus-visible {
-            outline: 2px solid #dc2626;
+            outline: 2px solid #ef4444;
             outline-offset: 3px;
+        }
+
+        @media (max-width: 640px) {
+            .sc-btn-logout {
+                width: 36px;
+                height: 36px;
+                min-height: 36px;
+                padding: 0;
+                border-radius: 50%;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .sc-btn-logout {
+                width: 33px;
+                height: 33px;
+                min-height: 33px;
+            }
         }
     
     </style>
@@ -1227,7 +1330,7 @@
             </button>
 
             <!-- Semua navigasi autentikasi berada dalam satu container -->
-            <div id="navAuthContainer" class="flex items-center gap-2">
+            <div id="navAuthContainer" class="sc-nav-auth">
                 <a href="login.html" class="sc-auth-button">Masuk</a>
                 <a href="register.html" class="sc-auth-button">Daftar</a>
             </div>
@@ -1579,9 +1682,18 @@
                         <input
                             type="file"
                             id="checkoutKTP"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none"
                         >
+                        <div id="checkoutKTPPreview" class="hidden mt-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                            <img
+                                id="checkoutKTPPreviewImage"
+                                class="max-h-44 w-full rounded-lg object-contain"
+                                alt="Pratinjau foto KTP atau KTM"
+                            >
+                            <p id="checkoutKTPFileName" class="mt-2 truncate text-[10px] font-semibold text-slate-500"></p>
+                        </div>
+                        <p class="mt-1 text-[10px] text-slate-400">JPG, PNG, atau WEBP, maksimal 2 MB.</p>
                     </div>
                 </div>
 
@@ -1614,11 +1726,19 @@
                         <input
                             type="file"
                             id="checkoutBukti"
-                            accept="image/*"
+                            accept="image/jpeg,image/png,image/webp"
                             class="w-full bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 text-xs text-slate-600 focus:outline-none"
                         >
+                        <div id="checkoutBuktiPreview" class="hidden mt-2 rounded-xl border border-slate-200 bg-slate-50 p-2.5">
+                            <img
+                                id="checkoutBuktiPreviewImage"
+                                class="max-h-44 w-full rounded-lg object-contain"
+                                alt="Pratinjau bukti transfer"
+                            >
+                            <p id="checkoutBuktiFileName" class="mt-2 truncate text-[10px] font-semibold text-slate-500"></p>
+                        </div>
                         <p class="text-[10px] text-slate-400 mt-1">
-                            Wajib unggah bukti pembayaran sebelum mengirim pesanan.
+                            Wajib unggah bukti pembayaran sebelum mengirim pesanan. JPG, PNG, atau WEBP, maksimal 2 MB.
                         </p>
                     </div>
                 </div>
